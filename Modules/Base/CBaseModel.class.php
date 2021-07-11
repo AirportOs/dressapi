@@ -1,0 +1,340 @@
+<?php
+/**
+ * 
+ * DressAPI
+ * @version 1.0
+ * @license This file is under Apache 2.0 license
+ * @author Tufano Pasquale
+ * @url https://dressapi.com
+ * 
+ * 
+ * This class defines the basis of the data model. Unlike other REST libraries, 
+ * the model automatically reads the data structure from the DB and stores it. 
+ * In most cases, it will not be necessary to create a template for each new form but it is still possible, 
+ * for example to define a restriction on the type of input or define which data to display.
+ * 
+ */
+namespace DressApi\Modules\Base;
+
+use Exception;
+
+class CBaseModel
+{
+    // array delle tabelle in cui è possibile effettuare operazioni
+    protected ?array $column_list = [];
+    protected string $current_table = '';
+
+    public const REGEX_INT = '/^[-]?[\d]+$/';
+    public const REGEX_UINT = '/^[\d]+$/';
+    public const REGEX_NUMBER = '/^\-?\d*\.?\d*$/';
+    public const REGEX_BIT = '/^[0-1]+$/';
+    public const REGEX_TIMESTAMP = '/^[\d]{10}$/'; // 1621344928
+    public const REGEX_DATETIME = '/\d{4}\-\d{2}\-\d{2}\s{1}\d{2}:\d{2}:\d{2}/'; // 2021-05-18 15:38:00
+    public const REGEX_TIME = '/^\d{2}:\d{2}:\d{2}$/'; // 15:38:00
+    public const REGEX_DATE = '/^\d{4}\-\d{2}\-\d{2}$/'; // 2021-05-18
+    public const REGEX_YEAR = '/^\d{4}$/'; // 2021
+
+    public const REGEX_INDEXES = '/[\d,]+/';  // indici numerici separati da virgole
+    
+    /**
+     * Method __construct
+     *
+     * @param $table $table current table name
+     * @param ?array $column_list $column_list list of database fields
+     *
+     * @return void
+     */
+    public function __construct( string $table, ?array $column_list )
+    {
+        $this->table = $table;
+        $this->column_list = $column_list;
+
+        if (isset($this->column_list))
+            foreach($this->column_list as $field=>&$value)
+            {
+                if ($field=='id')
+                    $value['rule'] = self::REGEX_INDEXES;
+                else
+                switch($value['type'])
+                {
+                    case 'INT':
+                    case 'TINYINT':
+                    case 'SMALLINT':
+                    case 'MEDIUMINT':
+                    case 'BIGINT':
+                        $value['rule'] = self::REGEX_INT;
+                        break;
+
+                    case 'INT UNSIGNED':
+                    case 'TINYINT UNSIGNED':
+                    case 'SMALLINT UNSIGNED':
+                    case 'MEDIUMINT UNSIGNED':
+                    case 'BIGINT UNSIGNED':
+                                $value['rule'] = self::REGEX_UINT;
+                            break;
+        
+                    case 'NUMBER':
+                    case 'FLOAT':
+                    case 'DOUBLE':
+                    case 'DECIMAL':
+                    case 'DEC':
+                            $value['rule'] = self::REGEX_NUMBER;
+                        break;
+
+                    case 'BIT':
+                        $value['rule'] = self::REGEX_BIT;
+                        break;
+                    
+                    case 'TIMESTAMP':
+                        $value['rule'] = self::REGEX_TIMESTAMP; // 1620344928
+                        break;
+        
+                    case 'DATETIME':
+                        $value['rule'] = self::REGEX_DATETIME; // 2020-05-18 15:38
+                        break;
+
+                    case 'TIME':
+                        $value['rule'] = self::REGEX_TIME; // 15:38
+                        break;
+
+                    case 'DATE':
+                        $value['rule'] = self::REGEX_DATE; // 2020-05-18
+                        break;
+
+                    case 'YEAR':
+                        $value['rule'] = self::REGEX_YEAR; // 2020
+                        break;
+
+                    case 'ENUM':
+                        $value['rule'] = '/['.$value['options'].']{1}/'; // red|green|yellow
+                        break;
+
+                    case 'SET':
+                        $value['rule'] = '/['.$value['options'].']+/'; // red|green|yellow
+                        break;
+        
+                    default: // tipo testuale
+                        break;
+                }
+            }
+
+//        print_r($this->column_list);
+    }
+
+
+    /**
+     * Method getListItems
+     *
+     * Return a list of column of current table
+     *
+     * @return array list of column names of current table
+     */
+    public function getListItems() : array
+    {
+        return array_keys($this->column_list);
+    }        
+
+
+    /**
+     * Method getAdditionalConditions
+     *
+     * Return a string contains all additional conditions for a GET/PUT/PATCH requests
+     *
+     * @return array list of column names of current table
+     */
+    public function getAdditionalConditions() : string
+    {
+        $conditions = '';
+
+        return $conditions;
+    }
+
+
+    /**
+     * Method setFilters
+     * 
+     * set all input's parameters
+     *
+     * @param array $filters all input's parameters
+     *
+     * @return void
+     */
+    public function setFilters(array $filters)
+    {        
+        foreach($this->column_list as $value)
+        {
+            $field_name = $value['field']; 
+            if (isset($filters[$field_name]))
+                $this->column_list[$field_name]['value'] = $filters[$field_name];
+        }
+    }
+
+
+    /**
+     * Method setRequiredInt
+     *
+     * @param string $field_name $field_name database field name
+     * @param int $min minimum value accepted
+     * @param int $max maximum value accepted
+     *
+     * @return void
+     */
+    public function setRequiredInt(string $field_name, int $min = null, int $max = null)
+    {
+        if (isset($this->column_list[$field_name]))
+        {
+            $this->column_list[$field_name]['rule'] = '/[0-9]+/';
+            if ($min!==null) $this->column_list[$field_name]['min'] = $min;
+            if ($max!==null) $this->column_list[$field_name]['max'] = $max;
+        }
+    }
+
+    
+    /**
+     * Method setRequiredFloat
+     *
+     * @param string $field_name $field_name database field name
+     * @param float $min minimum value accepted
+     * @param float $max maximum value accepted
+     *
+     * @return void
+     */
+    public function setRequiredFloat(string $field_name, float $min = null, float $max = null)
+    {
+        if (isset($this->column_list[$field_name]))
+        {
+            // filter_var("1.33", FILTER_VALIDATE_FLOAT);
+            $this->column_list[$field_name]['rule'] = '\d*(?:\.\d+)?';
+            if ($min!==null) $this->column_list[$field_name]['min'] = $min;
+            if ($max!==null) $this->column_list[$field_name]['max'] = $max;
+        }
+    }
+
+    
+    /**
+     * Method setRule
+     *
+     * @param string $field_name $field_name database field name
+     * @param string $pattern regular expression pattern
+     *
+     * @return void
+     */
+    public function setRule(string $field_name, string $pattern)
+    {
+        if (isset($this->column_list[$field_name]))
+            $this->column_list[$field_name]['rule'] = $pattern;
+        else
+            throw new Exception("The field $field_name not exists");
+    }
+    
+
+    
+    /**
+     * Method setRequired
+     *
+     * @param string $field_name database field name
+     * @param bool $required true is required
+     * @param int $min_length minimum length of value
+     * @param int $max_length maximum length of value
+     *
+     * @throw an exception if the field_name not exists in the current table of DB
+     * 
+     * @return void
+     */
+    public function setRequired($field_name, bool $required, $min_length = null, $max_length = null)
+    {                
+        if (isset($this->column_list[$field_name]))
+        {
+            $this->column_list[$field_name]['required'] = $required;
+            if ($min_length !== null)
+                $this->column_list[$field_name]['min'] = $min_length;
+            if ($max_length !== null)
+                $this->column_list[$field_name]['max'] = $max_length;
+        }
+        else
+            throw new Exception("The field $field_name not exists"); 
+    }
+    
+    /**
+     * Method setRequiredPattern
+     *
+     * @param string $field_name database field name
+     * @param string $pattern regular expression pattern
+     * @param string $options fixed and acceptable values separated by "|" (for example 'daily|weekly|monthly')
+     *
+     * @throw an exception if the field_name not exists in the current table of DB
+     * 
+     * @return void
+     */
+    public function setRequiredPattern(string $field_name, string $pattern, string $options = null)
+    {        
+        if (isset($this->column_list[$field_name]))
+        {
+            $this->column_list[$field_name]['rule'] = $pattern;
+            if ($options !== null)
+                $this->column_list[$field_name]['options'] = $options;
+        }
+        else
+            throw new Exception("The field $field_name not exists");
+    }
+
+
+    /**
+     * Method existsField
+     *
+     * Check if the field_name exists in the current DB table
+     * 
+     * @param string $field_name database field name
+     *
+     * @return bool true if exists the field in the current DB
+     */
+    public function existsField($field_name) { return isset($this->column_list[$field_name]); }
+
+
+    /**
+     * Method checkValid
+     * 
+     * check if the input values are valid
+     * 
+     * @param bool $all_required if true check all fields of DB table according to its type
+     *
+     * @throw an exception if a least one field value is not valid
+     * 
+     * @return void
+     * 
+     */
+    public function checkValid($all_required = true) // POST/PUT(all_required=true), PATCH(all_required=false)
+    {
+        $valid = 'OK';
+        if (isset($this->column_list))
+            foreach($this->column_list as $field)
+            if (!$all_required || isset($field['value']) || $field['field']=='id' )
+            {
+                if (isset($field['value']))
+                {
+                    if (is_array($field['value']) && count($field['value'])>1)
+                        $val = $field['value'][1];
+                    else
+                        $val = $field['value'];
+                }
+                if (isset($field['rule']) && isset($field['value']) && !preg_match($field['rule'], $val ))
+                    throw new Exception("The value '".str_replace('"','\"',$field['value'])."' for item '".$field['field']."' is not valid" );
+
+                if (isset($field['max']) && isset($field['value']) && (int)$field['max']>0 && strlen($val)>(int)$field['max'])
+                    throw new Exception("The length of the ".$field['field']." field exceeds the maximum value of ".(strlen($val)-(int)$field['max'])." characters" );
+
+                if ( isset($field['required']) )
+                {
+                    if (!isset($field['value']))
+                        throw new Exception("The value of the ".$field['field']." is required" );
+                    
+                    if (isset($field['min']) && strlen($val)<(int)$field['min'])
+                        throw new Exception("The length of the ".$field['field']." must at least ".$field['min']." characters" );
+                }
+            }
+            else
+                throw new Exception($field['field'].' column value is required in the table '.$this->table);
+    
+    }
+
+} // end class

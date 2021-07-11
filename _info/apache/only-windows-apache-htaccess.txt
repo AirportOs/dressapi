@@ -1,0 +1,6 @@
+<VirtualHost [your domain]:[port]>
+	[...]
+        RewriteCond %{HTTP:Authorization} ^(.*)
+        RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+	[...]
+</VirtualHost>

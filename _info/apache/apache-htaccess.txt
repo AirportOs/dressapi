@@ -1,0 +1,8 @@
+<VirtualHost [your domain]:[port]>
+	[...]
+
+RewriteEngine on
+RewriteRule ^api\/(.*?)\/?$ /rest-api/?$1 [L,QSA]
+
+	[...]
+</VirtualHost>
