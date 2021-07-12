@@ -1,10 +1,19 @@
 <div>
     <h1>DressApi</h1>
-    DressApi is an <b>open source framework under Apache 2.0 license for create a modern REST API</b>.
+    DressApi is an <b>open source framework for PHP 7.3+ (compatible with PHP 8.x) under Apache 2.0 license for create a modern REST API</b>.
     The name "DressApi" means it "dress up" your database, substantially it provides a quick REST API, to your db schema. 
-    DressApi maps your database as an <b>ORM</b> (Object-relational mapping) and it does it dynamically. Although it is structured as an <b>MVC</b> (Model, View, Controller) it does not need to define a model for each table in the DB but if it automatically reads and manage it from the DB. 
-    The most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code.
+    DressApi maps your database as an <b>ORM</b> (Object-relational mapping) and it does it dynamically. Although it is structured as an <b>MVC</b> (Model, View, Controller) it does not need to define a model for each table but reads it and manages it automatically from the DB. However, you can create a Model to define some details about its data structure. 
+    The most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code and only if you need to customize it can you create a specific model.
 </div>
+<div>
+    <h2>Prerequisites</h2>
+    <ul>
+        <li>LAMP platform</li>
+        <li>Composer</li>
+        <li>Open Visual studio code project workspace and run <b>composer install</b></li>
+        <li>Curl for Testing (or Postman or Firefox or another if you prefer)</b></li>
+    </ul>
+</div>    
 <div>
     <h2>Test API with an example</h2>
     <ul>
@@ -32,10 +41,10 @@
         <li>Try to run a login request as admin:<br>
             <b>curl -X POST http://dressapi/api/user/ -d "username=admin&password=admin"</b>
         </li>
-        <li>Copy your token, it will be your passkey for all future requests as an admin user until the token expires. It must be like this:<br><b>            eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE2MjYwNDAwMjYsImp0aSI6IlJkSUx2SHdJT3FxQ3pXMkorUVdZdGc9PSIsImlzcyI6IkRyZXNzQXBpLmNvbSIsIm5iZiI6MTYyNjA0MDAyNiwiZXhwIjoxNjQxOTQxMjI2LCJkYXRhIjp7InVzZXJuYW1lIjoiYWRtaW4iLCJpZCI6MX19.CqBqDHEPWs5ZAmwew5FaOqAeQgM7XWbESEHlkceRwaPhfg_jL3xvrWPVs7hj8obEljQ9av_JJQVg29-u0s8VMw</b>
+        <li>Copy your token, it will be your passkey for all future requests as an admin user until the token expires. It must be like this:<br>eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE2MjYwNDAwMjYsImp0aSI6IlJkSUx2SHdJT3FxQ3pXMkorUVdZdGc9PSIsImlzcyI6IkRyZXNzQXBpLmNvbSIsIm5iZiI6MTYyNjA0MDAyNiwiZXhwIjoxNjQxOTQxMjI2LCJkYXRhIjp7InVzZXJuYW1lIjoiYWRtaW4iLCJpZCI6MX19.CqBqDHEPWs5ZAmwew5FaOqAeQgM7XWbESEHlkceRwaPhfg_jL3xvrWPVs7hj8obEljQ9av_JJQVg29-u0s8VMw
         </li>
         <li>Now make your request inside DB<br>
-            <b>curl -H  "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE2MjYwNDAwMjYsImp0aSI6IlJkSUx2SHdJT3FxQ3pXMkorUVdZdGc9PSIsImlzcyI6IkRyZXNzQXBpLmNvbSIsIm5iZiI6MTYyNjA0MDAyNiwiZXhwIjoxNjQxOTQxMjI2LCJkYXRhIjp7InVzZXJuYW1lIjoiYWRtaW4iLCJpZCI6MX19.CqBqDHEPWs5ZAmwew5FaOqAeQgM7XWbESEHlkceRwaPhfg_jL3xvrWPVs7hj8obEljQ9av_JJQVg29-u0s8VMw" -X GET http://dressapi/api/page/1</b>
+            <b>curl -H  "Authorization: Bearer [YOUR TOKEN]" -X GET http://dressapi/api/page/1</b>
         </li>
     </ul>
 </div>
