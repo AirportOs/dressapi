@@ -204,7 +204,7 @@ If everything is set correctly the result will be for example that "id_user" wil
 ### The filters
 
 The filters extrapolate the data obtaining only those that satisfy certain conditions, the operators that can be used are:
-**=, &lt;, &gt;, &gt;=, &lt;=, ~**
+=, &lt;, &gt;, &gt;=, &lt;=, ~
 
 The **~** filter indicates that the searched text must be contained (and therefore not only the same) within the field.
 Some examples:
