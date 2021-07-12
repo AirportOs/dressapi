@@ -251,7 +251,7 @@ class CFileCache
       shell_exec($cmd);
     }
 
-    // Per WINDOWS
+    // For WINDOWS
     if (substr(PHP_OS,0,3)=='WIN')
     {
       $all_file_to_delete = $this->getCacheNames();

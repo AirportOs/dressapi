@@ -15,14 +15,11 @@
 namespace DressApi\Modules\Example;
 
 use Exception;
+use DressApi\Core\User\CUser;
+use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
 use DressApi\Modules\Base\CBaseController;
-
-use DressApi\Core\DBMS\CSqlComposerBase;
-
-// use DressApi\Core\Request\CRequest;
-// use DressApi\Modules\Base\CModel;
-// use DressApi\Core\DBMS\CDB;
+use DressApi\Core\DBMS\CMySqlComposer;
 
 class CExampleController extends CBaseController
 {
@@ -32,10 +29,10 @@ class CExampleController extends CBaseController
      *
      * @return void
      */
-    public function __construct( $user, $cache )
+    public function __construct(CUser $user = null, CRequest $request, CResponse $response, $cache = null)
     {
-        $this->setDBTable('page'); // Tabelle di default nel DB
-        parent::__construct($user, $cache);
+        $this->setDBTable('page'); // Default dbtable
+        parent::__construct($user, $request, $response, $cache);
     }
 
 
@@ -57,7 +54,7 @@ class CExampleController extends CBaseController
             // Only for MySQL/MariaDB
             // Use this if you think you will never change DBMS. 
             // This way with a smart editor you will have more help. (if you thinever)
-            $sql = new \DressApi\Core\DBMS\CMySqlComposer();
+            $sql = new CMySqlComposer();
 
 
             // Make your query here...for example a LEFT JOIN

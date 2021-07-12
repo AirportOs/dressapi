@@ -10,9 +10,6 @@ define('RELATED_TABLE_FROM_ID', '/^id_([\S]*)/');
 // i.e: if the table is "page" che one field is id_page, then the SAME_TABLE_ID is not used 
 define('SAME_TABLE_ID', 'parent'); 
 
-// Convetional id primary key name
-define('ITEM_ID', 'id'); // probable alternative: '[table]_id', '[table]ID', 'id_[table]'
-
 // Convetional related field id naming
 // to convert the indexes of related tables 
 // with a more meaningful value, such as a name

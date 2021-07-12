@@ -808,7 +808,7 @@ class CMySqlDB extends CDBMS
             $type = $this->getDBResultAssoc();
 
         $result = &self::$results[self::$dbkey] ?? null;
-        $data = null;
+        $data = [];
 
         $num_rows = ($result?->num_rows) ?? 0; // Tot. righe
 

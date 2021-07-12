@@ -13,6 +13,8 @@
 
 namespace DressApi\Core\Request;
 
+require_once __DIR__ . '/../../config.php';
+
 use Exception;
 
 class CRequest
