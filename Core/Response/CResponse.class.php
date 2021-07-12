@@ -133,7 +133,7 @@ class CResponse
 
 
     /**
-     * Method response
+     * Method output
      *
      * Return the data results in the required format
      * 
@@ -160,4 +160,25 @@ class CResponse
 
         return $data_format;
     }    
+
+
+
+    /**
+     * Method error
+     *
+     * Return an error message
+     * 
+     * @param int $code
+     * @param string $message messaggio da inviare
+     *  
+     * @ string with error
+     */
+    public function error(int $code, string $message): string
+    {
+        if ($this->getStatusCode() == CResponse::HTTP_STATUS_OK)
+            $this->setStatusCode(400);
+    
+        return $this->output(["ERROR" => $message]);
+    }    
+
 }
