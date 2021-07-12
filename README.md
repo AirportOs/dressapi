@@ -1,12 +1,16 @@
 # DressApi
 
-DressApi is an <b>open source framework for create a modern REST API. for PHP 7.3+ (compatible with PHP 8.x) under Apache 2.0 license</b>.
+DressApi is an <b>open source framework for create a modern REST API, for PHP 7.3+ (compatible with PHP 8.x) under Apache 2.0 license</b>.
+It was written in 2020 and released in 2021 reusing the best concepts adopted in the AirportOs framework: a proprietary framework used for over a decade.
+Its goal is to simplify the programmer's life using very few instructions but at the same time provide him with the ability to create any customization.
 The name "DressApi" means it "dress up" your database, substantially it provides a quick REST API, to your db schema.
 DressApi maps your database as an <b>ORM</b> (Object-relational mapping) and it does it dynamically.<br>
 Although it is structured as an <b>MVC</b> (Model, View, Controller) it does not need to define a model for each table but reads it and manages it automatically from the DB. However, you can create a Model to define some details about its data structure. 
-    The most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code and only if you need to customize it can you create a specific model.
+The most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code and only if you need to customize it can you create a specific model.
 
 ## Minimal but complete example code
+
+This is a minimal example, but not a little part: it may already be all the code you will need!
 
 ```php
 <?php
@@ -124,3 +128,7 @@ DressApi is under Apache 2.0 license, you can use for free for personal and comm
    
 DressApi was written by Tufano Pasquale
     
+## Official site
+   
+[DressApi]https://dressapi.com/
+
