@@ -43,11 +43,11 @@ if (!defined('DEFAULT_FORMAT_OUTPUT')) define('DEFAULT_FORMAT_OUTPUT', 'json'); 
 // USER DB
 //
 
-// Name of user id in your database 
-define('USER_ITEM_ID', 'id');
-
 // Name of user table in your database
 define('USER_TABLE', 'user');
+
+// Name of user id in your database
+define('USER_ITEM_ID', 'id');
 
 // Username name of user table in your database
 define('USER_ITEM_USERNAME', 'username');
