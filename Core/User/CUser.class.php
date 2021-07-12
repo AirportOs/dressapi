@@ -17,12 +17,14 @@ namespace DressApi\Core\User;
 use Exception;
 use Firebase\JWT\JWT;
 use DressApi\Core\DBMS\CMySqlDB as CDB;
+use DressApi\Core\Request\CRequest;
+use DressApi\Core\Cache\CFileCache as CCache; // An alternative is CRedisCache
+
 
 class CUser extends CDB
 {
     private ?int $id = 0;
     private string $token = '';
-    private string $module_name;
 
     // List of user permissions  [usertype]
     private array $role_permissions = []; // [string|int ROLE][string PERMISSION];
@@ -34,12 +36,10 @@ class CUser extends CDB
     /**
      * Constructor
      * 
-     * @param string $module_name name of the controller on which to check the user's permissions
      */
-    public function __construct(string $module_name) 
+    public function __construct() 
     {
         $this->id = 0;
-        // $this->module_name = $module_name;
     }
 
 
@@ -63,7 +63,7 @@ class CUser extends CDB
                           USER_ITEM_PASSWORD."='". hash(PASSWORD_ENC_ALGORITHM, $password)."' AND ".
                           "status='Verified'");
 
-                    echo "\n$sql\n";
+        // echo "\n$sql\n";
         return $this->getQueryDataValue($sql);
     }
 
@@ -265,8 +265,8 @@ class CUser extends CDB
      * @param string|int $role role of user where role can be "Admin", "Publisher" and anything else or a number 1=Admin, 2=Publisher, 3=Normal User
      *                         the role name and type depends from your app
      * @param string $module normally is the name of DB table but could be not in an custom extension 
-     * @param string Name of permission [Get, Post, Patch, Put, Delete, Options] 
-     *               or if you prefer you can use C.R.U.D.O. letters [C=Post, R=Get, U=Patch|Put, D=Delete, O=Options].
+     * @param string Name of permission [GET, HEAD, POST, PATCH, PUT, DELETE, OPTIONS] 
+     *               or if you prefer you can use C.R.U.D.O. letters [C=POST, R=GET, U=PATCH|PUT, D=DELETE, O=OPTIONS].
      *               Finally, you can use * for all valid permission (for example with Admin user)
      */
     public function addRolePermission( string|int $role, string $module, string $permission )
@@ -337,12 +337,16 @@ class CUser extends CDB
     public function checkPermission(string $module, string $permission)
     {
         foreach($this->user_roles as $user_role)
-        {
-            if (isset($this->role_permissions[$user_role]) &&
-                isset($this->role_permissions[$user_role][$module]) &&  
-                in_array($permission,$this->role_permissions[$user_role][$module]))
-                return true;
-        }
+            if (isset($this->role_permissions[$user_role]))
+            {
+                if (isset($this->role_permissions[$user_role][$module]) &&
+                    in_array($permission,$this->role_permissions[$user_role][$module]))
+                    return true;
+                else // check if it can access all modules
+                if (isset($this->role_permissions[$user_role]['*']) &&
+                    in_array($permission,$this->role_permissions[$user_role]['*']))
+                    return true;
+            }
 
         return false;
     }
@@ -401,21 +405,31 @@ class CUser extends CDB
      *   3    3               101
      *    
      */
-    public function importPermissionsByDB()
+    public function importPermissionsByDB(CRequest $request, CCache $cache)
     {
-//        throw new Exception("importPermissionsByDB() todo");
+        $moduletable = $request->getModule(); 
+        $sql = "SELECT id_role,permission FROM moduletable_role_permission ". 
+               "WHERE (id_role IN (SELECT id_role FROM user_role WHERE id_user=$this->id) OR id_role IS NULL) ".
+               "AND (id_moduletable IN (SELECT id FROM moduletable WHERE name='$moduletable') OR id_moduletable IS NULL) ";
 
-        // ToDo: Check what roles the user has
+        $hash = hash(PASSWORD_ENC_ALGORITHM, $sql);
+        $data = null;
+        if ($cache) 
+            $data = $cache->get($hash);
 
-        // SELECT permission FROM controller_role_permission crp 
-        // LEFT JOIN user_role ur ON crp.id_role=ur.id_role   
-        // WHERE id_user=$this->id AND controller='$module'
+        if ($data === null )
+        {
+            $data = [];
+            $this->getQueryDataTable($data, $sql);     
+            $cache->set($hash, $data);           
+        }
 
-        // SELECT permission FROM role_controller_permission 
-        // WHERE id_role IN (SELECT id_role FROM user_role WHERE id_user=$this->id) 
-        // AND controller='$controller'
-
-        // $this->setRolePermissions( $role, $this->module_name, $permissions );
+        foreach($data as $row)
+        {
+            $role = $row['id_role'] ?? '*';
+            $this->addUserRole( $role );
+            $this->addRolePermission( $role, $moduletable, $row['permission'] ?? '*' );
+        }
     }
 
 
@@ -427,7 +441,9 @@ class CUser extends CDB
 
     public function logout()
     {
-        // make a black list on file?
+        // normally the client loose his token for logout (like deleting cookies)
+        // but if logout is necessary we can make a black list on file
+        // not through the db because it would always require a connection and slow down the service 
         throw new Exception("logout todo");
     }
 }

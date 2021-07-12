@@ -6,16 +6,17 @@ DressApi maps your database as an <b>ORM</b> (Object-relational mapping) and it 
 Although it is structured as an <b>MVC</b> (Model, View, Controller) it does not need to define a model for each table but reads it and manages it automatically from the DB. However, you can create a Model to define some details about its data structure. 
     The most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code and only if you need to customize it can you create a specific model.
 
-## Minimal but full valid example code
+## Minimal but complete example code
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-require_once \_\_DIR\_\_ . '/../../vendor/autoload.php';
-require_once \_\_DIR\_\_ . '/../../config.php';
-require_once \_\_DIR\_\_ . '/../../Core/autoload.php'; // Autoloader dell'applicazione
+require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../../config.php';
+
+require_once __DIR__ . '/../../Core/autoload.php'; // Autoloader dell'applicazione
 
 use DressApi\Core\DBMS\CMySqlDB as CDB;       // In the future other DBMS as Oracle, PostgreSQL, MS SQL
 use DressApi\Core\Cache\CFileCache as CCache; // An alternative is CRedisCache
@@ -23,46 +24,47 @@ use DressApi\Core\User\CUser;
 use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
 use DressApi\Core\Logger\CLogger;
+
 use DressApi\Modules\Base\CBaseController;
 
 try
 {
-    $module = CBaseController::GetModule(); // Module request
-    $request = new CRequest($module); // Input manager (but the validations is the CBaseModel class)
+    // $module = CBaseController::GetModule(); // Module request
+    $request = new CRequest();        // Input manager (but the validations is the CBaseModel class)
     $response = new CResponse();      // Output manager
+    $cache = new CCache(DOMAIN_NAME); // Cache manager
 
     CDB::connect(DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT);
-    $user = new CUser($module);
+
+    $user = new CUser();
     $valid_token = $user->verify();
+
     if ($valid_token != 'OK')
         print $valid_token;
     else
     {
-        // import user permissions directly from the DB
-        // if the appropriate role_controller_permission tables exist
-        $user->importPermissionsByDB($module);
-        
-        $controller = CBaseController::GetModuleController();
-        $rest = new $controller($user, $request, $response, new CCache(DOMAIN_NAME));
-        
-        //
+        // Create a role ('all') and accept all permissions
+        $user->setUserRole(['all']); // // Add role "1" to current user
+        $user->addRolePermission('all', '*', '*'); // Role=All, All modules, all permission
+
+        $rest = new CBaseController($user, $request, $response, $cache);
+
         // Accept as input all tables except those listed below
-        //
-        // IMPORTANT: you must remove all data sensible for privacy and for security
         $rest->setExcludedControllers(['user']);
-        
-        //
-        // Add the name of related table, if * considers all tables
-        // NOTE: a good pratics is declare this inside the derived Controller if exists
-        //
-        $rest->addRelatedFieldName('name', '*'); // id_[table] => [table]:name
-        
+
+        // sets all the related tables with an array and the method setRelatedFieldNames()
+        // id_page => page:title 
+        // id_[table] => [table]:name
+        $rest->setRelatedFieldNames(['page'=>'title','*'=>'name']);  
+
         print $rest->exec();
     }
+
+    //        CDB::disconnect();
 }
 catch (Exception $ex)
 {
-    print $response->error(400, $ex->getMessage());
+    print $response->error(400, $ex->getMessage()); // Bad request
 }
 
 // track request into DB by logger

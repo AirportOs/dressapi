@@ -16,15 +16,16 @@ use DressApi\Core\Logger\CLogger;
 
 use DressApi\Modules\Base\CBaseController;
 
-$module = CBaseController::GetModule(); // Module request
-$request = new CRequest($module); // Input manager (but the validations is the CBaseModel class)
-$response = new CResponse();      // Output manager
-
 try
 {
+    // $module = CBaseController::GetModule(); // Module request
+    $request = new CRequest();        // Input manager (but the validations is the CBaseModel class)
+    $response = new CResponse();      // Output manager
+    $cache = new CCache(DOMAIN_NAME); // Cache manager
+
     CDB::connect(DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT);
 
-    $user = new CUser($module);
+    $user = new CUser();
     $valid_token = $user->verify();
 
     if ($valid_token != 'OK')
@@ -32,39 +33,46 @@ try
     else
     {
         // import user permissions directly from the DB
-        // if the appropriate role_controller_permission tables exist
-        $user->importPermissionsByDB($module);
+        // if the appropriate moduletable_role_permission, moduletable and role tables exist
+        $user->importPermissionsByDB($request, $cache);
 
-        // Crea un ruolo e accetta tutti i permessi
-        $user->setUserRole([1]); // Imposta l'identificativo dell'utente
-        $user->addRolePermission(1, $module, '*');
+        // Create a role
+        // $user->setUserRole([1]); // // Add role "1" to current user
+        
+        // Accept all permissions for the created role
+        // $user->addRolePermission(1, '*', '*'); // All modules, all permission
 
+        // Create an appropriate Controller for the request 
+        // (if you use additional modules besides CBaseController, i.e.: CExampleController)
         $controller = CBaseController::GetModuleController();
-        $rest = new $controller($user, $request, $response, new CCache(DOMAIN_NAME));
+        $rest = new $controller($user, $request, $response, $cache);
 
         //
-        // Accept as input all tables except those listed below
+        // It excludes the management of the tables or modules listed below.
         //
         // IMPORTANT: you must remove all data sensible for privacy and for security
-        $rest->setExcludedControllers(['user', 'area']);
+        $rest->setExcludedControllers(['user']);
 
         //
         // Add the name of related table, if * considers all tables
         // NOTE: a good pratics is declare this inside the derived Controller if exists
         //
-        $rest->addRelatedFieldName('name', 'preference'); // id_preference => preference:name
+        $rest->addRelatedFieldName('title', 'page'); // id_preference => preference:name
         $rest->addRelatedFieldName('name', '*'); // id_[TABLE] => [TABLE]:name
 
         // In alternative sets all the names of related tables with an array and the method setRelatedFieldNames()
-        // $rest->setRelatedFieldNames(['user'=>'name','*'=>'name']);
+        // sets all the related tables with an array and the method setRelatedFieldNames()
+        // id_page => page:title 
+        // id_[table] => [table]:name
+        // $rest->setRelatedFieldNames(['page'=>'title','*'=>'name']);  
 
         //
         // Input check for POST, PUT, PATCH
         // NOTE: a good pratics is declare this inside the derived Controller if exists
         //
-        $rest->addItemRequired('periodicy', ['rule'=>'/[daily|weekly|monthly]/'], 'student' );
-        $rest->addItemRequired('age', ['min'=>17], 'student' );
-        $rest->addItemRequired('vote', ['name'=>'vote','min'=>18, 'max'=>30], 'student' );
+        // $rest->addItemRequired('periodicy', ['rule'=>'/[daily|weekly|monthly]/'], 'student' );
+        // $rest->addItemRequired('age', ['min'=>17], 'student' );
+        // $rest->addItemRequired('vote', ['name'=>'vote','min'=>18, 'max'=>30], 'student' );
 
         // You can use addItemRequired() for each single condition
         // or a single array containing all the conditions
@@ -87,9 +95,7 @@ try
 }
 catch (Exception $ex)
 {
-    if ($response->getStatusCode() == CResponse::HTTP_STATUS_OK)
-        $response->setStatusCode(400);
-    print $response->output(["ERROR" => $ex->getMessage()]); // Bad request
+    $response->error(400, $ex->getMessage()); // Bad request
 }
 
 // track request into DB by logger

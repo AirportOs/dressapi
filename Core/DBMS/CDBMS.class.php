@@ -544,7 +544,7 @@ abstract class CDBMS
     {
         $this->getDataTable($elements, $this->getDBResultBoth());
 
-        if ($elements === null)
+        if ($elements === [])
             $v = null;
         else
         {
