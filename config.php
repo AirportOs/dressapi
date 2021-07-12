@@ -25,6 +25,9 @@ if (!defined('DB_PASSWORD'))        define('DB_PASSWORD', '');
 if (!defined('DBMS_TYPE'))            define('DBMS_TYPE', 'MySql'); // Oracle, PostgreSQL,...
 
 
+// Convetional id primary key name for all tables
+define('ITEM_ID', 'id'); // probable alternative: '[table]_id', '[table]ID', 'id_[table]'
+
 // Leave "false" in production!
 if (!defined('DEBUGGING'))          define('DEBUGGING', false);
 if (!defined('DEBUGGING_SELECT'))   define('DEBUGGING_SELECT', false);

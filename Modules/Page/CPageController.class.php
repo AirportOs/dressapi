@@ -11,6 +11,9 @@
 
 namespace DressApi\Modules\Page;
 
+use DressApi\Core\User\CUser;
+use DressApi\Core\Request\CRequest;
+use DressApi\Core\Response\CResponse;
 use DressApi\Modules\Base\CBaseController;
 
 class CPageController extends CBaseController
@@ -21,23 +24,10 @@ class CPageController extends CBaseController
      *
      * @return void
      */
-    public function __construct(  $user, $cache, $real_table = 'page' )
+    public function __construct(CUser $user = null, CRequest $request, CResponse $response, $cache = null, $real_table = 'page')
     {
-        parent::__construct($user, $cache, $real_table);
+        $this->table = $real_table;
+        parent::__construct($user, $request, $response, $cache, $real_table);
     }
-    
-            
-    /**
-     * Method setListItems()
-     *
-     * Return a list of setListItems()
-     *
-     * @return array contenente l'elenco delle colonne della tabella
-     */
-    public function setListItems()
-    {
-        return "id,id_user,name";
-    }        
-
        
 } // end class

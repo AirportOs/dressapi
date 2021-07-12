@@ -20,12 +20,12 @@ class CPageModel extends \DressApi\Modules\Base\CBaseModel
      * Method getListItems()
      *
      * Return a list of column of current table
-     *      *
+     *
      * @return array list of column names of current table
      */
     public function getListItems() : array
     {
-        return ['id','id_user','name'];
+        return ['id','id_user','title','creation_date'];
     }        
  
 } // end class

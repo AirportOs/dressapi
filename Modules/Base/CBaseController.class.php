@@ -847,10 +847,10 @@ class CBaseController extends CDB
             $db_composer = CSqlComposerBase::getComposerClass();
             $sql = new $db_composer();
             $sql = new \DressApi\Core\DBMS\CMySqlComposer();
-            $sql->from($this->table, $letter_table++);
 
             if ($this->request->getWithRelations() && $this->items_view!='*')
             {
+                $sql->from($this->table, $letter_table++);
                 $fields = explode(',',$this->items_view);
 
                 if (isset($fields))
