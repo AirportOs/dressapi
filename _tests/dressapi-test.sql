@@ -83,16 +83,7 @@ CREATE TABLE `logger` (
 INSERT INTO `logger` (`id`, `request`, `method`, `params`, `request_date`, `status_code`, `id_user`) VALUES
 (1, 'comment', 'POST', 'Good!,2021-01-23,1', '2021-07-12 00:58:46', 201, 1),
 (2, 'page/1', 'PATCH', '2021-01-13', '2021-07-12 01:03:50', 200, 1),
-(3, 'comment/1,2/wr', 'GET', '', '2021-07-12 01:07:25', 200, 1),
-(4, 'comment', 'POST', 'Bleah!%sIs\\%sbetter%sLumen!,2021-01-23,1', '2021-07-12 01:09:29', 201, 1),
-(5, 'comment', 'POST', 'Bleah! Is better Lumen!,2021-01-23,1', '2021-07-12 01:10:19', 201, 1),
-(6, 'comment', 'POST', 'Bleah! Is better Lumen!,1', '2021-07-12 01:11:32', 400, 1),
-(7, 'comment', 'POST', 'Bleah! Is better Lumen!,1', '2021-07-12 01:16:08', 400, 1),
-(8, 'comment', 'POST', 'Bleah! Is better Lumen!,1', '2021-07-12 01:19:08', 400, 1),
-(9, 'comment', 'POST', 'Bleah! Is better Lumen!,1', '2021-07-12 01:19:19', 400, 1),
-(10, 'comment', 'POST', 'Bleah! Is better Lumen!,1', '2021-07-12 01:19:45', 400, 1),
-(11, 'comment', 'POST', 'Bleah! Is better Lumen!,1', '2021-07-12 01:21:08', 304, 1),
-(12, 'comment', 'POST', 'Bleah! Is better Lumen!,1', '2021-07-12 01:21:37', 201, 1);
+(3, 'comment/1,2/wr', 'GET', '', '2021-07-12 01:07:25', 200, 1);
 
 -- --------------------------------------------------------
 
@@ -332,7 +323,7 @@ ALTER TABLE `contact`
 -- AUTO_INCREMENT per la tabella `logger`
 --
 ALTER TABLE `logger`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT per la tabella `moduletable`
