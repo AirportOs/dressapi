@@ -97,6 +97,35 @@ curl -H  "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE
 #-X GET http://dressapi/api/logger/wr/ob/id-desc
 curl -H  "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE2MjYwNDAwMjYsImp0aSI6IlJkSUx2SHdJT3FxQ3pXMkorUVdZdGc9PSIsImlzcyI6IkRyZXNzQXBpLmNvbSIsIm5iZiI6MTYyNjA0MDAyNiwiZXhwIjoxNjQxOTQxMjI2LCJkYXRhIjp7InVzZXJuYW1lIjoiYWRtaW4iLCJpZCI6MX19.CqBqDHEPWs5ZAmwew5FaOqAeQgM7XWbESEHlkceRwaPhfg_jL3xvrWPVs7hj8obEljQ9av_JJQVg29-u0s8VMw" -X GET http://dressapi/api/logger/wr/ob/id-desc
 
+# 
+# In summary
+#
+
+# For your authentication:
+-H  "Authorization: Bearer [YOUR_TOKEN]"
 
 
+[format]
+#if you change the output format use one of this
+-H 'Content-Type: application/json'
+-H 'Content-Type: plain/text'
+-H 'Content-Type: application/xml
+'
+
+# Query options 
+-X GET http://dressapi/api/[TABLE|MODULE]/[IDs/][filters]/[wr]/[p/pag,elements_per_page]/[ob/id|id-ASC|id-DESC]
+
+[ob|order-by] order of the table (the next value must be the name of the item like "id-DESC")
+[wr|with-relations] change the index value with a related value of foreign table
+[p|page] with explicit impagination (the next value must be the number of page and optionally the max row per page) 
+
+[filters] you can you use more than one conditions with this operators:
+[=]
+[<=]
+[=>]
+[<]
+[>]
+[~] contains the text
+
+for example "/api/page/id_user>=100/title~Welcome"
 
