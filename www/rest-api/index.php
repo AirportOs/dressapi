@@ -16,12 +16,12 @@ use DressApi\Core\Logger\CLogger;
 
 use DressApi\Modules\Base\CBaseController;
 
-$module = CBaseController::GetModule(); // Module request
-$request = new CRequest($module); // Input manager (but the validations is the CBaseModel class)
-$response = new CResponse();      // Output manager
-
 try
 {
+    $module = CBaseController::GetModule(); // Module request
+    $request = new CRequest($module); // Input manager (but the validations is the CBaseModel class)
+    $response = new CResponse();      // Output manager
+
     CDB::connect(DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT);
 
     $user = new CUser($module);
