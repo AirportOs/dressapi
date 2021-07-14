@@ -230,7 +230,7 @@ To indicate one, add one of these options:
 
 ## Other function
 
--**DressApi use a cache** with on file or on Redis and is integrated to the application.
+-**DressApi use a cache** on file (normally on virtual disk on memory) or on Redis and is integrated to the application.
 This means it deletes interested parties (**including relations**) when there is an update.
 
 -**Deferred connection of the DB**: if the request is already in cache it does not make any connection to the database.
@@ -242,7 +242,7 @@ DressApi is under Apache 2.0 license, you can use for free for personal and comm
 
 ## Author
 
-DressApi was written by Tufano Pasquale
+DressApi was written by **Tufano Pasquale**
 
 ## Official site
 
