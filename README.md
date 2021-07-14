@@ -70,7 +70,7 @@ catch (Exception $ex)
     print $response->error(400, $ex->getMessage()); // Bad request
 }
 
-// track request into DB by logger
+// track request into log file by logger
 (new CLogger())->addLog($user, $request, $response);
 
 ```
@@ -228,12 +228,12 @@ To indicate one, add one of these options:
 -H 'Accept: application/xml'
 ```
 
-## Other function
+## Other features
 
--**DressApi use a cache** on file (normally on virtual disk on memory) or on Redis and is integrated to the application.
+* **DressApi use a cache** based on file (normally on virtual disk on memory) or on Redis and is integrated to the application.
 This means it deletes interested parties (**including relations**) when there is an update.
 
--**Deferred connection of the DB**: if the request is already in cache it does not make any connection to the database.
+* **Deferred connection of the DB**: if the request is already in cache it does not make any connection to the database.
 In this way it saves unnecessary resources and is more efficient.
 
 ## License

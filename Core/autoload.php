@@ -4,6 +4,7 @@
  * DressAPI
  * @version 1.0
  * @author Tufano Pasquale
+ * @copyright Tufano Pasquale
  * @date 2020-2021
  * 
  * @This file is under Apache 2.0 license

@@ -5,6 +5,7 @@
  * @version 1.0
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
+ * @copyright Tufano Pasquale
  * @url https://dressapi.com
  * 
  * 
@@ -101,6 +102,24 @@ class CMySqlDB extends CDBMS
                 }
     }
 
+
+    /**
+     *
+     * Set the current db key (if you have more than on DB)
+     *
+     * @param $dbkey the new dbkey for identify the DB connection if exists
+     *
+     * @throws Exception if $dbkey value is not a valid key
+     */
+    protected static function getConnectionError(?string $dbkey = null) : int
+    {
+        if ($dbkey===null)
+            $dbkey = self::$dbkey;
+
+        return (isset(self::$handle[$dbkey]->connect_errno)?(self::$handle[$dbkey]):(-1));
+    }
+
+
     /**
      *
      * Check the connection to the DB, if not there, try to connect
@@ -108,19 +127,19 @@ class CMySqlDB extends CDBMS
      */
     protected static function _realConnection()
     {
-        if (!isset(self::$handle[self::$dbkey]) || self::$handle[self::$dbkey]->connect_error)
+        if (!isset(self::$handle[self::$dbkey]) || self::$handle[self::$dbkey]->connect_errno)
         {
             self::$handle[self::$dbkey] = new \mysqli(
                 self::$hostname,
-                self::$username,
-                self::$password,
+                self::$dbusername,
+                self::$dbpassword,
                 self::$database_name,
                 self::$port
             );
             self::$handle[self::$dbkey]->autocommit(self::$autocommit);
         }
 
-        return (isset(self::$handle[self::$dbkey]) && !self::$handle[self::$dbkey]->connect_error);
+        return (isset(self::$handle[self::$dbkey]) && !self::$handle[self::$dbkey]->connect_errno);
     }
 
 
@@ -131,7 +150,7 @@ class CMySqlDB extends CDBMS
      */
     public static function getLastDBErrorString(): string
     {
-        return self::$handle[self::$dbkey]?->errno;
+        return self::$handle[self::$dbkey]?->error;
     }
 
 
@@ -249,13 +268,13 @@ class CMySqlDB extends CDBMS
                     $stmt->bind_param($stypes, ...$items_values);
                 $ret = $stmt->execute();
                 if (!$ret) 
-                    self::writeLog("#### ERROR ($sql): " . $stmt->error);
+                   self::notice("on update records ($sql): " . $stmt->error);
                 $stmt->close();
             }
             catch (Exception $e)
             {
                 $ret = false;
-                self::writeLog("#### EXCEPTION ($sql): " . $e->getMessage());
+                self::error("EXCEPTION($sql) - " . $e->getMessage());
             }
         }
         return $ret;
@@ -312,16 +331,16 @@ class CMySqlDB extends CDBMS
                 $ret = $stmt->execute();
                 $stmt->close();
 
-                if (self::getLastDBErrorString())
+                if (self::getLastDBErrorNumber())
                 {
                     $ret = false;
-                    self::writeDebug("#### ERROR: " . $this->getLastDBErrorString());
+                    self::notice("on update records ($sql): ".$this->getLastDBErrorString());
                 }
             }
             catch (Exception $e)
             {
                 $ret = false;
-                self::writeLog("#### EXCEPTION ($sql): " . $e->getMessage());
+                self::error("EXCEPTION($sql) - " . $e->getMessage());
             }
         }
 
@@ -368,13 +387,13 @@ class CMySqlDB extends CDBMS
                 if (self::getLastDBErrorString())
                 {
                     $ret = false;
-                    self::writeDebug("#### ERROR: " . $this->getLastDBErrorString());
+                    self::notice("on delete records ($sql): " . $this->getLastDBErrorString());
                 }
             }
             catch (Exception $e)
             {
                 $ret = false;
-                self::writeLog("#### EXCEPTION ($sql): " . $e->getMessage());
+                self::error("EXCEPTION($sql) - " . $e->getMessage());
             }
         }
 
@@ -450,7 +469,7 @@ class CMySqlDB extends CDBMS
         if ($result)
             return $result->num_rows;
         else
-            self::writeLog("#### ERROR: No DB " . self::$dbkey . " found");
+            self::alert("No DB " . self::$dbkey . " found");
 
         return false;
     }
@@ -468,7 +487,7 @@ class CMySqlDB extends CDBMS
         if ($result)
             return $result->field_count;
         else
-            self::writeLog("#### ERROR: No DB " . self::$dbkey . " found");
+            self::alert("No DB " . self::$dbkey . " found");
         return false;
     }
 
@@ -503,11 +522,11 @@ class CMySqlDB extends CDBMS
             }
             catch (Exception $e)
             {
-                self::writeLog("#### EXCEPTION: " . $e->getMessage());
+                self::error("EXCEPTION: " . $e->getMessage());
             }
         }
         else
-            self::writeLog("#### ERROR: No DB " . self::$dbkey . " found");
+            self::alert("No DB " . self::$dbkey . " found");
 
         return $names;
     }
@@ -518,9 +537,9 @@ class CMySqlDB extends CDBMS
      *
      * @return int integer value containing the error issued by the DB
      */
-    public function getLastDBErrorNumber(): int
+    public static function getLastDBErrorNumber(): int
     {
-        return $this->handle[$this->dbkey]?->error;
+        return self::$handle[self::$dbkey]?->errno;
     }
 
 
@@ -573,10 +592,9 @@ class CMySqlDB extends CDBMS
         $ret = false;
         try
         {
-            if ((defined('DEBUGGING_SELECT') && DEBUGGING_SELECT) || (defined('DEBUGGING') && DEBUGGING && 
-                                                                    (!stristr($sql, "SELECT") && !stristr($sql, "SHOW ") && 
-                                                                    !stristr($sql, "session"))))
-                self::writeDebug($sql." - [".(($bind_param_values===null)?(''):(print_r($bind_param_values,true)))."]");
+            if ((defined('DEBUG_LEVEL_MIN') && (DEBUG_LEVEL_MIN=='debug' || DEBUG_LEVEL_MIN==0)) && 
+                ((!stristr($sql, "SELECT ") && !stristr($sql, "SHOW ") && !stristr($sql, "session")))
+               ) self::debug($sql." - [".(($bind_param_values===null)?(''):(print_r($bind_param_values,true)))."]");
 
             $types = '';
             if ($bind_param_types)
@@ -598,12 +616,12 @@ class CMySqlDB extends CDBMS
         }
         catch (Exception $e)
         {
-            self::writeLog("#### EXCEPTION ($sql): " . $e->getMessage());
+            self::error("EXCEPTION($sql) - " . $e->getMessage());
         }
 
         if (self::getLastDBErrorString())
         {
-            self::writeLog("#### ERROR: " . $this->getLastDBErrorString());
+            self::warning($this->getLastDBErrorString());
         }
 
         return $ret;
@@ -677,15 +695,15 @@ class CMySqlDB extends CDBMS
                 if ($pos_row === null || $result->data_seek($pos_row))
                     return $result->fetch_array($this->getDBResultBoth());
                 else
-                    self::writeLog("#### ERROR: " . $this->getLastDBErrorString());
+                    self::debug($this->getLastDBErrorString());
             }
             catch (Exception $e)
             {
-                self::writeLog("#### EXCEPTION: " . $e->getMessage());
+                self::error("EXCEPTION [".$this->getLastDBErrorString()."] - " . $e->getMessage());
             }
         }
         else
-            self::writeLog("#### ERROR: No DB " . self::$dbkey . " found");
+            self::alert("No DB " . self::$dbkey . " found");
 
         return null;
     }
@@ -710,11 +728,11 @@ class CMySqlDB extends CDBMS
                 if ($pos_row === null || $result->data_seek($pos_row))
                     return $result->fetch_assoc();
                 else
-                    self::writeLog("#### ERROR: " . $this->getLastDBErrorString());
+                    self::debug($this->getLastDBErrorString());
             }
             catch (Exception $e)
             {
-                self::writeLog("#### EXCEPTION: " . $e->getMessage());
+                self::error("EXCEPTION [".$this->getLastDBErrorString()."] - " . $e->getMessage());
             }
         }
 
@@ -741,15 +759,15 @@ class CMySqlDB extends CDBMS
                 if ($pos_row === null || $result->data_seek($pos_row))
                     return $result->fetch_row();
                 else
-                    self::writeLog("#### ERROR: " . $this->getLastDBErrorString());
+                    self::debug($this->getLastDBErrorString());
             }
             catch (Exception $e)
             {
-                self::writeLog("#### EXCEPTION: " . $e->getMessage());
+                self::error("EXCEPTION [".$this->getLastDBErrorString()."] - " . $e->getMessage());
             }
         }
         else
-            self::writeLog("#### ERROR: No DB " . self::$dbkey . " found");
+            self::alert("ERROR: No DB " . self::$dbkey . " found");
 
         return null;
     }
@@ -777,14 +795,12 @@ class CMySqlDB extends CDBMS
                 }
                 catch (Exception $e)
                 {
-                    self::writeLog("#### EXCEPTION: " . $e->getMessage());
+                    self::error("EXCEPTION - " . $e->getMessage());
                 }
             }
-            else
-                self::writeLog("#### ERROR: No results found");
         }
         else
-            self::writeLog("#### ERROR: No DB " . self::$dbkey . " found");
+            self::alert("No DB " . self::$dbkey . " found");
 
         return null;
     }
@@ -838,11 +854,11 @@ class CMySqlDB extends CDBMS
             }
             catch (Exception $e)
             {
-                self::writeLog("#### EXCEPTION: " . $e->getMessage());
+                self::error("EXCEPTION - " . $e->getMessage());
             }
         }
         else
-            self::writeLog("#### ERROR: No DB " . self::$dbkey . " found");
+            self::alert("No DB " . self::$dbkey . " found");
 
         return $num_rows;
     }

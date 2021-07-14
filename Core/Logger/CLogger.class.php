@@ -5,6 +5,7 @@
  * @version 1.0
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
+ * @copyright Tufano Pasquale
  * @url https://dressapi.com
  * 
  * 
@@ -14,12 +15,11 @@
 namespace DressApi\Core\Logger;
 
 use Exception;
-use DressApi\Core\DBMS\CMySqlDB as CDB;
 use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
 use DressApi\Core\User\CUser;
 
-class CLogger extends CDB 
+class CLogger
 {
 
     public function __construct()
@@ -27,19 +27,34 @@ class CLogger extends CDB
     }
 
 
-    public function addLog(CUser $user, CRequest $request, CResponse $response)
+    /**
+     * addLog
+    *
+    * Writes a log request on file logs/dress-apirequest.log
+    *
+    * @param string CUser $users user object
+    * @param string CRequest $request request object (for input data)
+    * @param string CResponse $response response object (for output data)
+    *
+    * @return void
+    */
+    public function addLog(CUser $user, CRequest $request, CResponse $response) : void
     {
-        $items = [
-                  'request'=>$request->getRequest(),
-                  // 'request_date'=>date('Y-m-d H:i:s'),
-                  'method'=>$request->getMethod(),
-                  'params'=>implode(',',$request->getParameters() ?? []),
-                  'status_code'=>$response->getStatusCode(),
-                  'id_user'=>(($user!==null)?($user->getId()):(null))
-                 ];
-        $types = ['VARCHAR','VARCHAR','VARCHAR','INT','INT'];
+        try
+        {
+            $path = realpath (__DIR__ . '/../../');
+            $filename = $path.'/logs/dressapi-requests.log';
+            $datarow = sprintf(date('Y-m-d H:i:s') . ' - '."%3d - %10s - %30s - %s\r\n",$response->getStatusCode(), 
+                                $request->getMethod(), $user->getUsername(), implode(',',$request->getParameters() ?? []) 
+                              );
 
-        $this->insertRecord('logger', $items, $types);
+            file_put_contents($filename, $datarow, LOCK_EX|FILE_APPEND);
+        }
+        catch(Exception)
+        {
+            // if we use print or echo we could compromise the good result due to the log
+            // where we can write the exception? :)
+        }
     }
 
 }

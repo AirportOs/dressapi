@@ -52,5 +52,5 @@ catch (Exception $ex)
     $response->error(400, $ex->getMessage()); // Bad request
 }
 
-// track request into DB by logger
+// track request into log file by logger
 (new CLogger())->addLog($user, $request, $response);

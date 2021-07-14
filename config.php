@@ -10,7 +10,7 @@ define('ITEM_ID', 'id'); // probable alternative: '[table]_id', '[table]ID', 'id
 define('PWD_CRYPT', '@AShHK#Dfjdx45');
 
 // Output
-define('DEFAULT_FORMAT_OUTPUT', 'json'); // json, xml, debug
+define('DEFAULT_FORMAT_OUTPUT', 'json'); // json, xml, text
 
 // Date or datetime field that can be set automatically as current time
 define('CREATION_DATE', 'creation_date');

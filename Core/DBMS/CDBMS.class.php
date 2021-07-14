@@ -5,6 +5,7 @@
  * @version 1.0
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
+ * @copyright Tufano Pasquale
  * @url https://dressapi.com
  * 
  * 
@@ -15,12 +16,24 @@
 
 namespace DressApi\Core\DBMS;
 
+use Exception;
+
 /**
  * Class to manage a DataBase in MySql
  */
 abstract class CDBMS
 {
-    protected static string $dbkey;                 // index of the current db
+    // possible enum in future
+    const EMERGENCY = 'emergency';
+    const ALERT     = 'alert';
+    const CRITICAL  = 'critical';
+    const ERROR     = 'error';
+    const WARNING   = 'warning';
+    const NOTICE    = 'notice';
+    const INFO      = 'info';
+    const DEBUG     = 'debug';
+
+    protected static ?string $dbkey = null;                 // index of the current db
     protected static array $handle          = [];   // list of DB handles
     protected static array  $dbname         = [];   // DB names
     protected static array  $results        = [];   // pointer to the result of a DB
@@ -30,11 +43,10 @@ abstract class CDBMS
 
     // DB connection parameters
     protected static string $database_name;
-    protected static string $username;
-    protected static string $password;
+    protected static string $dbusername;
+    protected static string $dbpassword;
     protected static string $hostname;
     protected static int    $port;
-
 
     /**
      * Constructor
@@ -76,8 +88,8 @@ abstract class CDBMS
             self::$hostname = $hostname;
             self::$port = $port;
             self::$database_name = $dbname;
-            self::$username = $username;
-            self::$password = $password;
+            self::$dbusername = $username;
+            self::$dbpassword = $password;
 
             self::$results[self::$dbkey] = null;
 
@@ -85,7 +97,7 @@ abstract class CDBMS
         }
         catch (\Exception $ex)
         {
-            self::writeLog('ERROR: ' . __FILE__ . ':' . __LINE__ . ' - ' . $ex->getMessage());
+            self::critical(__FILE__ . ':' . __LINE__ . ' - ' . $ex->getMessage());
             return false;
         }
         return true;
@@ -299,7 +311,7 @@ abstract class CDBMS
      *
      * @return int integer value containing the error issued by the DB
      */
-    abstract public function getLastDBErrorNumber(): int;
+    abstract public static function getLastDBErrorNumber(): int;
 
 
     /**
@@ -469,6 +481,17 @@ abstract class CDBMS
      * @return string DB instruction to decrypt $ val
      */
     abstract public function decrypt(string $val, $name = ''): string;
+
+
+    /**
+     *
+     * Set the current db key (if you have more than on DB)
+     *
+     * @param $dbkey the new dbkey for identify the DB connection if exists
+     *
+     * @throws Exception if $dbkey value is not a valid key
+     */
+    abstract protected static function getConnectionError(?string $dbkey = null) : int;
 
 
     /**
@@ -680,7 +703,7 @@ abstract class CDBMS
      */
     public static function getDBHandle()
     {
-        return self::$handle[self::$dbkey];
+        return self::$handle[self::$dbkey] ?? null;
     }
 
 
@@ -707,37 +730,184 @@ abstract class CDBMS
 
 
     /**
-     * Writes a text at the end of a DEBUG log file
-     * Please note: this feature should not be used in production but only in development
      *
-     * @param string $s string or array to print in a log file debug.log to perform DEBUG
+     * Check the connection is active without error
+     *
+     * @param $dbkey valid key for identify the DB connection (if null or not declared the key is of current db)
+     *               Is useful when you have more than one DB, in other case you don't need to use
+     * 
      */
-    public static function writeDebug(string $s)
+    protected static function isConnected(?string $dbkey = null)
     {
-        $path = realpath('../');
-        $f = fopen($path . 'debug.log', 'ab');
-        if ($f !== null)
+        if ($dbkey===null)
+            $dbkey = self::$dbkey;
+        return (!isset(self::$handle[$dbkey]) || self::getConnectionError($dbkey));
+    }
+
+
+    /**
+     *
+     * Get the current db key
+     *
+     * @return $dbkey key for identify the DB connection
+     * 
+     */
+    protected static function getCurrentConnectionKey() : ?string
+    {
+        return self::$dbkey;
+    }
+
+
+    /**
+     *
+     * Set the current db key (if you have more than on DB)
+     *
+     * @param $dbkey the new dbkey for identify the DB connection if exists
+     *
+     * @throws Exception if $dbkey value is not a valid key
+     */
+    protected static function setCurrentConnectionKey(string $dbkey) : void
+    {
+        if (isset(self::$handle[$dbkey]) && !self::getConnectionError($dbkey))
+            self::$dbkey = $dbkey;
+        else
         {
-            fwrite($f, date('Y-m-d H:i:s') . ' - ' . ((is_array($s)) ? (print_r($s, true)) : ($s)) . "\r\n");
-            fclose($f);
+            $message = 'The db key is not valid, the current db is unchanged';
+            self::error($message);
+            throw new Exception($message);
         }
     }
 
 
     /**
-     * Writes a text at the end of a Error db log file
-     * Please note: this feature should not be used in production but only in development
+     * System is unusable.
      *
-     * @param string $s string or array to print in a log file errors.log
+     * @param string $message
+     * @param array $context
+     * @return void
      */
-    public static function writeLog(string $s)
+    public static function emergency(string $message, array $context = [])
     {
-        $path = realpath('../../');
-        $f = fopen($path . '/errors.log', 'ab');
-        if ($f != null)
-        {
-            fwrite($f, date('Y-m-d H:i:s') . ' - ' . ((is_array($s)) ? (print_r($s, true)) : ($s)) . "\r\n");
-            fclose($f);
-        }
+        self::log(self::EMERGENCY, $message, $context);
+    }
+
+    /**
+     * Action must be taken immediately.
+     *
+     * Example: Entire website down, database unavailable, etc. This should
+     * trigger the SMS alerts and wake you up.
+     *
+     * @param string $message
+     * @param array $context
+     * @return void
+     */
+    public static function alert(string $message, array $context = [])
+    {
+        self::log(self::ALERT, $message, $context);
+    }
+
+
+    /**
+     * Critical conditions.
+     *
+     * Example: Application component unavailable, unexpected exception.
+     *
+     * @param string $message
+     * @param array $context
+     * @return void
+     */
+    public static function critical(string $message, array $context = [])
+    {
+        self::log(self::CRITICAL, $message, $context);
+    }
+
+    /**
+     * Runtime errors that do not require immediate action but should typically
+     * be logged and monitored.
+     *
+     * @param string $message
+     * @param array $context
+     * @return void
+     */
+    public static function error(string $message, array $context = [])
+    {
+        self::log(self::ERROR, $message, $context);
+    }
+
+    /**
+     * Exceptional occurrences that are not errors.
+     *
+     * Example: Use of deprecated APIs, poor use of an API, undesirable things
+     * that are not necessarily wrong.
+     *
+     * @param string $message
+     * @param array $context
+     * @return void
+     */
+    public static function warning(string $message, array $context = [])
+    {
+        self::log(self::WARNING, $message, $context);
+    }
+
+
+    /**
+     * Normal but significant events.
+     *
+     * @param string $message
+     * @param array $context
+     * @return void
+     */
+    public static function notice(string $message, array $context = [])
+    {
+        self::log(self::NOTICE, $message, $context);
+    }
+
+
+    /**
+     * Interesting events.
+     *
+     * Example: User logs in, SQL logs.
+     *
+     * @param string $message
+     * @param array $context
+     * @return void
+     */
+    public static function info(string $message, array $context = [])
+    {    
+        self::log(self::INFO, $message, $context);
+    }
+
+    /**
+     * Detailed debug information.
+     *
+     * @param string $message
+     * @param array $context
+     * @return void
+     */
+    public static function debug(string $message, array $context = [])
+    {   
+        self::log(self::DEBUG, $message, $context);
+    }
+
+
+    /**
+     * Logs with an arbitrary level.
+     *
+     * @param mixed $level
+     * @param string $message
+     * @param array $context
+     * @return void
+     */
+    public static function log(mixed $level, string $message, array $context = [])
+    {
+        $path = realpath(__DIR__ . '/../../');
+        
+        if ($level==self::INFO || $level==self::DEBUG || $level==6 || $level==7) // 6=INFO, 7=DEBUG
+            $filename = $path . '/logs/dressapi-info.log';
+        else
+            $filename = $path . '/logs/dressapi-errors.log';
+        $datarow =  date('Y-m-d H:i:s') . ' - '.$level . ' - ' . $message . (($context) ? ('') : (print_r($context, true))) . "\r\n";
+
+        file_put_contents($filename, $datarow, LOCK_EX | FILE_APPEND);
     }
 }

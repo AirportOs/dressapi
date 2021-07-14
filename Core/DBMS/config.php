@@ -40,8 +40,6 @@ define('USER_ITEM_USERNAME', 'username');
 define('USER_ITEM_PASSWORD', 'pwd');
 
 
-// Leave "false" in production!
-define('DEBUGGING',FALSE);
-define('DEBUGGING_SELECT',FALSE);
+define('DEBUG_LEVEL_MIN', 'info');
 
 define('AES_CRYPT_CODE', 'F3229A0B371ED2D9441B830D21A390C3'); // Please, change me if you use it!

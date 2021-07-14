@@ -5,6 +5,7 @@
  * @version 1.0
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
+ * @copyright Tufano Pasquale
  * @url https://dressapi.com
  * 
  * 
@@ -24,6 +25,7 @@ use DressApi\Core\Cache\CFileCache as CCache; // An alternative is CRedisCache
 class CUser extends CDB
 {
     private ?int $id = 0;
+    private string $username = 'nobody';
     private string $token = '';
 
     // List of user permissions  [usertype]
@@ -39,6 +41,7 @@ class CUser extends CDB
     public function __construct() 
     {
         $this->id = 0;
+        $this->username = 'nobody';
     }
 
 
@@ -155,6 +158,7 @@ class CUser extends CDB
             $now = new \DateTimeImmutable();
     
             $this->id = $token->data->id; 
+            $this->username = $token->data->username; 
             if ($token->iss !== DOMAIN_NAME ||
                 $token->nbf > $now->getTimestamp() ||
                 $token->exp < $now->getTimestamp())
@@ -168,9 +172,22 @@ class CUser extends CDB
         return $ret;
     }
 
-    public function getId()
+
+    /**
+     * @return [type]
+     */
+    public function getId() : ?int
     {
         return $this->id;
+    }
+
+
+    /**
+     * @return [type]
+     */
+    public function getUsername() : string
+    {
+        return $this->username;
     }
 
 

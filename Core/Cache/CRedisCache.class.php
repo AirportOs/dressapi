@@ -6,6 +6,7 @@
  * @version 1.0
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
+ * @copyright Tufano Pasquale
  * @url https://dressapi.com
  * 
  * 
@@ -126,7 +127,7 @@ class CRedisCache
         return $this->CACHE_PATH;
     }
 
-
+    
     /**
      * writeDebug
      *
@@ -138,12 +139,11 @@ class CRedisCache
      */
     public function writeDebug(string $s): void
     {
-        $f = fopen(__DIR__ . '/../../cache.log', 'ab');
-        if ($f != null)
-        {
-            fwrite($f, date('Y-m-d H:i:s') . ' - ' . ((is_array($s)) ? (print_r($s, true)) : ($s)) . "\r\n");
-            fclose($f);
-        }
+        $path = realpath(__DIR__ . '/../../');
+        $filename = $path . '/logs/dressapi-cache.log';
+        $datarow =  date('Y-m-d H:i:s') . ' - ' . ((is_array($s)) ? (print_r($s, true)) : ($s)) . "\r\n";
+
+        file_put_contents($filename, $datarow, LOCK_EX | FILE_APPEND);
     }
 
 

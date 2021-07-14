@@ -4,4 +4,4 @@ build/*
 docs/*
 .phpdoc/*
 phpDocumentor.phar
-
+logs/*.log
