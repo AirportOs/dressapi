@@ -108,12 +108,19 @@ define('USER_ITEM_PASSWORD', 'pwd');
 ```
 
 * Try to run a login request as admin:
-**curl -X POST [http://localhost/api/user/](http://localhost/api/user/) -d "username=admin&password=admin"**
+
+```bash
+curl -X POST [http://localhost/api/user/](http://localhost/api/user/) -d "username=admin&password=admin"
+```
 
 * Copy your token, it will be your passkey for all future requests as an admin user until the token expires. It must be like this: **eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE2MjYwNDAwMjYsImp0aSI6IlJkSUx2SHdJT3FxQ3pXMkorUVdZdGc9PSIsImlzcyI6IkRyZXNzQXBpLmNvbSIsIm5iZiI6MTYyNjA0MDAyNiwiZXhwIjoxNjQxOTQxMjI2LCJkYXRhIjp7InVzZXJuYW1lIjoiYWRtaW4iLCJpZCI6MX19.CqBqDHEPWs5ZAmwew5FaOqAeQgM7XWbESEHlkceRwaPhfg_jL3xvrWPVs7hj8obEljQ9av_JJQVg29-u0s8VMw**
 
 * Now make your request inside DB
-**curl -H  "Authorization: Bearer [YOUR TOKEN]" -X GET [http://localhost/api/page/1](http://localhost/api/page/1)**
+
+```bash
+curl -H  "Authorization: Bearer [YOUR TOKEN]" -X GET [http://localhost/api/page/1](http://localhost/api/page/1)
+```
+
 Which requires the **id=1** of the **page** table
 
 ## Test DressApi with curl
