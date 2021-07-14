@@ -13,6 +13,8 @@
 
 namespace DressApi\Core\Response;
 
+use DressApi\Core\Request\CRequest;
+
 class CResponse
 {
     public const HTTP_STATUS_OK = 200;
@@ -36,6 +38,7 @@ class CResponse
     {
         $this->status_code = 0;
         $this->message_error = '';
+        $this->format = CRequest::getFormat();
     } 
 
 
@@ -176,7 +179,7 @@ class CResponse
     public function error(int $code, string $message): string
     {
         if ($this->getStatusCode() == CResponse::HTTP_STATUS_OK)
-            $this->setStatusCode(400);
+            $this->setStatusCode($code);
     
         return $this->output(["ERROR" => $message]);
     }    

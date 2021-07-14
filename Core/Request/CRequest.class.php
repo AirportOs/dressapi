@@ -35,6 +35,8 @@ class CRequest
 
     protected string $charset = 'UTF-8';
 
+    protected static string $format = DEFAULT_FORMAT_OUTPUT;
+
     public function __construct()
     {
         $this->with_relations = false;
@@ -192,6 +194,7 @@ class CRequest
             $format = DEFAULT_FORMAT_OUTPUT;
             if (isset($_SERVER['HTTP_ACCEPT']))
             {
+                $h = $_SERVER['HTTP_ACCEPT'];
                 list($app, $format) = explode('/', $_SERVER['HTTP_ACCEPT']);    
                 if (strpos($format,';'))
                 {
@@ -202,9 +205,10 @@ class CRequest
             }
         }
 
-        $this->format = ( ($format == '*') ? (DEFAULT_FORMAT_OUTPUT) : (strtolower($format)) );
+        self::$format = ( ($format == '*') ? (DEFAULT_FORMAT_OUTPUT) : (strtolower($format)) );
     }
 
+    public static function getFormat() : string       { return self::$format; }
 
     public function getRequest() : string      { return $this->request; }
     public function getModule() : string       { return $this->module; }

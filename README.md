@@ -223,9 +223,9 @@ By default the output is the JSON format but, alternatively, you can explicitly 
 To indicate one, add one of these options:
 
 ```bash
--H 'Content-Type: application/json'
--H 'Content-Type: plain/text'
--H 'Content-Type: application/xml
+-H 'Accept: application/json'
+-H 'Accept: plain/text'
+-H 'Accept: application/xml'
 ```
 
 ## License

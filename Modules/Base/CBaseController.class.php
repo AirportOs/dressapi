@@ -81,7 +81,6 @@ class CBaseController extends CDB
         $this->bind_params_values = [];
         $this->bind_params_types = [];
 
-        $this->format = DEFAULT_FORMAT_OUTPUT;
         try
         {
             $this->_setAllTables(); // Legge e memorizza tutte le tabelle del DB
