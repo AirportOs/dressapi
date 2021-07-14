@@ -1,6 +1,6 @@
 # DressApi
 
-DressApi is an **open source framework for create a modern REST API, for PHP 7.3+ (compatible with PHP 8.x) under Apache 2.0 license**.
+DressApi is a new **open source framework for create a modern REST API, for PHP 8.x under Apache 2.0 license**.
 It was written in 2020 and released in 2021 reusing the best concepts adopted in the AirportOs framework: a proprietary framework used for over a decade.
 Its goal is to simplify the programmer's life using very few instructions but at the same time provide him with the ability to create any customization.
 The name "DressApi" means it "dress up" your database, substantially it provides a quick REST API, to your db schema.
@@ -63,7 +63,7 @@ try
         print $rest->exec();
     }
 
-    //        CDB::disconnect();
+    //  CDB::disconnect();
 }
 catch (Exception $ex)
 {
@@ -77,9 +77,8 @@ catch (Exception $ex)
 
 ## Prerequisites
 
-* LAMP platform
-* Composer
-* Open Visual studio code project workspace and run **composer install**
+* LAMP platform with **PHP 8.0** or more recent
+* Composer (go to directory of dressapi and run **composer install**)
 * Curl for Testing (or Postman or Firefox or another if you prefer)**
 * Configure your Apache configuration (add regular expression in apache.conf or your virtual host file **from _info/apache-htaccess.txt**)
 * For Windows users only add text into apache.conf or your virtual host file from **_info/apache/only-windows-apache-htaccess.txt**)
@@ -204,7 +203,7 @@ If everything is set correctly the result will be for example that "id_user" wil
 ### The filters
 
 The filters extrapolate the data obtaining only those that satisfy certain conditions, the operators that can be used are:
-**=, &lt;, &gt;, &gt;=, &lt;=, ~**
+=, &lt;, &gt;, &gt;=, &lt;=, ~
 
 The **~** filter indicates that the searched text must be contained (and therefore not only the same) within the field.
 Some examples:

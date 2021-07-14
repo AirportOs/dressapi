@@ -67,7 +67,7 @@ abstract class CDBMS
      * 
      * @return bool true if the DB is connected
      */
-    public static function connect(string $dbname, string $username, string $password, string $hostname = 'localhost', int $port = DB_DEFAULT_PORT): bool
+    public static function connect(string $dbname, string $username, string $password, string $hostname = 'localhost', int $port = DB_PORT): bool
     {
         try
         {
@@ -732,8 +732,8 @@ abstract class CDBMS
      */
     public static function writeLog(string $s)
     {
-        $path = realpath('../');
-        $f = fopen($path . 'errors.log', 'ab');
+        $path = realpath('../../');
+        $f = fopen($path . '/errors.log', 'ab');
         if ($f != null)
         {
             fwrite($f, date('Y-m-d H:i:s') . ' - ' . ((is_array($s)) ? (print_r($s, true)) : ($s)) . "\r\n");

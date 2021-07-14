@@ -35,7 +35,6 @@ class CUser extends CDB
 
     /**
      * Constructor
-     * 
      */
     public function __construct() 
     {
@@ -74,9 +73,9 @@ class CUser extends CDB
      * @param string $username username of a user
      * @param string $password password of a user
      * 
-     * @return int a user id if exists, otherwise is 0
+     * @return string a user token if the user exists, otherwise is a string 'Invalid login'
      */
-    public function authenticate(string $username, string $password)
+    public function authenticate(string $username, string $password) : string
     {
         $token = 'Invalid login';
         // Validate the credentials against a database, or other data store.
@@ -117,7 +116,12 @@ class CUser extends CDB
     }
 
     
-    public function checkToken( string $token )
+    /**
+     * @param string $token
+     * 
+     * @return bool
+     */
+    public function checkToken( string $token ) : bool
     {
 
         $matches = [];
@@ -170,6 +174,9 @@ class CUser extends CDB
     }
 
 
+    /**
+     * @return [type]
+     */
     public function verify()
     {
         // Parameters
@@ -198,7 +205,10 @@ class CUser extends CDB
     }
 
 
-    public function getToken()
+    /**
+     * @return string|null
+     */
+    public function getToken() :?string
     {
         return $this->token;
     }
@@ -433,12 +443,18 @@ class CUser extends CDB
     }
 
 
+    /**
+     * @return [type]
+     */
     public function subscribe()
     {
         throw new Exception("subscribe todo");
     }
 
 
+    /**
+     * @return [type]
+     */
     public function logout()
     {
         // normally the client loose his token for logout (like deleting cookies)

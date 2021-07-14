@@ -573,7 +573,9 @@ class CMySqlDB extends CDBMS
         $ret = false;
         try
         {
-            if ((defined('DEBUGGING_SELECT') && DEBUGGING_SELECT) || ((defined('DEBUGGING') && DEBUGGING) && (!stristr($sql, "SELECT") && !stristr($sql, "SHOW ") && !stristr($sql, "session"))))
+            if ((defined('DEBUGGING_SELECT') && DEBUGGING_SELECT) || (defined('DEBUGGING') && DEBUGGING && 
+                                                                    (!stristr($sql, "SELECT") && !stristr($sql, "SHOW ") && 
+                                                                    !stristr($sql, "session"))))
                 self::writeDebug($sql." - [".(($bind_param_values===null)?(''):(print_r($bind_param_values,true)))."]");
 
             $types = '';
@@ -1024,8 +1026,8 @@ class CMySqlDB extends CDBMS
      *  's'    corresponding variable has type string
      *  'b'    corresponding variable is a blob and will be sent in packets
      * 
-     * @param string $db_type tipo del db del campo
-     * @return handle del risultato della query
+     * @param string $db_type field db type
+     * @return handle of the query result
      */
     protected function convertDBType2BindType(string $db_type)
     {

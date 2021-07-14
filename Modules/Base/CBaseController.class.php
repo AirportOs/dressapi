@@ -806,10 +806,8 @@ class CBaseController extends CDB
 
         $this->getQueryDataTable($data['data'], $sql, $this->bind_params_values, $this->bind_params_types);
 
-        // $sql = $sc->select('COUNT(*)')->from($this->table)->where($this->getConditions())->paging(0, 0);
         $sql->select('COUNT(*)')->paging(0, 0);
 
-        // getQueryDataValue(string $sql, string|int $name_col = '0', ?int $pos_row = null)
         $total_items = (int)$this->getQueryDataValue($sql);
         $items_per_page = $this->request->getItemsPerPage();
         $total_pages = (($items_per_page > 0 && $total_items > 0) ? (ceil($total_items / $items_per_page)) : (1));
@@ -926,7 +924,7 @@ die;
     /**
      * Manager of HTTP Method HEAD (as GET but without body)
      *
-     * @return risultato dell'operazione
+     * @return array result of the operation
      * @throw on error
      */
     public function execHEAD(): array
