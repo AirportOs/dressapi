@@ -902,7 +902,7 @@ print "\n$full_sql\n";
 die;
 */
             $cache_key = $this->_getCacheKey($sql);
-            $data = $this->_getCachedData($sql, $cache_key);
+            $data = $this->_getCachedData($cache_key);
             if ($data===null)
                 $data = $this->_getContentFromDB($sql, (string)$cache_key);     
         }
