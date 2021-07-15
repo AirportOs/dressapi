@@ -17,7 +17,7 @@ define('DB_NAME', 'dressapi-test');
 define('DB_USERNAME', 'root');
 
 // Password of db user
-define('DB_PASSWORD', 'pask70');
+define('DB_PASSWORD', '');
 
 // For the moment you can use only MySql
 define('DBMS_TYPE', 'MySql'); // Oracle, PostgreSQL,...
