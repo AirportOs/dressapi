@@ -1,4 +1,3 @@
-TEST
 <?php
 
 require_once __DIR__ . '/../../Core/autoload.php'; // Autoloader dell'applicazione
