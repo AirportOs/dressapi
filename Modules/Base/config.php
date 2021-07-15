@@ -21,9 +21,6 @@ define ('UPLOAD_FILE_PATH', '/var/www/upload/');
 // Type accepted during upload file, the type is case insensitive
 define ('UPLOAD_EXT_ACCEPTED', ['doc','docx','pdf','odf','pptx']);
 
-// if is omit "order-by/id", "order-by/id-ASC" or its abbreviation "ob/id-ASC"
-define('DEFAULT_ORDER', 'DESC'); // DESC or ASC
-
 // Default of total rows for each request
 define('DEFAULT_ITEMS_PER_PAGE', 20);
 

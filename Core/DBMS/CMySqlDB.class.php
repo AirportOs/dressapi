@@ -1042,10 +1042,10 @@ class CMySqlDB extends CDBMS
      *  's'    corresponding variable has type string
      *  'b'    corresponding variable is a blob and will be sent in packets
      * 
-     * @param string $db_type field db type
+     * @param ?string $db_type field db type
      * @return handle of the query result
      */
-    protected function convertDBType2BindType(string $db_type)
+    protected function convertDBType2BindType(?string $db_type)
     {
         $type = 's';
         if (strpos($db_type, 'INT') !== false)

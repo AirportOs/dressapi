@@ -49,6 +49,7 @@ try
 }
 catch (Exception $ex)
 {
+    print "\nERROR: ".$ex->getMessage()."\n\n";
     $response->error(400, $ex->getMessage()); // Bad request
 }
 
