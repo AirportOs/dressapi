@@ -34,19 +34,28 @@ class CRequest
     protected int $page = 1;
     protected int $items_per_page = 20;
 
-    protected string $charset = 'UTF-8';
+    protected string $http_autorization = '';
 
     protected static string $format = DEFAULT_FORMAT_OUTPUT;
+    protected static string $charset = 'UTF-8';
 
     public function __construct()
     {
         $this->with_relations = false;
         $this->module = '';
 
+        $this->setHttpAuthorization();
         $this->setMethod();
         $this->setFormat();
         $this->setParameters();
         $this->setFilters();
+    }
+
+
+    protected function setHttpAuthorization()
+    {
+        if (isset($_SERVER['HTTP_AUTHORIZATION']))
+            $this->http_autorization = $_SERVER['HTTP_AUTHORIZATION'];
     }
 
 
@@ -63,9 +72,9 @@ class CRequest
         // curl -d "params...."
         $this->sets = file_get_contents('php://input');
 
+        $this->params = [];
         if ($this->sets)
         {
-            $this->params = [];
             try
             {
                 parse_str($this->sets, $this->params);
@@ -73,7 +82,10 @@ class CRequest
             catch (Exception)
             {
             }
-        }        
+        }
+        
+        if (isset($_POST) && count($_POST))
+            $this->params = array_merge($this->params, $_POST);
     }
 
 
@@ -211,6 +223,7 @@ class CRequest
 
     public static function getFormat() : string       { return self::$format; }
 
+    public function getHttpAuthorization() : string { return $this->http_autorization; }
     public function getRequest() : string      { return $this->request; }
     public function getModule() : string       { return $this->module; }
     public function getMethod() : string       { return $this->method; }

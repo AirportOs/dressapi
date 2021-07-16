@@ -28,6 +28,8 @@ class CUser extends CDB
     private string $username = 'nobody';
     private string $token = '';
 
+    protected CRequest $request;
+
     // List of user permissions  [usertype]
     private array $role_permissions = []; // [string|int ROLE][string PERMISSION];
 
@@ -38,10 +40,11 @@ class CUser extends CDB
     /**
      * Constructor
      */
-    public function __construct() 
+    public function __construct(CRequest $request) 
     {
         $this->id = 0;
         $this->username = 'nobody';
+        $this->request = $request;
     }
 
 
@@ -197,23 +200,17 @@ class CUser extends CDB
     public function verify()
     {
         // Parameters
-        $sets = file_get_contents('php://input');
-        $params = [];            
-        if ($sets)
-            parse_str($sets, $params);    
+        $params = $this->request->getParameters();
 
         // Method
-        $method = ((isset($_SERVER['REQUEST_METHOD']))?($_SERVER['REQUEST_METHOD']):('GET'));
+        $method = $this->request->getMethod();
 
         // Verifica del login
         if ($method=='POST' && isset($params['username']) && isset($params['password']))
             return $this->authenticate($params['username'], $params['password']);
         else
         {
-            $token = '';
-            if (isset($_SERVER['HTTP_AUTHORIZATION']))
-                $token = $_SERVER['HTTP_AUTHORIZATION'];
-
+            $token = $this->request->getHttpAuthorization();
             if ($token!='' && !$this->checkToken($token))
                 throw new Exception('Invalid login');
 
