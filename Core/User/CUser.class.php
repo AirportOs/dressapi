@@ -18,7 +18,9 @@ namespace DressApi\Core\User;
 use Exception;
 use Firebase\JWT\JWT;
 use DressApi\Core\DBMS\CMySqlDB as CDB;
+use DressApi\Core\DBMS\CMySqlComposer as CComposer;
 use DressApi\Core\Request\CRequest;
+use DressApi\Core\Response\CResponse;
 use DressApi\Core\Cache\CFileCache as CCache; // An alternative is CRedisCache
 
 
@@ -60,8 +62,7 @@ class CUser extends CDB
     {
         $ret = 0;
 
-        $db_composer = 'DressApi\\Core\DBMS\\C'.DBMS_TYPE.'Composer';
-        $sc = new $db_composer();
+        $sc = new CComposer();
 
         $sql = $sc->select(USER_ITEM_ID)->from(USER_TABLE)->
                     where(USER_ITEM_USERNAME."='$username' AND ".
@@ -90,7 +91,9 @@ class CUser extends CDB
         $this->id = $this->checkValidUser($username, $password);
 
         if ($this->id<1) 
-            throw new Exception('Invalid login');
+        {
+            throw new Exception('Invalid login',401);
+        }
         else
         {
             $tokenId    = base64_encode(random_bytes(16));
@@ -140,7 +143,7 @@ class CUser extends CDB
         {
             $ret = false;
             // header('HTTP/1.0 400 Bad Request');
-            throw new Exception('Token not found in request');    
+            throw new Exception('Token not found in request',CResponse::HTTP_STATUS_UNAUTHORIZED);    
         }
         else
         {
@@ -149,8 +152,7 @@ class CUser extends CDB
             {
                 $ret = false;
                 // No token was able to be extracted from the authorization header
-                // header('HTTP/1.0 400 Bad Request');
-                throw new Exception('Invalid Token');    
+                throw new Exception('Invalid Token',CResponse::HTTP_STATUS_FORBIDDEN);    
             }    
         }
 
@@ -167,7 +169,7 @@ class CUser extends CDB
                 $token->exp < $now->getTimestamp())
             {
                 // header('HTTP/1.1 401 Unauthorized');
-                throw new Exception('Unauthorized');    
+                throw new Exception('Unauthorized',401);    
                 $ret = false;
             }    
         }
@@ -210,9 +212,12 @@ class CUser extends CDB
             return $this->authenticate($params['username'], $params['password']);
         else
         {
-            $token = $this->request->getHttpAuthorization();
-            if ($token!='' && !$this->checkToken($token))
-                throw new Exception('Invalid login');
+            if (USER_TABLE!='')
+            {
+                $token = $this->request->getHttpAuthorization();
+                if ($token=='' || !$this->checkToken($token))
+                    throw new Exception('Invalid token', CResponse::HTTP_STATUS_UNAUTHORIZED);
+            }
 
             return 'OK';
         }

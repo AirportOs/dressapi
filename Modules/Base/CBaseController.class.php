@@ -16,9 +16,10 @@
 
 namespace DressApi\Modules\Base;
 
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/config.php'; // local module config
 
 use Exception;
+use DressApi\Core\DBMS\CMySqlComposer as CComposer;
 use DressApi\Core\DBMS\CMySqlDB as CDB;
 use DressApi\Core\User\CUser;
 use DressApi\Core\Request\CRequest;
@@ -737,7 +738,7 @@ class CBaseController extends CDB
      *
      * @return array message result of upload operation
      */
-    public function execUUPLOAD(): array
+    public function execUPLOAD(): array
     {
         try
         {
@@ -842,9 +843,7 @@ class CBaseController extends CDB
 
             $letter_table = 'a';
 
-            $db_composer = CSqlComposerBase::getComposerClass();
-            $sql = new $db_composer();
-            $sql = new \DressApi\Core\DBMS\CMySqlComposer();
+            $sql = new CComposer();
 
             if ($this->request->getWithRelations() && $this->items_view!='*')
             {
@@ -854,22 +853,29 @@ class CBaseController extends CDB
                 if (isset($fields))
                     foreach($fields as &$field) // $field = id_area
                     {
-                        $matches = [];
-                        if (preg_match(RELATED_TABLE_FROM_ID,$field,$matches))
+                        $matches = []; //  /^([\S]*)_id/
+                        $related_table_from_id = '/^'.str_replace('[related_table]','([\S]*)',RELATED_TABLE_ID).'/';
+                        
+                        if (preg_match($related_table_from_id, $field, $matches))
                         {
                             $rel_table = $matches[1];
-
-                            if ($rel_table==SAME_TABLE_ID) // Reference to the same table (i.e: tree with parent)
-                                $rel_table = $this->table;
-
-                            $sql->leftJoin($rel_table,"$letter_table.id=a.$field", $letter_table);
-                            if (isset($this->related_field_names[$rel_table]))
-                                $field = "$letter_table.".$this->related_field_names[$rel_table]." '$rel_table'";
+                            if (str_replace('[table]',$this->table,ITEM_ID)===$field)
+                                $field = "a.$field";
                             else
-                                if (isset($this->related_field_names['*']))
-                                    $field = "$letter_table.".$this->related_field_names['*']." '$rel_table'";
+                            {
+                                $id_table = str_replace('[table]',$rel_table,ITEM_ID);
+                                if ($rel_table==SAME_TABLE_ID) // Reference to the same table (i.e: tree with parent)
+                                    $rel_table = $this->table;
 
-                            $letter_table++;
+                                $sql->leftJoin($rel_table,"$letter_table.$id_table=a.$field", $letter_table);
+                                if (isset($this->related_field_names[$rel_table]))
+                                    $field = "$letter_table.".$this->related_field_names[$rel_table]." '$rel_table'";
+                                else
+                                    if (isset($this->related_field_names['*']))
+                                        $field = "$letter_table.".$this->related_field_names['*']." '$rel_table'";
+
+                                $letter_table++;
+                            }
                         }
                         else
                             $field = "a.$field";

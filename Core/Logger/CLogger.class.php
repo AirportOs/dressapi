@@ -44,8 +44,10 @@ class CLogger
         {
             $path = realpath (__DIR__ . '/../../');
             $filename = $path.'/logs/dressapi-requests.log';
-            $datarow = sprintf(date('Y-m-d H:i:s') . ' - '."%3d - %10s - %30s - %s\r\n",$response->getStatusCode(), 
-                                $request->getMethod(), $user->getUsername(), implode(',',$request->getParameters() ?? []) 
+            $datarow = sprintf(date('Y-m-d H:i:s') . ' '."%3d %8s %20s %-20s %s\r\n",$response->getStatusCode(), 
+                                $request->getMethod(),  
+                                $user->getUsername(), $request->getRequest(), 
+                                implode(',',$request->getParameters() ?? []) 
                               );
 
             file_put_contents($filename, $datarow, LOCK_EX|FILE_APPEND);

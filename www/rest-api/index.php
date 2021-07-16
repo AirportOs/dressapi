@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../config.php';
+
+require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../Core/autoload.php'; // Autoloader dell'applicazione
 
 use DressApi\Core\DBMS\CMySqlDB as CDB;       // In the future other DBMS as Oracle, PostgreSQL, MS SQL
@@ -17,10 +18,9 @@ use DressApi\Modules\Base\CBaseController;
 
 try
 {
-    // $module = CBaseController::GetModule(); // Module request
     $request = new CRequest();        // Input manager (but the validations is the CBaseModel class)
     $response = new CResponse();      // Output manager
-    $cache = new CCache(DOMAIN_NAME); // Cache manager
+    $cache = new CCache(DOMAIN_NAME,DB_NAME); // Cache manager
 
     CDB::connect(DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT);
 
@@ -28,19 +28,25 @@ try
     $valid_token = $user->verify();
 
     if ($valid_token != 'OK')
+    {
+        $response->setStatusCode(CResponse::HTTP_STATUS_OK);
         print $valid_token;
+    }
     else
     {
         // Create a role ('all') and accept all permissions
         $user->setUserRole(['all']); // // Add role "1" to current user
         $user->addRolePermission('all', '*', '*'); // Role=All, All modules, all permission
 
+        // $module = CBaseController::GetModule(); // Module request
         $rest = new CBaseController($user, $request, $response, $cache);
         
         // sets all the related tables with an array and the method setRelatedFieldNames()
         // id_page => page:title 
         // id_[table] => [table]:name
         $rest->setRelatedFieldNames(['page'=>'title','*'=>'name']);  
+
+        // $rest->setRelatedFieldNames(['car_type'=>'name']);  
 
         print $rest->exec();
     }
@@ -50,7 +56,7 @@ try
 catch (Exception $ex)
 {
     print "\nERROR: ".$ex->getMessage()."\n\n";
-    $response->error(400, $ex->getMessage()); // Bad request
+    $response->error(($ex->getCode())?$ex->getCode():400, $ex->getMessage()); // Bad request
 }
 
 // track request into log file by logger

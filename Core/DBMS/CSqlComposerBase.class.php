@@ -42,15 +42,6 @@ namespace DressApi\Core\DBMS
         /**
          * Reset all internal data (like a new)
          */
-        public static function getComposerClass()
-        {
-            return "DressApi\\Core\DBMS\\C" . DBMS_TYPE . "Composer";
-        }
-
-
-        /**
-         * Reset all internal data (like a new)
-         */
         public function clear()
         {
             $this->param = [];

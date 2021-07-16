@@ -14,8 +14,6 @@
 
 namespace DressApi\Core\Request;
 
-require_once __DIR__ . '/../../config.php';
-
 use Exception;
 
 class CRequest
@@ -228,14 +226,14 @@ class CRequest
     public function getModule() : string       { return $this->module; }
     public function getMethod() : string       { return $this->method; }
     public function getSets() : string         { return $this->sets; }
-    public function getFilters() : ?array      { return $this->filters ?? null; }
-    public function getParameters() : ?array   { return $this->params ?? null; }
+    public function getFilters() : array      { return $this->filters ?? []; }
+    public function getParameters() : array   { return $this->params ?? []; }
     public function getWithRelations() : bool  { return $this->with_relations; }
     public function getCurrentPage() : int     { return $this->page; }
     public function getItemsPerPage() : int    { return $this->items_per_page; }
     public function getFilter($name) : ?string { return $this->filters[$name] ?? null; }
     public function getParameter($name) : ?string { return $this->params[$name] ?? null; }
     public function getCharset() : string { return $this->charset; }
-    public function getOrderBy() : ?array     { return $this->order_by ?? null; }
+    public function getOrderBy() : array     { return $this->order_by ?? []; }
 
 }

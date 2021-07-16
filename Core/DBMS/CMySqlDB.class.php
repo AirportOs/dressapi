@@ -17,10 +17,6 @@ namespace DressApi\Core\DBMS;
 
 use Exception;
 
-// require_once __DIR__ . '/../../config.php';
-require_once __DIR__ . '/config.php'; // DB CONFIGURATION
-
-
 /**
  * Class to manage a DataBase in MySql
  */

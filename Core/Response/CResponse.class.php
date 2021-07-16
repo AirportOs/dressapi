@@ -37,7 +37,7 @@ class CResponse
 
     public function __construct()
     {
-        $this->status_code = 0;
+        $this->status_code = self::HTTP_STATUS_OK;
         $this->message_error = '';
         $this->format = CRequest::getFormat();
     } 

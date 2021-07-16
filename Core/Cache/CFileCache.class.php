@@ -37,12 +37,12 @@ class CFileCache
      *
      * @param string $domain application domain (unique name for each app)
      */
-    public function __construct(string $domain)
+    public function __construct(string $domain, $db_name)
     {
         // Crea la cartella cachefiles nella path indicata. Utile ad esempio se scrive in memoria tipo '/dev/shm/'
-        $this->CACHE_PATH = self::MAIN_CACHE_PATH . $domain . '/cachefiles/';
+        $this->CACHE_PATH = self::MAIN_CACHE_PATH . $domain . '/'.$db_name.'/';
         $this->area_name = '';
-        $this->_createPathIfNotExists($this->CACHE_PATH = self::MAIN_CACHE_PATH . $domain . '/cachefiles/');
+        $this->_createPathIfNotExists($this->CACHE_PATH);
 
         //    print $this->CACHE_PATH;
     }

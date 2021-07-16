@@ -21,7 +21,7 @@ try
     // $module = CBaseController::GetModule(); // Module request
     $request = new CRequest();        // Input manager (but the validations is the CBaseModel class)
     $response = new CResponse();      // Output manager
-    $cache = new CCache(DOMAIN_NAME); // Cache manager
+    $cache = new CCache(DOMAIN_NAME, DB_NAME); // Cache manager
 
     CDB::connect(DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT);
 

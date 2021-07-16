@@ -24,14 +24,14 @@ use Exception;
 abstract class CDBMS
 {
     // possible enum in future
-    const EMERGENCY = 'emergency';
-    const ALERT     = 'alert';
-    const CRITICAL  = 'critical';
-    const ERROR     = 'error';
-    const WARNING   = 'warning';
-    const NOTICE    = 'notice';
-    const INFO      = 'info';
-    const DEBUG     = 'debug';
+    const EMERGENCY = 7;
+    const ALERT     = 6;
+    const CRITICAL  = 5;
+    const ERROR     = 4;
+    const WARNING   = 3;
+    const NOTICE    = 2;
+    const INFO      = 1;
+    const DEBUG     = 0;
 
     protected static ?string $dbkey = null;                 // index of the current db
     protected static array $handle          = [];   // list of DB handles
@@ -898,15 +898,30 @@ abstract class CDBMS
      * @param array $context
      * @return void
      */
-    public static function log(mixed $level, string $message, array $context = [])
+    public static function log(mixed $level, string $message, array $context = []) : void
     {
+        $levels = [ self::EMERGENCY => 'emergency', self::ALERT    => 'alert',
+                    self::CRITICAL => 'critical',   self::ERROR  => 'error',
+                    self::WARNING=> 'warning',      self::NOTICE => 'notice',
+                    self::INFO => 'info',           self::DEBUG=>'debug'];
+    
+        if (is_int($level)) // 6=INFO, 7=DEBUG
+        {
+            if ($level>=LOG_LEVEL_MIN)
+                $level_text = $levels[$level];
+            else
+                return;
+        }
+        else
+            $level_text = $level;
         $path = realpath(__DIR__ . '/../../');
         
-        if ($level==self::INFO || $level==self::DEBUG || $level==6 || $level==7) // 6=INFO, 7=DEBUG
+        if ($level==self::INFO || $level==self::DEBUG || 
+            $level==$levels[self::INFO] || $level==$levels[self::DEBUG]) // 6=INFO, 7=DEBUG
             $filename = $path . '/logs/dressapi-info.log';
         else
             $filename = $path . '/logs/dressapi-errors.log';
-        $datarow =  date('Y-m-d H:i:s') . ' - '.$level . ' - ' . $message . (($context) ? ('') : (print_r($context, true))) . "\r\n";
+        $datarow =  date('Y-m-d H:i:s') . ' - '.$level_text . ' - ' . $message . (($context) ? ('') : (print_r($context, true))) . "\r\n";
 
         file_put_contents($filename, $datarow, LOCK_EX | FILE_APPEND);
     }

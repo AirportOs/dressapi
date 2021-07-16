@@ -48,7 +48,6 @@ define('DB_HOST', 'localhost');
 define('DB_PORT', 3306);
 
 // name of DB
-// define('DB_NAME', 'dressapi-test');
 define('DB_NAME', 'dressapi-test');
 
 // Username of db user

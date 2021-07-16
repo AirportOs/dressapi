@@ -20,7 +20,7 @@ use DressApi\Core\User\CUser;
 use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
 use DressApi\Modules\Base\CBaseController;
-use DressApi\Core\DBMS\CMySqlComposer;
+use DressApi\Core\DBMS\CMySqlComposer as CComposer;
 
 class CExampleController extends CBaseController
 {
@@ -48,15 +48,7 @@ class CExampleController extends CBaseController
         $data = [];
         try
         {
-            // GENERIC ALTERNATIVE FOR ANY DBMS COMPOSER
-            // $db_composer = CSqlComposerBase::getComposerClass();
-            // $sc = new $db_composer();
-
-            // Only for MySQL/MariaDB
-            // Use this if you think you will never change DBMS. 
-            // This way with a smart editor you will have more help. (if you thinever)
-            $sql = new CMySqlComposer();
-
+            $sql = new CComposer();
 
             // Make your query here...for example a LEFT JOIN
             $sql = $sql->select('*')->from('metadata','m');
