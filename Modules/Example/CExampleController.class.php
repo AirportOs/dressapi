@@ -17,6 +17,7 @@ namespace DressApi\Modules\Example;
 
 use Exception;
 use DressApi\Core\User\CUser;
+use DressApi\Core\Cache\CFileCache as CCache;
 use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
 use DressApi\Modules\Base\CBaseController;
@@ -30,10 +31,10 @@ class CExampleController extends CBaseController
      *
      * @return void
      */
-    public function __construct(CUser $user = null, CRequest $request, CResponse $response, $cache = null)
+    public function __construct(CRequest $request, CResponse $response, ?CUser $user = null, ?CCache $cache = null)
     {
         $this->setDBTable('page'); // Default dbtable
-        parent::__construct($user, $request, $response, $cache);
+        parent::__construct($request, $response, $user, $cache);
     }
 
 

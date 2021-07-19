@@ -28,7 +28,7 @@ use Exception;
  */
 class CFileCache
 {
-    private const MAIN_CACHE_PATH = '/var/www/html/dressapi-cache/'; // /dev/shm/
+    private const MAIN_CACHE_PATH = CACHE_PATH; // /dev/shm/
     private string $CACHE_PATH;
     private $area_name;
 

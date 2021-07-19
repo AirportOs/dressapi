@@ -45,7 +45,7 @@ try
         // Create an appropriate Controller for the request 
         // (if you use additional modules besides CBaseController, i.e.: CExampleController)
         $controller = CBaseController::GetModuleController();
-        $rest = new $controller($user, $request, $response, $cache);
+        $rest = new $controller($request, $response, $user, $cache);
 
         //
         // It excludes the management of the tables or modules listed below.

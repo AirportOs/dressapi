@@ -43,7 +43,7 @@ try
         $user->addRolePermission('all', '*', '*'); // Role=All, All modules, all permission
 
         // $module = CBaseController::GetModule(); // Module request
-        $rest = new CBaseController($user, $request, $response, $cache);
+        $rest = new CBaseController($request, $response, $user, $cache);
         
         // sets all the related tables with an array and the method setRelatedFieldNames()
         // id_page => page:title 

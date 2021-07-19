@@ -21,6 +21,7 @@ require_once __DIR__ . '/config.php'; // local module config
 use Exception;
 use DressApi\Core\DBMS\CMySqlComposer as CComposer;
 use DressApi\Core\DBMS\CMySqlDB as CDB;
+use DressApi\Core\Cache\CFileCache as CCache;
 use DressApi\Core\User\CUser;
 use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
@@ -47,13 +48,16 @@ class CBaseController extends CDB
 
     protected array $related_field_names = [];
 
+    
+    protected bool $cache_per_user = true; // flag: if true, one cache foreach user, false: same cache for all
+
     // optional objects
-    protected $cache; // CCache or sons
-    protected $user;  // CUser  or sons
+    protected ?CCache $cache; // CCache or sons
+    protected ?CUser $user;  // CUser  or sons
 
-    protected $request;  // CRequest
-    protected $response; // CResponse
-
+    protected CRequest $request;  // CRequest
+    protected CResponse $response; // CResponse
+    
     /**
      * Constructor
      *
@@ -61,7 +65,7 @@ class CBaseController extends CDB
      *
      * @return void
      */
-    public function __construct(CUser $user = null, CRequest $request, CResponse $response, $cache = null)
+    public function __construct(CRequest $request, CResponse $response, ?CUser $user = null, ?CCache $cache = null)
     {
         $this->user = $user;
         $this->request  = $request;
@@ -771,7 +775,7 @@ class CBaseController extends CDB
             $key .= '.'.implode('.',$this->bind_params_values);
 
         if ($this->cache)
-            $cache_key = ((isset($this->user)) ? ($this->user->getId() . '.') : ('')) . hash('sha256', $key);
+            $cache_key = (($this->cache_per_user && isset($this->user)) ? ($this->user->getId() . '.') : ('')) . hash('sha256', $key);
 
         return $cache_key;
     }
@@ -1088,7 +1092,6 @@ die;
 
 
     /**
-     * Method exec
      *
      * Call the appropriate method (GET,POST,PUT,PATCH,DELETE,...) e return the results
      * 
@@ -1128,25 +1131,41 @@ die;
 
 
     /**
-     * Method setCache
      *
      * Set a cache manager object
      * 
+     * @param CCache a object cache 
+     * 
      */
-    public function setCache(mixed $cache)
+    public function setCache(CCache $cache)
     {
         $this->cache = $cache;
     }
 
 
     /**
-     * Method setUser
      *
      * Set a user manager object (CUser or childs)
      * 
+     * @param CUser a object user
+     * 
      */
-    public function setUser(mixed $user)
+    public function setUser(CUser $user)
     {
         $this->user = $user;
     }
+
+
+    /**
+     *
+     * Set an individual cache per each user
+     * 
+     * @param bool $cache_per_user if true is an individual cache per each user (recommended), false cache for all
+     * 
+     */
+    public function setCachePerUser(bool $cache_per_user = true)
+    {
+        $this->cache_per_user = $cache_per_user;
+    }
+    
 } // end class
