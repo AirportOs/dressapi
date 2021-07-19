@@ -38,19 +38,23 @@ try
         // if the appropriate moduletable_role_permission, moduletable and role tables exist
         // $user->importPermissionsByDB($request, $cache);
 
+        // It excludes the management of the tables or modules listed below.
+        $rest->setExcludedControllers(['user']);
+
+        // For testing
         // Create a role ('all') and accept all permissions
-        $user->setUserRole(['all']); // // Add role "1" to current user
-        $user->addRolePermission('all', '*', '*'); // Role=All, All modules, all permission
+        // $user->setUserRole(['all']); // // Add role "1" to current user
+        // $user->addRolePermission('all', '*', '*'); // Role=All, All modules, all permission
 
-        // $module = CBaseController::GetModule(); // Module request
-        $rest = new CBaseController($request, $response, $user, $cache);
+        $module = CBaseController::GetModule(); // Module request
+        $rest = new $module($request, $response, $user, $cache);
         
-        // sets all the related tables with an array and the method setRelatedFieldNames()
-        // id_page => page:title 
-        // id_[table] => [table]:name
-        $rest->setRelatedFieldNames(['page'=>'title','*'=>'name']);  
+        if (defined('REQUIRED_ITEMS'))
+            $rest->setItemsRequired( $required );            
 
-        // $rest->setRelatedFieldNames(['car_type'=>'name']);  
+        // sets all the related tables with an array and the method setRelatedFieldNames()
+        if (defined('RELATED_FIELD_NAMES'))
+            $rest->setRelatedFieldNames(RELATED_FIELD_NAMES);  
 
         print $rest->exec();
     }
