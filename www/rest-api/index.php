@@ -60,7 +60,7 @@ try
         $rest->setExcludedControllers(['user']);
         
         if (defined('REQUIRED_ITEMS'))
-            $rest->setItemsRequired( $required );            
+            $rest->setItemsRequired(REQUIRED_ITEMS);            
 
         // sets all the related tables with an array and the method setRelatedFieldNames()
         if (defined('RELATED_FIELD_NAMES'))

@@ -434,7 +434,7 @@ class CUser extends CDB
      *   3    3               101
      *    
      */
-    public function importPermissionsByDB(CRequest $request, CCache $cache)
+    public function importPermissionsByDB(CRequest $request, CCache $cache) : bool
     {
         $moduletable = $request->getModule(); 
         $sql = "SELECT id_role,permission FROM moduletable_role_permission ". 
@@ -449,16 +449,20 @@ class CUser extends CDB
         if ($data === null )
         {
             $data = [];
-            $this->getQueryDataTable($data, $sql);     
-            $cache->set($hash, $data);           
+            $this->getQueryDataTable($data, $sql);
+            if ($data === null )     
+                $cache->set($hash, $data);           
         }
 
-        foreach($data as $row)
-        {
-            $role = $row['id_role'] ?? '*';
-            $this->addUserRole( $role );
-            $this->addRolePermission( $role, $moduletable, $row['permission'] ?? '*' );
-        }
+        if ($data !== null )
+            foreach($data as $row)
+            {
+                $role = $row['id_role'] ?? '*';
+                $this->addUserRole( $role );
+                $this->addRolePermission( $role, $moduletable, $row['permission'] ?? '*' );
+            }
+
+        return $data !== null;
     }
 
 

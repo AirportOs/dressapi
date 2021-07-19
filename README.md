@@ -2,10 +2,10 @@
 
 DressApi is a new **open source framework for create a modern REST API, for PHP 8.x under Apache 2.0 license**.
 It was written in 2020 and released in 2021 reusing the best concepts adopted in the AirportOs framework: a proprietary framework used for over a decade.
-Its goal is to simplify the programmer's life using very few instructions but at the same time provide him with the ability to create any customization.
+Its goal is to simplify the programmer's life using very few instructions but at the same time provide it with the ability to create any customization.
 The name "DressApi" means it "dress up" your database, substantially it provides a quick REST API, to your db schema.
 DressApi maps your database as an **ORM** (Object-relational mapping) and it does it dynamically.
-Although it is structured as an **MVC** (Model, View, Controller) it does not need to define a model for each table but reads it and manages it automatically from the DB. However, you can create a Model to define some details about its data structure.
+Although it is structured as an **MVC** (Model, View, Controller) but it does not need to define a model for each table but reads it and manages it automatically from the DB. However, you can create a Model to define some details about its data structure.
 The most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code and only if you need to customize it can you create a specific model.
 
 ## Minimal but complete example code
@@ -62,12 +62,10 @@ try
 
         print $rest->exec();
     }
-
-    //  CDB::disconnect();
 }
 catch (Exception $ex)
 {
-    print $response->error(400, $ex->getMessage()); // Bad request
+    print "\n".$response->error(($ex->getCode())?$ex->getCode():CResponse::HTTP_STATUS_BAD_REQUEST, $ex->getMessage())."\n";
 }
 
 // track request into log file by logger

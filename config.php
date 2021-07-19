@@ -7,6 +7,11 @@ define('DEFAULT_FORMAT_OUTPUT', 'json'); // json, xml, text
 // Level of log info
 define('LOG_LEVEL_MIN', 'info');
 
+
+//
+// Relations
+//
+
 // Convetional id primary key name for all tables
 define('ITEM_ID', 'id'); // probable alternative: '[table]_id', '[table]ID', 'id_[table]'
 
@@ -20,11 +25,36 @@ define('RELATED_TABLE_ID', 'id_[related_table]');
 // i.e: if the table is "page" and one field in the same table is id_page, then the SAME_TABLE_ID is not used 
 define('SAME_TABLE_ID', 'parent'); 
 
-// if is omit "order-by/id", "order-by/id-ASC" or its abbreviation "ob/id-ASC"
-define('DEFAULT_ORDER', 'DESC'); // DESC or ASC
-
 // Date or datetime field that can be set automatically as current time
 define('CREATION_DATE', 'creation_date');
+
+
+//
+// RELATION OF FOREIGN KEY WITH OTHER TABLE
+//
+
+// id_page => page:title 
+// id_[table] => [table]:name
+// NOTE: you can also set relationships in the controller with addRelatedFieldName()
+define('RELATED_FIELD_NAMES', ['page'=>'title','*'=>'name']);
+
+
+// REQUIRED ITEMS AND ACCEPTED INPUT VALUES (with rule expressions)
+// Input check valid for POST, PUT, PATCH
+// NOTE: you can also set required items in the controller with addItemRequired();
+//       i.e: $this->addItemRequired('vote', ['name'=>'vote','min'=>18, 'max'=>30], 'student' );
+define('REQUIRED_ITEMS', ['student'=> // table
+                            [ // item=>rules
+                             ['periodicy' => '/[daily|weekly|monthly]/'],
+                             ['name'=>'age','min'=>17],
+                             ['name'=>'vote','min'=>18, 'max'=>30]
+                           ]
+                        ]);
+
+
+
+// if is omit "order-by/id", "order-by/id-ASC" or its abbreviation "ob/id-ASC"
+define('DEFAULT_ORDER', 'DESC'); // DESC or ASC
 
 // Please, personalize it change me if you use it! crypt/decrypt by db
 define('PWD_CRYPT', '@AShHK#Dfjdx45');
@@ -85,3 +115,14 @@ define('TOKEN_ENC_ALGORITHM', 'HS512');
 define('TOKEN_DURATION', '2 months'); // minutes, hours, days, months, years
 define('PASSWORD_ENC_ALGORITHM', 'tiger192,4');
 
+
+//
+// CACHE
+//
+
+// On Debian
+define('CACHE_PATH', '/dev/shm/dressapi-cache/');
+
+// Others 
+// Preferably create a memory virtual disk
+// define('CACHE_PATH', '/var/www/dressapi-cache/');
