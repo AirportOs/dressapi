@@ -20,7 +20,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/../../config.php';
 
-require_once __DIR__ . '/../../Core/autoload.php'; // Autoloader dell'applicazione
+require_once __DIR__ . '/../../Core/autoload.php'; // DressApi Autoloader
 
 use DressApi\Core\DBMS\CMySqlDB as CDB;       // In the future other DBMS as Oracle, PostgreSQL, MS SQL
 use DressApi\Core\Cache\CFileCache as CCache; // An alternative is CRedisCache

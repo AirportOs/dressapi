@@ -14,8 +14,9 @@
  *   - curl -H "Accept plain/text" -X GET http://dressapi/api/car_make/wr/p/1,20
  *   - curl -H "Accept: plain/text" -X GET http://dressapi/api/car_option_value/wr/p/1,20
  * 
- *   This DB don't use the authentication, 
- *   if you this create a new DB table with table "user" with id, name, username and password fields.
+ *   This DB don't use the authentication.
+ *   If you want the authentication feature create a new table of the DB
+ *   called "user" with the fields: id, name, username and password.
  * 
  */
 

@@ -141,11 +141,11 @@ class CResponse
      *
      * Return the data results in the required format
      * 
-     * @param array|object|null $result data to tranform
+     * @param mixed $result data to tranform
      *  
      * @ string all data results
      */
-    public function output(array|object|null $result): string
+    public function output(mixed $result): string
     {
         $formatMethod = 'as'.strtoupper($this->format);
 

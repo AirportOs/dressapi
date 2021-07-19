@@ -26,7 +26,7 @@ class CPageModel extends \DressApi\Modules\Base\CBaseModel
      */
     public function getListItems() : array
     {
-        return ['id','id_user','title','creation_date'];
+        return ['id','id_user','title','body'];
     }        
  
 } // end class

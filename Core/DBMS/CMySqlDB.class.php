@@ -123,19 +123,24 @@ class CMySqlDB extends CDBMS
      */
     protected static function _realConnection()
     {
-        if (!isset(self::$handle[self::$dbkey]) || self::$handle[self::$dbkey]->connect_errno)
+        $connected = (isset(self::$handle[self::$dbkey]) && self::$handle[self::$dbkey]->connect_errno==0);
+        if (!$connected)
         {
-            self::$handle[self::$dbkey] = new \mysqli(
+            self::$handle[self::$dbkey] = @new \mysqli(
                 self::$hostname,
                 self::$dbusername,
                 self::$dbpassword,
                 self::$database_name,
                 self::$port
             );
-            self::$handle[self::$dbkey]->autocommit(self::$autocommit);
+            $connected = (isset(self::$handle[self::$dbkey]) && self::$handle[self::$dbkey]->connect_errno==0);
+            if ($connected)
+                self::$handle[self::$dbkey]->autocommit(self::$autocommit);
+            else
+                throw new Exception(self::$handle[self::$dbkey]->connect_error);
         }
 
-        return (isset(self::$handle[self::$dbkey]) && !self::$handle[self::$dbkey]->connect_errno);
+        return $connected;
     }
 
 
@@ -318,7 +323,7 @@ class CMySqlDB extends CDBMS
 
             try
             {
-                $sql = "UPDATE `$table` SET " . implode(",", $items_keys) . " WHERE $conditions";
+                $sql = str_replace('a.','',"UPDATE `$table` SET " . implode(",", $items_keys) . " WHERE $conditions");
                 $stmt = $mysqli->prepare($sql);
                 // echo "\n$sql ($types) ".print_r($items_values,true)."\n";
 
@@ -373,12 +378,16 @@ class CMySqlDB extends CDBMS
                     foreach ($types as $db_type)
                         $stypes .= $this->convertDBType2BindType($db_type);
 
-                $sql = "DELETE FROM $table WHERE $conditions";
+                $sql = str_replace('a.','',"DELETE FROM `$table` WHERE $conditions");
                 $stmt = $mysqli->prepare($sql);
 
-                $stmt->bind_param($stypes, ...array_values($conditions_values));
-                $ret = $stmt->execute();
-                $stmt->close();
+                if ($stmt)
+                {
+                    $stmt->bind_param($stypes, ...array_values($conditions_values));
+                    $ret = $stmt->execute();
+                    $stmt->close();
+    
+                }
 
                 if (self::getLastDBErrorString())
                 {
@@ -588,7 +597,7 @@ class CMySqlDB extends CDBMS
         $ret = false;
         try
         {
-            if ((defined('DEBUG_LEVEL_MIN') && (DEBUG_LEVEL_MIN=='debug' || DEBUG_LEVEL_MIN==0)) && 
+            if ((defined('LOG_LEVEL_MIN') && (LOG_LEVEL_MIN=='debug' || LOG_LEVEL_MIN==0)) && 
                 ((!stristr($sql, "SELECT ") && !stristr($sql, "SHOW ") && !stristr($sql, "session")))
                ) self::debug($sql." - [".(($bind_param_values===null)?(''):(print_r($bind_param_values,true)))."]");
 
@@ -870,17 +879,20 @@ class CMySqlDB extends CDBMS
     {
         $db_tables = [];
 
-        $this->query("SHOW TABLES");
+        $ret = $this->query("SHOW TABLES");
         //    $db_tables = array_keys($this->getArrayByName(0));
 
-        $db_tables = $this->getArrayByName(0);
-        if (isset($db_tables))
-            foreach ($db_tables as $table => $dummy)
-            {
-                $db_cols = [];
-                $this->setDBColumns($db_cols, $table);
-                $db_tables[$table] = $db_cols;
-            }
+        if ($ret)
+        {
+            $db_tables = $this->getArrayByName(0);
+            if (isset($db_tables))
+                foreach ($db_tables as $table => $dummy)
+                {
+                    $db_cols = [];
+                    $this->setDBColumns($db_cols, $table);
+                    $db_tables[$table] = $db_cols;
+                }
+        }
     }
 
 

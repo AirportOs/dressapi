@@ -203,7 +203,7 @@ class CBaseController extends CDB
         {
             $this->db_tables = [];
             $this->getAllTables($this->db_tables);
-            if ($this->cache)
+            if ($this->cache && $this->db_tables)
                 $this->cache->set('db_tables', $this->db_tables);
         }
 
@@ -246,7 +246,7 @@ class CBaseController extends CDB
      */
     protected function setTable(string $table): void
     {
-        if (isset($this->db_tables) && !isset($this->db_tables[$table])) // NOT exists
+        if (isset($this->db_tables) && !isset($this->db_tables[$table]) && $table!='all') // NOT exists
             throw new Exception("Module ".ucfirst($table)." not exist");
 
         $order_by = $this->request->getOrderBy();
@@ -425,7 +425,7 @@ class CBaseController extends CDB
                             $start = false;
                         else
                             $conditions .= ' OR';
-                        $conditions .= " (`$name` LIKE ?)";
+                        $conditions .= " (`a.$name` LIKE ?)";
                         $this->bind_params_values[] = "%$value%";
                         $this->bind_params_types[] = $col['type'];
                     }
@@ -445,7 +445,7 @@ class CBaseController extends CDB
                             continue;
                         else
                         {
-                            $conditions .= " $name IN (?)";
+                            $conditions .= " a.$name IN (?)";
                             $this->bind_params_values[] = $value;
                         }
                     }
@@ -455,11 +455,11 @@ class CBaseController extends CDB
                         switch ($operator)
                         {
                             case '~':
-                                $conditions .= " $name LIKE ?";
+                                $conditions .= " a.$name LIKE ?";
                                 $this->bind_params_values[] = "%$value%";
                                 break;
                             default:
-                                $conditions .= " $name$operator?";
+                                $conditions .= " a.$name$operator?";
                                 $this->bind_params_values[] = $value;
                                 break;
                         }
@@ -766,6 +766,10 @@ class CBaseController extends CDB
     protected function _getCacheKey(string $key): string
     {
         $cache_key = ''; // request new data
+
+        if (count($this->bind_params_values))
+            $key .= '.'.implode('.',$this->bind_params_values);
+
         if ($this->cache)
             $cache_key = ((isset($this->user)) ? ($this->user->getId() . '.') : ('')) . hash('sha256', $key);
 
@@ -802,8 +806,11 @@ class CBaseController extends CDB
 
     protected function _getContentFromDB(mixed $sql, string $cache_key = '') : array
     {
+        // $s = (string)$sql;
+        
         $data = [];
         $data['data'] = [];
+
 
         $this->getQueryDataTable($data['data'], $sql, $this->bind_params_values, $this->bind_params_types);
 
@@ -817,7 +824,8 @@ class CBaseController extends CDB
             'total_items' => $total_items,
             'page' => $this->request->getCurrentPage(),
             'total_pages' => $total_pages,
-            'items_per_page' => $items_per_page
+            'items_per_page' => $items_per_page,
+            'table' => $this->table,
         ];
 
         if ($this->cache && $cache_key && $data['data'] !== null && count($data['data']) > 0)
@@ -892,7 +900,7 @@ class CBaseController extends CDB
             }
             else // simple table
             {
-                $sql->select($this->items_view)->from($this->table);
+                $sql->select($this->items_view)->from($this->table,'a');
                 $sql->where($this->getConditions());
                 $sql->paging($this->request->getCurrentPage(), $this->request->getItemsPerPage());
     
@@ -997,7 +1005,7 @@ die;
     {
         try
         {
-            $ret_input_file = $this->_inputFile();
+
 
             $this->response->setStatusCode(CResponse::HTTP_STATUS_BAD_REQUEST);
 
@@ -1029,15 +1037,12 @@ die;
     /**
      * Manager of HTTP Method OPTIONS
      * 
-     * @return array array with results all tables if not set one or a structure informations 
+     * @return array array with a structure of table or if table=all, the list of all tables available 
      */
     public function execOPTIONS(): array
     {
-        if ($this->table == '')
-            return [
-                'requests' => ['HEAD', 'GET', 'PUT', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-                'tables' => array_keys($this->db_tables)
-            ];
+        if ($this->table == 'all')
+            return array_keys($this->db_tables);
         else
             return $this->db_tables[$this->table];
     }

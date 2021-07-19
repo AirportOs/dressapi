@@ -63,31 +63,6 @@ INSERT INTO `contact` (`id`, `first_name`, `surname`, `address`, `zip_code`, `ci
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `logger`
---
-
-CREATE TABLE `logger` (
-  `id` int(11) NOT NULL,
-  `request` varchar(255) NOT NULL,
-  `method` varchar(20) NOT NULL,
-  `params` varchar(255) NOT NULL,
-  `request_date` datetime NOT NULL DEFAULT current_timestamp(),
-  `status_code` int(11) NOT NULL,
-  `id_user` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dump dei dati per la tabella `logger`
---
-
-INSERT INTO `logger` (`id`, `request`, `method`, `params`, `request_date`, `status_code`, `id_user`) VALUES
-(1, 'comment', 'POST', 'Good!,2021-01-23,1', '2021-07-12 00:58:46', 201, 1),
-(2, 'page/1', 'PATCH', '2021-01-13', '2021-07-12 01:03:50', 200, 1),
-(3, 'comment/1,2/wr', 'GET', '', '2021-07-12 01:07:25', 200, 1);
-
--- --------------------------------------------------------
-
---
 -- Struttura della tabella `moduletable`
 --
 
@@ -257,13 +232,6 @@ ALTER TABLE `contact`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indici per le tabelle `logger`
---
-ALTER TABLE `logger`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_user` (`id_user`);
-
---
 -- Indici per le tabelle `moduletable`
 --
 ALTER TABLE `moduletable`
@@ -320,12 +288,6 @@ ALTER TABLE `contact`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT per la tabella `logger`
---
-ALTER TABLE `logger`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
 -- AUTO_INCREMENT per la tabella `moduletable`
 --
 ALTER TABLE `moduletable`
@@ -371,13 +333,6 @@ ALTER TABLE `user_role`
 ALTER TABLE `comment`
   ADD CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`id_page`) REFERENCES `page` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Limiti per la tabella `logger`
---
-ALTER TABLE `logger`
-  ADD CONSTRAINT `logger_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
 --
 -- Limiti per la tabella `page`
 --
