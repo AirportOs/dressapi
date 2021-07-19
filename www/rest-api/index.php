@@ -36,18 +36,28 @@ try
     {
         // import user permissions directly from the DB
         // if the appropriate moduletable_role_permission, moduletable and role tables exist
-        // $user->importPermissionsByDB($request, $cache);
+        $imported_permission = $user->importPermissionsByDB($request, $cache);
 
-        // It excludes the management of the tables or modules listed below.
-        $rest->setExcludedControllers(['user']);
-
-        // For testing
+        // If there are no permissions to import then it allows you to do everything
         // Create a role ('all') and accept all permissions
-        // $user->setUserRole(['all']); // // Add role "1" to current user
-        // $user->addRolePermission('all', '*', '*'); // Role=All, All modules, all permission
+        // This operation is for general purposes, if you have indicated the permissions 
+        // in the "moduletable_role_permission" table then delete these instructions
+        if (!$imported_permission)
+        {
+            $user->setUserRole(['all']); // // Add role "all" to current user
+            $user->addRolePermission('all', '*', '*'); // Role=all, All modules, all permission
+        }
 
-        $module = CBaseController::GetModule(); // Module request
-        $rest = new $module($request, $response, $user, $cache);
+        // Create an appropriate Controller for the request 
+        // (if you use additional modules besides CBaseController, i.e.: CExampleController)
+        $controller = CBaseController::GetModuleController();
+        $rest = new $controller($request, $response, $user, $cache);
+
+        //
+        // It excludes the management of the tables or modules listed below.
+        //
+        // IMPORTANT: you must remove all data sensible for privacy and security
+        $rest->setExcludedControllers(['user']);
         
         if (defined('REQUIRED_ITEMS'))
             $rest->setItemsRequired( $required );            
