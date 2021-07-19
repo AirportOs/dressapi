@@ -108,8 +108,8 @@
 
 
         <div>
-            <h3 id="page-title">DressApi Testx</h3>
-            <p id="page-body"> xxvxvxv</p>
+            <h3 id="page-title">DressApi Test</h3>
+            <p id="page-body"></p>
         </div>
 
         <div id="insert-comment">
@@ -276,7 +276,7 @@
                 {
                     let table = '<div class="table-responsive"><table class="table table-striped table-sm">';
                     let head = false;
-
+console.log(full_data.data);
                     if (typeof(full_data.data)!='undefined')
                     {
                         let data = full_data.data;
@@ -287,15 +287,18 @@
                                 table += '<tr>';
                                 for(let col_name in data[i])
                                     table += '<th>'+col_name.toUpperCase()+'</th>';
-                                table += '<th>Delete</th>';
+                                
+                                if (typeof(full_data.metadata)!='undefined')
+                                    table += '<th>Delete</th>';
                                 table += '</tr>';
                                 head = true;
                             }
                             table += '<tr>';
                             for(let col_name in data[i])
                                 table += '<td>'+data[i][col_name]+'</td>';
-                            console.log("["+full_data.metadata.table+"] "+data[i]['id']);
-                            table += '<td><input type="button" class="btn btn-danger" value="Delete" onclick="DeleteRow(\''+full_data.metadata.table+'\', '+data[i]['id']+')"></td>';
+
+                            if (typeof(full_data.metadata)!='undefined')
+                                table += '<td><input type="button" class="btn btn-danger" value="Delete" onclick="DeleteRow(\''+full_data.metadata.table+'\', '+data[i]['id']+')"></td>';
                             table += '</tr>';
                         }
                     }
