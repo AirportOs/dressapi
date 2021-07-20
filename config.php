@@ -117,7 +117,7 @@ define('PASSWORD_ENC_ALGORITHM', 'tiger192,4');
 
 
 //
-// CACHE
+// CACHE ON FILE
 //
 
 // On Debian
