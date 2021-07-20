@@ -106,23 +106,6 @@
         <div class="alert alert-primary" role="alert" id="message">
         </div>
 
-
-        <div>
-            <h3 id="page-title">DressApi Test</h3>
-            <p id="page-body"></p>
-        </div>
-
-        <div id="insert-comment">
-            <form name="insert_comment" onsubmit="InsertRow('comment', this); return false;">
-                Your Comment<br>
-                <textarea class="form-control" type="text" name="comment" value=""></textarea><br>
-
-                <input type="hidden" name="id_page" value="" id="id_page_in_add_comment">
-                <input type="submit" name="insert-comment" value="Add Comment" class="btn btn-primary"
-                        ><br>
-            </form>
-        </div>
-
         <h4>Results</h4>
         <span class="metadata"></span><br>
         <div class="results"></div>
@@ -382,90 +365,6 @@
                                     res.json().then(data => { console.log(data); document.querySelector('.results').innerHTML = createTable(data);} );
                             });
                 }                
-
-                //
-                // Insert (Method POST)
-                //
-                function InsertRow(table, formData)
-                {
-                    let output = document.getElementById('output');
-                    output.querySelector('.operation').innerHTML = 'Insert a row (id=1000) in <b>'+table+'</b> table';
-                    output.querySelector('.method').innerHTML = 'POST';
-                    output.querySelector('.request').innerHTML = '/api/'+table;
-                    output.querySelector('.parameters').innerHTML = '';
-                    output.querySelector('.accept').innerHTML = 'plain/text';
-
-                    // let formData = new FormData();
-                    // formData.append('id', 1000);
-                    // formData.append(table, 'Lumen is better than DressApi!');
-                    // formData.append('id_page', 1);
-              
-                    postData('/api/'+table+'/',formData)
-                            .then(data => {
-                                output.querySelector('.status').innerHTML = data.status+ ' (' + data.statusText + ')';
-                                // if (data.status==201)
-                                data.text().then(text => { 
-                                                            document.getElementById('message').innerHTML = ''+JSON.parse(text).message+'';
-                                                            GetList('comment',list_options);
-                                                         } );
-                            });
-                }
-
-
-                //
-                // Update (Method PATCH)
-                //
-                function UpdateRow(table, formData)
-                {
-                    // let formData = new FormData();
-                    // formData.append('id', 1000);
-                    // formData.append(table, 'Yii is better than DressApi!');
-                    // formData.append('id_page', 1);
-                    
-                    let output = document.getElementById('output');
-                    output.querySelector('.operation').innerHTML = 'Insert a row (id=1000) in <b>'+table+'</b> table';
-                    output.querySelector('.method').innerHTML = 'PATCH';
-                    output.querySelector('.request').innerHTML = '/api/'+table;
-                    output.querySelector('.parameters').innerHTML = '';
-                    output.querySelector('.accept').innerHTML = 'plain/text';
-                    postData('/api/'+table, formData)
-                        .then(data => {
-                                    output.querySelector('.status').innerHTML = data.status+ ' (' + data.statusText + ')';
-                                    if (data.status==200)
-                                    {
-                                        data.text().then(text => { document.querySelector('.results').innerHTML = '<pre>'+text+'<pre>';} );
-                                    }
-                                    else
-                                        console.log('status: '+data.status);
-                                });
-                }
-
-
-                //
-                // Delete (Method DELETE)
-                //
-                function DeleteRow(table, id)
-                {
-                    // let formData = new FormData();
-                    // formData.append('id', 1000);
-                    
-                    let output = document.getElementById('output');
-                    output.querySelector('.operation').innerHTML = 'Insert a row (id=1000) in <b>'+table+'</b> table';
-                    output.querySelector('.method').innerHTML = 'PATCH';
-                    output.querySelector('.request').innerHTML = '/api/'+table;
-                    output.querySelector('.parameters').innerHTML = '';
-                    output.querySelector('.accept').innerHTML = 'plain/text';
-                    deleteData('/api/'+table+'/'+id)
-                            .then(data => {
-                                output.querySelector('.status').innerHTML = data.status+ ' (' + data.statusText + ')';
-                                if (data.status==200)
-                                {
-                                    data.json().then(res => {  GetList('comment',list_options); document.getElementById('message').innerHTML = res.message;} );
-                                }
-                                else
-                                    console.log('status: '+data.status);
-                            });
-                }
 
 
                 function setPage()

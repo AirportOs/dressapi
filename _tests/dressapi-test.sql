@@ -90,7 +90,7 @@ CREATE TABLE `moduletable_role_permission` (
   `id` int(11) NOT NULL,
   `id_moduletable` int(11) DEFAULT NULL COMMENT 'contains the index of module or table name managed by the base module',
   `id_role` int(11) NOT NULL COMMENT 'Role of the user',
-  `permission` enum('C','R','U','D','O') DEFAULT 'R' COMMENT 'C (create),R (read), U (update),D (delete) or O (options)'
+  `permission` enum('C','R','U','D') DEFAULT 'R' COMMENT 'C (create),R (read), U (update),D (delete)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -98,24 +98,33 @@ CREATE TABLE `moduletable_role_permission` (
 --
 
 INSERT INTO `moduletable_role_permission` (`id`, `id_moduletable`, `id_role`, `permission`) VALUES
-(1, NULL, 1, NULL),
-(2, 1, 2, 'R'),
-(3, 1, 3, 'C'),
-(4, 1, 3, 'U'),
-(5, 1, 3, 'D'),
-(6, 1, 3, 'O'),
-(7, 1, 4, 'C'),
-(8, 1, 4, 'U'),
-(9, 1, 4, 'O'),
-(10, 2, 2, 'R'),
-(11, 2, 3, 'C'),
-(12, 2, 3, 'U'),
-(13, 2, 3, 'D'),
-(14, 2, 3, 'O'),
-(15, 2, 4, 'C'),
-(16, 2, 4, 'U'),
-(17, 2, 4, 'O'),
-(18, 2, 5, 'C');
+#Administrator   // Can make all
+( 1, NULL, 1, NULL),
+
+#Anonymous       // Can read page and comment
+( 2, 1, 2, 'R'),
+( 3, 2, 2, 'R'),
+
+#Editor          // Full power: can read, update a page or a comment
+( 4, 1, 3, 'R'),
+( 5, 1, 3, 'U'), // page, editor
+( 6, 1, 3, 'D'),
+
+( 7, 2, 3, 'R'), // page, writer
+( 8, 2, 3, 'U'),
+( 9, 2, 3, 'D'),
+
+#Writer          // Can read, write, update a page
+(10, 2, 4, 'C'), // comment, anonymous/all
+(11, 2, 4, 'R'),
+(12, 2, 4, 'U'),
+
+#Commentator     // Can read a page and read or write a comment
+(13, 1, 4, 'R'),
+(14, 2, 4, 'C'),
+(15, 2, 4, 'R');
+
+
 
 -- --------------------------------------------------------
 

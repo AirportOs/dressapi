@@ -320,6 +320,7 @@ class CUser extends CDB
                 case 'R':
                     $this->role_permissions[$role][$module][] = 'GET';
                     $this->role_permissions[$role][$module][] = 'HEAD';
+                    $this->role_permissions[$role][$module][] = 'OPTIONS';
                     break;
                         
                 case 'U':
@@ -331,10 +332,6 @@ class CUser extends CDB
                     $this->role_permissions[$role][$module][] = 'DELETE';
                     break;
                         
-                case 'O':
-                    $this->role_permissions[$role][$module][] = 'OPTIONS';
-                    break;
-
                 case '*':
                     $this->role_permissions[$role][$module][] = 'POST';
                     $this->role_permissions[$role][$module][] = 'Upload';
@@ -360,7 +357,7 @@ class CUser extends CDB
      * 
      * @param string $module normally is the name of DB table but could be not in an custom extension 
      * @param string Name of permission [Get, Post, Patch, Put, Delete, Options] 
-     *               or if you prefer you can use C.R.U.D.O. letters [C=Post, R=Get, U=Patch|Put, D=Delete, O=Options].
+     *               or if you prefer you can use C.R.U.D. letters [C=Post, R=Get/Head/Options, U=Patch|Put, D=Delete].
      *               Finally, you can use * for all valid permission (for example with Admin user)
      */
     public function checkPermission(string $module, string $permission)
@@ -407,10 +404,10 @@ class CUser extends CDB
      *  id    name
      *  ===================
      *   1    Administrator   // Can make all
-     *   2    Anonymous       // Can read - All permissions for anonymous is valid for all user
-     *   3    Editor          // Full power: can Delete or publish a post
-     *   4    Writer          // Can write a post
-     *   5    Commentator     // Can write a comment
+     *   2    Anonymous       // Can read page and comment
+     *   3    Editor          // Full power: can read, update, delete or update a page or a comment
+     *   4    Writer          // Can read, write, update a page
+     *   5    Commentator     // Can read a page and read or write a comment
      *
      * 
      * 
@@ -422,7 +419,6 @@ class CUser extends CDB
      *   3    page      2        R 
      *   4    page      3        U 
      *   5    page      4        D 
-     *   6    page      3        O
      * 
      * 
      * For identificate the roles of current user is necessary use a cross table like this
