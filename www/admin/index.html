@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <title>DressApi Test</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="./assets/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+
+
+    <!-- Custom styles for this template -->
+    <link href="css/dressapi-admin.css" rel="stylesheet">
+    <script>
+        if (localStorage.token == null)
+            document.location = './signin/';
+
+        let list_options = 'with-relations/order-by/id-DESC';
+    </script>
+</head>
+
+<body>
+
+    <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
+        <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">DressApi</a>
+        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <!-- input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search" -->
+        <div class="navbar-nav">
+            <div class="nav-item text-nowrap">
+                <a class="nav-link px-3" href="#" onclick="localStorage.token=null;document.location='./signin/';">Sign
+                    out</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <ul id="sidebarMenuList" class="nav flex-column">
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div
+                    class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h1">DressApi Test</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse"
+                                href="#collapseToken" role="button" aria-expanded="false"
+                                aria-controls="collapseToken">My Token</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="container">
+
+                    <div class="collapse" id="collapseToken">
+                        <div class="card card-body">
+                            <h2>Your Token is</h2>
+                            <p id="token"> </p>
+                            <br>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-primary" role="alert" id="message">
+                    </div>
+
+
+                    <h4 id="tableName">Results</h4>
+                    <span class="metadata"></span><br>
+                    <div class="results"></div>
+
+                </div>
+
+
+                <script>
+
+                    //
+                    // Get Structure of table (Method OPTIONS)
+                    //
+                    function GetTableStructure(table) {
+                        let output = document.getElementById('output');
+                        output.querySelector('.operation').innerHTML = 'Get the structure of <b>' + table + '</b> table';
+                        output.querySelector('.method').innerHTML = 'OPTIONS';
+                        output.querySelector('.request').innerHTML = '/api/' + table;
+                        output.querySelector('.parameters').innerHTML = '';
+                        output.querySelector('.accept').innerHTML = 'application/json';
+                        optionsData('/api/' + table)
+                            .then(res => {
+                                output.querySelector('.status').innerHTML = res.status + ' (' + res.statusText + ')';
+                                if (res.status == 200)
+                                    res.json().then(data => { document.querySelector('.results').innerHTML = createTable({ 'data': data }); });
+                            });
+                    }
+
+
+                    //
+                    // Get Structure of table (Method OPTIONS)
+                    //
+                    function GetAllTableStructures() {
+                        let output = document.getElementById('output');
+                        output.querySelector('.operation').innerHTML = 'Get the structure of <b>all</b> table';
+                        output.querySelector('.method').innerHTML = 'OPTIONS';
+                        output.querySelector('.request').innerHTML = '/api/all';
+                        output.querySelector('.parameters').innerHTML = '';
+                        output.querySelector('.accept').innerHTML = 'plain/text';
+                        optionsData('/api/all')
+                            .then(res => {
+                                output.querySelector('.status').innerHTML = res.status + ' (' + res.statusText + ')';
+                                if (res.status == 200)
+                                    res.json().then(data => { console.log(data); document.querySelector('.results').innerHTML = createTable(data); });
+                            });
+                    }
+
+                    //
+                    // Insert (Method POST)
+                    //
+                    function InsertRow(table, formData) {
+                        let output = document.getElementById('output');
+                        output.querySelector('.operation').innerHTML = 'Insert a row (id=1000) in <b>' + table + '</b> table';
+                        output.querySelector('.method').innerHTML = 'POST';
+                        output.querySelector('.request').innerHTML = '/api/' + table;
+                        output.querySelector('.parameters').innerHTML = '';
+                        output.querySelector('.accept').innerHTML = 'plain/text';
+
+                        // let formData = new FormData();
+                        // formData.append('id', 1000);
+                        // formData.append(table, 'Lumen is better than DressApi!');
+                        // formData.append('id_page', 1);
+
+                        postData('/api/' + table + '/', formData)
+                            .then(data => {
+                                output.querySelector('.status').innerHTML = data.status + ' (' + data.statusText + ')';
+                                // if (data.status==201)
+                                data.text().then(text => {
+                                    document.getElementById('message').innerHTML = '' + JSON.parse(text).message + '';
+                                    GetList('comment', list_options);
+                                });
+                            });
+                    }
+
+
+                    //
+                    // Update (Method PATCH)
+                    //
+                    function UpdateRow(table, formData) {
+                        // let formData = new FormData();
+                        // formData.append('id', 1000);
+                        // formData.append(table, 'Yii is better than DressApi!');
+                        // formData.append('id_page', 1);
+
+                        let output = document.getElementById('output');
+                        output.querySelector('.operation').innerHTML = 'Insert a row (id=1000) in <b>' + table + '</b> table';
+                        output.querySelector('.method').innerHTML = 'PATCH';
+                        output.querySelector('.request').innerHTML = '/api/' + table;
+                        output.querySelector('.parameters').innerHTML = '';
+                        output.querySelector('.accept').innerHTML = 'plain/text';
+                        postData('/api/' + table, formData)
+                            .then(data => {
+                                output.querySelector('.status').innerHTML = data.status + ' (' + data.statusText + ')';
+                                if (data.status == 200) {
+                                    data.text().then(text => { document.querySelector('.results').innerHTML = '<pre>' + text + '<pre>'; });
+                                }
+                                else
+                                    console.log('status: ' + data.status);
+                            });
+                    }
+
+
+                    //
+                    // Delete (Method DELETE)
+                    //
+                    function DeleteRow(table, id) {
+                        // let formData = new FormData();
+                        // formData.append('id', 1000);
+
+                        let output = document.getElementById('output');
+                        output.querySelector('.operation').innerHTML = 'Insert a row (id=1000) in <b>' + table + '</b> table';
+                        output.querySelector('.method').innerHTML = 'PATCH';
+                        output.querySelector('.request').innerHTML = '/api/' + table;
+                        output.querySelector('.parameters').innerHTML = '';
+                        output.querySelector('.accept').innerHTML = 'plain/text';
+                        deleteData('/api/' + table + '/' + id)
+                            .then(data => {
+                                output.querySelector('.status').innerHTML = data.status + ' (' + data.statusText + ')';
+                                if (data.status == 200) {
+                                    data.json().then(res => { GetList('comment', list_options); document.getElementById('message').innerHTML = res.message; });
+                                }
+                                else
+                                    console.log('status: ' + data.status);
+                            });
+                    }
+
+
+                    function setPage() {
+                        getData('/api/page')
+                            .then(res => {
+                                if (res.status == 200)
+                                    res.json().then(data => {
+                                        let sel = document.getElementById('id_page');
+
+                                        if (typeof (data) != 'undefined' && typeof (data.data) != 'undefined') {
+                                            let index = 0;
+                                            let select_empty = (sel.length == 0);
+                                            // popolate a select
+                                            for (let i in data.data) {
+                                                if (select_empty) {
+                                                    let el = document.createElement("option");
+                                                    el.textContent = data.data[i].title;
+                                                    el.value = data.data[i].id;
+                                                    sel.appendChild(el);
+                                                }
+                                                if (sel.value == data.data[i].id)
+                                                    index = i;
+                                                // console.log(data.data[i].title);
+                                            }
+                                            document.getElementById('id_page_in_add_comment').value = sel.value;
+                                            document.getElementById('page-title').innerHTML = data.data[index].title;
+                                            document.getElementById('page-body').innerHTML = data.data[index].body;
+                                        }
+
+                                        // Read all comments of current page
+                                        list_options = 'with-relations/id_page=' + sel.value + '/order-by/id-DESC';
+                                        GetList('comment', list_options);
+                                    });
+                            });
+                    }
+                </script>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="./assets/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="./js/dressapi-admin.js"></script>
+
+    <script>
+        (function () {
+            if (!localStorage.token)
+                document.location('./signin/');
+
+            document.getElementById('token').innerHTML = localStorage.token;
+
+
+            createMenuTables();
+
+            // console.log(localStorage.token);
+
+            // GetList('comment');
+            // GetTableStructure('comment');
+            // GetAllTableStructures();
+
+            // popolate a page components
+            // setPage();
+        })();
+    </script>
+
+</body>
+
+</html>

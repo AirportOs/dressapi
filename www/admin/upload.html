@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Upload File</title>
+    <!--link rel="stylesheet" href="css/main.css" / -->
+    <!-- link rel="icon" href="images/favicon.png" / -->
+
+    <style>
+      #uploadfile-file { width: 100%; height: 150px; background:#ccc;color: #999}
+    </style>
+  </head>
+
+  <body>
+    <input id="uploadfile-file" type="file" onchange="upload();" name="path_uploadfile" value="Drag and drop here your file" />
+    
+    <form enctype="multipart/form-data" action="/api/" method="post">
+        <input id="uploadfile" type="hidden" name="uploadfile" />
+    </form>
+
+    <script>
+      // Example POST method implementation:
+      async function postData(url = '', data = {}) 
+      {
+        // Default options are marked with *
+        const response = await fetch(url, 
+        {
+          method: 'POST', // *GET, POST, PUT, DELETE, etc.
+          mode: 'cors', // no-cors, *cors, same-origin
+          cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+          credentials: 'same-origin', // include, *same-origin, omit
+          redirect: 'follow', // manual, *follow, error
+          referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+          body: data // body data type must match "Content-Type" header
+        });
+        return response.json(); // parses JSON response into native JavaScript objects
+      }
+
+
+      function upload()
+      {
+          let file = document.getElementById("uploadfile-file").files[0];
+          let item = document.getElementById("uploadfile-file").name;
+          let formData = new FormData();
+
+          formData.append(item, file);
+
+          postData('/rest-api/upload',formData)
+            .then(data => {
+              document.getElementById('uploadfile').value = data.slice(0, -1);
+              console.log(data); // JSON data parsed by `data.json()` call
+            });                               
+      }
+    </script>
+
+    <!--script src="js/scripts.js"></script-->
+  </body>
+</html>

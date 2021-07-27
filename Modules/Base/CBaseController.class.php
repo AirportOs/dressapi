@@ -131,7 +131,7 @@ class CBaseController extends CDB
 
         if ($filters)
         {
-            if (strpos($filters, '/') === false)
+            if (str_contains($filters, '/') === false)
                 $module_name = ucfirst($filters);  // the unique element of filter is the module/table
             else
             {
@@ -207,8 +207,13 @@ class CBaseController extends CDB
         {
             $this->db_tables = [];
             $this->getAllTables($this->db_tables);
-            if ($this->cache && $this->db_tables)
-                $this->cache->set('db_tables', $this->db_tables);
+            if ($this->db_tables)
+            {
+                if ($this->cache)
+                    $this->cache->set('db_tables', $this->db_tables);
+            }
+            else
+                throw new Exception("No table available");
         }
 
         $this->setExcludedControllers();
@@ -838,6 +843,58 @@ class CBaseController extends CDB
         return $data;
     }
     
+
+    /**
+     * Converts from the type of the DB (INT, VARCHAR, FLOAT, BLOB) to the html type (i, s, d, b)
+     *
+     * @param string $db_type the type of field of DB 
+     * 
+     * @return corresponding variable type for binding:
+     * 
+     *  'i'    corresponding variable has type integer
+     *  'd'    corresponding variable has type double
+     *  's'    corresponding variable has type string
+     *  'b'    corresponding variable is a blob and will be sent in packets
+     * 
+     * @param ?string $db_type field db type
+     * @return handle of the query result
+     */
+    protected function convertDBType2HTMLType(?string $db_type, $name = '')
+    {
+        $type = 'text';
+        if (str_contains($db_type, 'INT'))
+            $type = 'number';
+        elseif (str_contains($db_type, 'ENUM'))
+            $type = 'radio';
+        elseif (str_contains($db_type, 'SET'))
+            $type = 'checkbox';
+        elseif (str_contains($db_type, 'LOB') || str_contains($db_type,'TEXT'))
+            $type = 'textarea';
+        elseif (
+            str_contains($db_type, 'FLOAT')  || str_contains($db_type, 'DOUBLE') ||
+            str_contains($db_type, 'NUMBER') || str_contains($db_type, 'DEC')
+        )
+            $type = 'number';
+
+        // SPECIAL HTML TYPES (changed by name)
+        if ($type=='text' && $name!='')
+        {
+            if (str_contains($name, 'color')) $type = 'color';
+            if (str_contains($name, 'email')) $type = 'email';
+            if (str_contains($name, 'image')) $type = 'image';
+            if (str_contains($name, 'password')) $type = 'password';
+            if (str_contains($name, 'url'))  $type = 'url';
+            if (str_contains($name, 'date')) $type = 'date';
+            if (str_contains($name, 'datetime')) $type = 'datetime-local';
+            if (str_contains($name, 'time')) $type = 'time';
+            if (str_contains($name, 'file')) $type = 'file';
+            if (str_contains($name, 'phone') || str_contains($name, 'cellular')) $type = 'tel';
+        }
+
+        return $type;
+    }
+
+
     /**
      * Manager of HTTP Method GET (Read data)
      *
@@ -1048,7 +1105,22 @@ die;
         if ($this->table == 'all')
             return array_keys($this->db_tables);
         else
-            return $this->db_tables[$this->table];
+        {
+
+            $structure = $this->db_tables[$this->table];
+            foreach($structure as $name=>&$struct)
+            {
+                $struct['html_type'] = $this->convertDBType2HTMLType($struct['type']);
+                $struct['rule'] = $this->model->getFieldRule($struct['field']);
+
+                //
+                // ToDo
+                // Verificare se è un campo relazione, in tal caso iniettare il nome della tabella e i campi
+                // sarebbe utile se nei filtri ci fosse anche qualcosa tipo "/items/id,name/"
+                //
+            }
+            return $structure;
+        }
     }
 
 

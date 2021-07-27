@@ -281,15 +281,23 @@ class CBaseModel
 
 
     /**
-     * Method existsField
-     *
      * Check if the field_name exists in the current DB table
      * 
      * @param string $field_name database field name
      *
      * @return bool true if exists the field in the current DB
      */
-    public function existsField($field_name) { return isset($this->column_list[$field_name]); }
+    public function existsField($field_name) : bool { return isset($this->column_list[$field_name]); }
+
+
+    /**
+     * Get a rule of field_name
+     * 
+     * @param string $field_name database field name
+     *
+     * @return string return a string contains rule and other filter conditions
+     */
+    public function getFieldRule($field_name) : string { return $this->column_list[$field_name]['rule'] ?? ''; }
 
 
     /**

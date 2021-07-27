@@ -82,7 +82,7 @@ class CRequest
             }
         }
         
-        if (isset($_POST) && count($_POST))
+        if (isset($_POST) && $_POST)
             $this->params = array_merge($this->params, $_POST);
     }
 

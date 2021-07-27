@@ -36,7 +36,7 @@ define('CREATION_DATE', 'creation_date');
 // id_page => page:title 
 // id_[table] => [table]:name
 // NOTE: you can also set relationships in the controller with addRelatedFieldName()
-define('RELATED_FIELD_NAMES', ['page'=>'title','*'=>'name']);
+define('RELATED_FIELD_NAMES', ['page'=>'title','*'=>'name']); // fare inm modo che ci possono mettere piu' campi per una relazione
 
 
 // REQUIRED ITEMS AND ACCEPTED INPUT VALUES (with rule expressions)
@@ -47,7 +47,8 @@ define('REQUIRED_ITEMS', ['student'=> // table
                             [ // item=>rules
                              ['periodicy' => '/[daily|weekly|monthly]/'],
                              ['name'=>'age','min'=>17],
-                             ['name'=>'vote','min'=>18, 'max'=>30]
+                             ['name'=>'vote','min'=>18, 'max'=>30],
+                             
                            ]
                         ]);
 

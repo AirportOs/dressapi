@@ -33,7 +33,7 @@ class CResponse
 
     protected int $status_code = CResponse::HTTP_STATUS_OK; // OK as default
     protected string $message_error = '';
-    protected string $format = DEFAULT_FORMAT_OUTPUT;         // JSON, XML, TXT 
+    protected string $format = DEFAULT_FORMAT_OUTPUT;         // JSON, XML, PLAIN 
 
     public function __construct()
     {
@@ -110,7 +110,7 @@ class CResponse
      *
      * @return string data transformed into text format (for debugging)
      */
-    protected function asTEXT(array|object|null $data): string
+    protected function asPLAIN(array|object|null $data): string
     {
         header('Content-Type: text/plain; charset=UTF-8');
         if ($data === null)

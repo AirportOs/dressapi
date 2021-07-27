@@ -2,7 +2,7 @@
 define('DOMAIN_NAME', 'DressApi.com');
 
 // Output
-define('DEFAULT_FORMAT_OUTPUT', 'json'); // json, xml, text
+define('DEFAULT_FORMAT_OUTPUT', 'JSON'); // JSON, XML, PLAIN (TEXT)
 
 // Level of log info
 define('LOG_LEVEL_MIN', 'info');
