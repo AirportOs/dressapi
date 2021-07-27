@@ -2,7 +2,8 @@
 define('DOMAIN_NAME', 'DressApi.com');
 
 // Output
-define('DEFAULT_FORMAT_OUTPUT', 'json'); // json, xml, text
+define('DEFAULT_FORMAT_OUTPUT', 'json'); // json, xml, plain (text/csv), debug
+
 
 // Level of log info
 define('LOG_LEVEL_MIN', 'info');
@@ -36,7 +37,8 @@ define('CREATION_DATE', 'creation_date');
 // id_page => page:title 
 // id_[table] => [table]:name
 // NOTE: you can also set relationships in the controller with addRelatedFieldName()
-define('RELATED_FIELD_NAMES', ['page'=>'title','*'=>'name']); // fare inm modo che ci possono mettere piu' campi per una relazione
+define('RELATED_FIELD_NAMES', ['page'=>['title','creation_date'], // the value can be an array of strings
+                               '*'=>'name']);                     // or a simple string
 
 
 // REQUIRED ITEMS AND ACCEPTED INPUT VALUES (with rule expressions)
@@ -122,8 +124,8 @@ define('PASSWORD_ENC_ALGORITHM', 'tiger192,4');
 //
 
 // On Debian
-define('CACHE_PATH', '/dev/shm/dressapi-cache/');
+define('CACHE_PATH', '/dev/shm/');
 
 // Others 
 // Preferably create a memory virtual disk
-// define('CACHE_PATH', '/var/www/dressapi-cache/');
+// define('CACHE_PATH', '/var/www/');

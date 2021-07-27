@@ -110,12 +110,40 @@ class CResponse
      *
      * @return string data transformed into text format (for debugging)
      */
-    protected function asPLAIN(array|object|null $data): string
+    protected function asDEBUG(array|object|null $data): string
     {
         header('Content-Type: text/plain; charset=UTF-8');
         if ($data === null)
             $data = ['message' => 'Empty'];
         return print_r($data, true) . "\n";
+    }
+
+
+    /**
+     * encode all data in CSV/Plain Text format
+     * 
+     * @param array|object|null $data array or object to send to client
+     *
+     * @return string data transformed into text format
+     */
+    protected function asPLAIN(array|object|null $data): string
+    {
+        $ret = '';
+        header('Content-Type: text/plain; charset=UTF-8');
+        if (is_array($data) || is_countable($data))
+        {
+            foreach($data as $row)
+            {
+                if (is_array($row) || is_countable($row))
+                {
+                    foreach($row as $col)
+                        $ret .= "$col\t";
+                    $ret .= "\n";
+                }
+            }
+        }
+            
+        return $ret;
     }
 
 
@@ -152,7 +180,10 @@ class CResponse
         if (method_exists($this, $formatMethod))
             $data_format = $this->$formatMethod($result);
         else
+        {
             $this->status_code = self::HTTP_STATUS_METHOD_NOT_ACCEPTABLE;
+            $data_format = $result['ERROR'] ?? 'Invalid Format'; 
+        }
 
         header("Access-Control-Allow-Origin: *");
         header("Content-Type: application/json; charset=UTF-8");

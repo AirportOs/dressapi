@@ -938,7 +938,17 @@ class CBaseController extends CDB
 
                                 $sql->leftJoin($rel_table,"$letter_table.$id_table=a.$field", $letter_table);
                                 if (isset($this->related_field_names[$rel_table]))
-                                    $field = "$letter_table.".$this->related_field_names[$rel_table]." '$rel_table'";
+                                {
+                                    // array of related fields
+                                    if (is_array($this->related_field_names[$rel_table]))
+                                    {
+                                        $field = '';
+                                        foreach($this->related_field_names[$rel_table] as $rel_field)
+                                            $field .= (($field=='')?(''):(','))."$letter_table.".$rel_field." '$rel_table-".$rel_field."'";
+                                    }
+                                    else
+                                        $field = "$letter_table.".$this->related_field_names[$rel_table]." '$rel_table'";
+                                }
                                 else
                                     if (isset($this->related_field_names['*']))
                                         $field = "$letter_table.".$this->related_field_names['*']." '$rel_table'";
@@ -957,7 +967,10 @@ class CBaseController extends CDB
     
                 $order_by = $this->request->getOrderBy();
                 if (count($order_by) > 0)
-                    $sql = $sql->orderBy(str_replace('by ','by a.',$order_by));
+                {
+                    $order_by[0] = 'a.'.$order_by[0];
+                    $sql = $sql->orderBy($order_by);
+                }
             }
             else // simple table
             {
