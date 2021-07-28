@@ -229,8 +229,9 @@ To indicate one, add one of these options:
 
 ```bash
 -H 'Accept: application/json'
--H 'Accept: plain/text'
+-H 'Accept: text/plain'
 -H 'Accept: application/xml'
+-H 'Accept: application/debug'
 ```
 
 ## Other features

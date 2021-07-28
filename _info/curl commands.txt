@@ -107,10 +107,10 @@ curl -H  "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE
 
 [format]
 #if you change the output format use one of this
--H 'Content-Type: application/json'
--H 'Content-Type: plain/text'
--H 'Content-Type: application/xml
-'
+-H 'Accept: application/json'
+-H 'Accept: text/plain'
+-H 'Accept: application/xml'
+-H 'Accept: application/debug'
 
 # Query options 
 -X GET http://dressapi/api/[TABLE|MODULE]/[IDs/][filters]/[wr]/[p/pag,elements_per_page]/[ob/id|id-ASC|id-DESC]
