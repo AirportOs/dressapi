@@ -83,21 +83,21 @@ INSERT INTO `moduletable` (`id`, `name`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `moduletable_role_permission`
+-- Struttura della tabella `acl`
 --
 
-CREATE TABLE `moduletable_role_permission` (
+CREATE TABLE `acl` (
   `id` int(11) NOT NULL,
   `id_moduletable` int(11) DEFAULT NULL COMMENT 'contains the index of module or table name managed by the base module',
   `id_role` int(11) NOT NULL COMMENT 'Role of the user',
-  `permission` enum('C','R','U','D') DEFAULT 'R' COMMENT 'C (create),R (read), U (update),D (delete)'
+  `permission` enum('C','R','U','D') DEFAULT 'R' COMMENT 'C (create),R (read/head/options), U (update),D (delete)'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dump dei dati per la tabella `moduletable_role_permission`
+-- Dump dei dati per la tabella `acl`
 --
 
-INSERT INTO `moduletable_role_permission` (`id`, `id_moduletable`, `id_role`, `permission`) VALUES
+INSERT INTO `acl` (`id`, `id_moduletable`, `id_role`, `permission`) VALUES
 #Administrator   // Can make all
 ( 1, NULL, 1, NULL),
 
@@ -247,9 +247,9 @@ ALTER TABLE `moduletable`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indici per le tabelle `moduletable_role_permission`
+-- Indici per le tabelle `acl`
 --
-ALTER TABLE `moduletable_role_permission`
+ALTER TABLE `acl`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_role` (`id_role`);
 
@@ -303,9 +303,9 @@ ALTER TABLE `moduletable`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT per la tabella `moduletable_role_permission`
+-- AUTO_INCREMENT per la tabella `acl`
 --
-ALTER TABLE `moduletable_role_permission`
+ALTER TABLE `acl`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --

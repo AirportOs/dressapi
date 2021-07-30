@@ -35,13 +35,13 @@ try
     else
     {
         // import user permissions directly from the DB
-        // if the appropriate moduletable_role_permission, moduletable and role tables exist
+        // if the appropriate acl, moduletable and role tables exist
         $imported_permission = $user->importPermissionsByDB($request, $cache);
 
         // If there are no permissions to import then it allows you to do everything
         // Create a role ('all') and accept all permissions
         // This operation is for general purposes, if you have indicated the permissions 
-        // in the "moduletable_role_permission" table then delete these instructions
+        // in the "acl" table then delete these instructions
         if (!$imported_permission)
         {
             $user->setUserRole(['all']); // // Add role "all" to current user

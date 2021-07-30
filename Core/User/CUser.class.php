@@ -433,8 +433,8 @@ class CUser extends CDB
     public function importPermissionsByDB(CRequest $request, CCache $cache) : bool
     {
         $moduletable = $request->getModule(); 
-        $sql = "SELECT id_role,permission FROM moduletable_role_permission ". 
-               "WHERE (id_role IN (SELECT id_role FROM user_role WHERE id_user=$this->id) OR id_role IS NULL) ".
+        $sql = "SELECT id_role,permission FROM acl ". 
+               "WHERE (id_role IN (SELECT id_role FROM user_role WHERE id_user=$this->id) OR id_role IS NULL OR id_role=".ID_ROLE_ANONYMOUS.") ".
                "AND (id_moduletable IN (SELECT id FROM moduletable WHERE name='$moduletable') OR id_moduletable IS NULL) ";
 
         $hash = hash(PASSWORD_ENC_ALGORITHM, $sql);

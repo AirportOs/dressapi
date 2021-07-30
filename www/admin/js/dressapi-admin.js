@@ -213,14 +213,14 @@ function createForm(full_data, item)
             case 'date': 
             case 'time': 
                     htmlform += '<div class="mb-3 row">' +
-                                '<label class="col-sm-2 form-label" for="input_'+field+'">'+display_name+'</label>' +
+                                '<label class="col-sm-2 form-label fw-bold fs-6" for="input_'+field+'">'+display_name+'</label>' +
                                 '<div class="col-sm-10"><input value="'+value+'" type="'+full_data.data[i]['html_type']+'" size="'+size+'" class="form-control" id="input_'+field+'" required></div>' +
                                 '</div>'+"\r\n";
                     break;
    
                 case 'textarea':
                     htmlform += '<div class="mb-3 row">' +
-                         '<label for="input_'+field+'" class="col-sm-2 form-label">'+display_name+'</label>' +
+                         '<label for="input_'+field+'" class="col-sm-2 form-label fw-bold fs-6">'+display_name+'</label>' +
                          '<div class="col-sm-10"><textarea class="form-control" id="input_'+field+'" required>'+value+'</textarea></div>' +
                          // '<div class="invalid-feedback">' + field + '</div>' +
                          '</div>'+"\r\n";                        
@@ -228,24 +228,28 @@ function createForm(full_data, item)
 
             case 'checkbox': 
                     htmlform += '<div class="mb-3 row">' +
-                        '<label for="input_'+field+'" class="col-sm-2 col-form-label">'+display_name+'</label>' +
+                        '<label for="input_'+field+'" class="col-sm-2 col-form-label fw-bold fs-6">'+display_name+'</label>' +
                         '<div class="col-sm-10"><input value="'+value+'" type="checkbox" class="form-control" id="input_'+field+'"></div>' +
-                        // '<div class="invalid-feedback">Example invalid feedback text</div>' +
-                        '</div>'+"\r\n";
-                        break;
-
-            case 'radio': 
-                    htmlform += '<div class="mb-3 row">' +
-                        '<label for="input_'+field+'" class="col-sm-2 col-form-label">'+display_name+'</label>' +
-                        '<div class="col-sm-10"><input value="'+value+'" type="radio" class="form-radio-input" id="input_'+field+'"></div>' +
                         // '<div class="invalid-feedback">Example invalid feedback text</div>' +
                         '</div>'+"\r\n";
                         break;
 
             case 'select': 
                     htmlform += '<div class="mb-3 row">' +
-                        '<label for="input_'+field+'" class="col-sm-2 col-form-label">'+display_name+'</label>' +
+                        '<label for="input_'+field+'" class="col-sm-2 col-form-label fw-bold fs-6">'+display_name+'</label>' +
                         '<div class="col-sm-10"><select class="form-control" id="input_'+field+'"></select></div>' +
+                        // '<div class="invalid-feedback">Example invalid feedback text</div>' +
+                        '</div>'+"\r\n";
+                        
+                        [rel_table,rel_sitems] = full_data.data[i]['ref'].split(':');
+                        [rel_id_name,rel_items] = rel_sitems.split('-');
+                        popolateLists.push(['select','input_'+field, rel_table, '', rel_id_name, rel_items]);
+                        break;
+
+            case 'datalist': 
+                    htmlform += '<div class="mb-3 row">' +
+                        '<label for="input_'+field+'" class="col-sm-2 col-form-label fw-bold fs-6">'+display_name+'</label>' +
+                        '<div class="col-sm-10"><datalist class="form-control" id="input_'+field+'"></datalist></div>' +
                         // '<div class="invalid-feedback">Example invalid feedback text</div>' +
                         '</div>'+"\r\n";
                         
@@ -257,7 +261,7 @@ function createForm(full_data, item)
             case 'checkbox-list': 
                     htmlform += '<div class="mb-3 row">' +
                         '<input type="checkbox" size="'+size+'" class="form-check-input" id="input_'+field+'" required>' +
-                        '<label for="input_'+field+'" class="col-sm-2 col-form-label">'+display_name+'</label>' +
+                        '<label for="input_'+field+'" class="col-sm-2 col-form-label fw-bold fs-6">'+display_name+'</label>' +
                         '<div class="col-sm-10"><input value="'+value+'" type="checkbox" class="form-checkbox-input" id="input_'+field+'"></div>' +
                         '<div class="invalid-feedback">Example invalid feedback text</div>' +
                         '</div>'+"\r\n";
@@ -266,7 +270,7 @@ function createForm(full_data, item)
             case 'radio-list': 
                     htmlform += '<div class="mb-3 row">' +
                         '<input type="checkbox" size="'+size+'" class="form-check-input" id="input_'+field+'" required>' +
-                        '<label for="input_'+field+'" class="col-sm-2 col-form-label">'+display_name+'</label>' +
+                        '<label for="input_'+field+'" class="col-sm-2 col-form-label fw-bold fs-6">'+display_name+'</label>' +
                         '<div class="col-sm-10"><input value="'+value+'" type="radio" class="form-radio-input" id="input_'+field+'"></div>' +
                         '<div class="invalid-feedback">Example invalid feedback text</div>' +
                         '</div>'+"\r\n";
@@ -289,6 +293,7 @@ function createForm(full_data, item)
 
         switch(row[0])
         {
+            case 'datalist':
             case 'select':
                            // id_obj, rel_table,  options, rel_id_name, items to display
                 rel_list = popolateSelect(row[1], row[2], row[3], row[4], row[5]);

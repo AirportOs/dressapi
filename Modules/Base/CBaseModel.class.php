@@ -22,7 +22,8 @@ use Exception;
 class CBaseModel
 {
     // array delle tabelle in cui è possibile effettuare operazioni
-    protected ?array $column_list = [];
+    protected array  $all_tables = [];
+    protected ?array  $column_list = [];
     protected string $current_table = '';
 
     public const REGEX_INT = '/^[-]?[\d]+$/';
@@ -41,17 +42,24 @@ class CBaseModel
      * Method __construct
      *
      * @param $table $table current table name
-     * @param ?array $column_list $column_list list of database fields
+     * @param array $all_tables list of all tables of current DB with column_list list
      *
      * @return void
      */
-    public function __construct( string $table, ?array $column_list )
+    public function __construct( string $table, array $all_tables )
     {
         $this->table = $table;
-        $this->column_list = $column_list;
 
-        
-        if (isset($this->column_list))
+        if ($all_tables && isset($all_tables[$this->table]))
+        {
+            $this->setAllAvailableTables($all_tables);
+            $this->column_list = $all_tables[$this->table];    
+        }
+        else
+            if ($table=='all')
+                $this->setAllAvailableTables($all_tables);
+
+        if ($this->column_list)
             foreach($this->column_list as $field=>&$value)
             {
                 if (str_replace('[table]',$this->table,ITEM_ID)===$field)
@@ -165,13 +173,44 @@ class CBaseModel
 
 
     /**
+     * Delete all controllers derived from DB tables
+     * 
+     * @param array $db_tables list of all table of current DB
+     * @param array $excluded_controllers list of controllers derived from the DB to be excluded
+     * 
+     */
+    public function setExcludedControllers(array $excluded_controllers = []): void
+    {
+        if (isset($excluded_controllers) && count($excluded_controllers) > 0)
+            $this->all_tables = array_filter(
+                $this->all_tables,
+                    function ($k) use ($excluded_controllers)
+                    {
+                        return !in_array($k, $excluded_controllers);
+                    },
+                    ARRAY_FILTER_USE_KEY
+            );
+    }
+
+    /**
      * Import all table/modules avaiable
      *
-     * @return array list of all table/modules avaiable
+     * @param array $tables list of all table/modules avaiable
      */
     public function setAllAvailableTables(array $tables) : void
     {
         $this->all_tables = $tables;
+    }        
+
+
+    /**
+     * Import all table/modules avaiable
+     *
+     * @return array list of all table/modules avaiable
+     */
+    public function getAllAvailableTables() : array
+    {
+        return $this->all_tables;
     }        
 
 
@@ -367,7 +406,7 @@ class CBaseModel
 
                 if (isset(RELATED_FIELD_NAMES[$table_check]))
                 {
-                    $struct['html_type'] = 'select';
+                    $struct['html_type'] = ((!isset($this->all_tables[$rel_table]))?('hidden'):('select'));
                     $struct['display_name'] = ucfirst($rel_table);
 
                     if (is_array(RELATED_FIELD_NAMES[$table_check]))
@@ -389,7 +428,7 @@ class CBaseModel
      *
      * @return bool true if exists the table name in the current DB
      */
-    public function existsTable($table) : bool { return isset($this->all_tables[$table]); }
+    public function existsTable(string $table) : bool { return (isset($this->all_tables) && isset($this->all_tables[$table])); }
 
 
     /**
@@ -399,7 +438,36 @@ class CBaseModel
      *
      * @return bool true if exists the field in the current DB
      */
-    public function existsField($field_name) : bool { return isset($this->column_list[$field_name]); }
+    public function existsField(string $field_name) : bool { return (isset($this->column_list) && isset($this->column_list[$field_name])); }
+
+
+    /**
+     * Returns an array containing the attributes of a given field
+     * 
+     * @param string $field_name field name
+     *
+     * @return array an array containing the attributes of a given field
+     */
+    public function getField(string $field_name) : array 
+    { 
+        return $this->column_list[$field_name] ?? []; 
+    }
+
+    /**
+     * Check if the field_name exists in the current DB table
+     * 
+     * @param string $field_name field name
+     * @param string $attr attribute'name of field
+     *
+     * @return string the value of attribute
+     */
+    public function getFieldAttribute(string $field_name, string $attr) : string 
+    { 
+        if (isset($this->column_list[$field_name]) && isset($this->column_list[$field_name][$attr]))
+            return $this->column_list[$field_name][$attr];
+        else 
+            return '';
+    }
 
 
     /**

@@ -30,14 +30,9 @@ use DressApi\Core\DBMS\CSqlComposerBase;
 
 class CBaseController extends CDB
 {
-    // Table (structure cachable)
-    protected ?array $db_tables = null;      // all the tables in the DB and all fields data
-
     protected string $table;         // name of current table (derived from current module) 
 
     protected string $items_view = '*'; // fields of the table to display 
-
-    protected array $excluded_controllers = [];      // the tables that should not be exposed
 
     protected string $method;         // GET, PUT, PATCH, POST, OPTIONS, HEAD, DELETE 
 
@@ -50,6 +45,8 @@ class CBaseController extends CDB
 
     
     protected bool $cache_per_user = true; // flag: if true, one cache foreach user, false: same cache for all
+
+    protected bool $auto_user = true; // true set automatically the id value of user to current user
 
     // optional objects
     protected ?CCache $cache; // CCache or sons
@@ -90,7 +87,7 @@ class CBaseController extends CDB
         try
         {
             // Reads and stores all the tables in the DB
-            $this->_setAllTables(); // it also excludes tables that are not to be managed
+            $db_tables = $this->_getAllTables(); // it also excludes tables that are not to be managed
 
             $module = $this->table;
 
@@ -99,13 +96,18 @@ class CBaseController extends CDB
 
             if (!$have_a_specific_module)
             {
-                // set a table of DB with "Base" Module
-                $this->setTable($module); // Tables of the DB
+                if ($this->table!='all')
+                {
+                    if (!isset($db_tables[$this->table])) // NOT exists
+                        throw new Exception("Module ".ucfirst($this->table)." not exist");
+                
+                    // set a table of DB with "Base" Module
+                    $this->setTable($db_tables, $module); // Tables of the DB
+                }
             }
 
             $model = self::GetModuleModel();
-            $this->model = new $model($this->table, $this->db_tables[$this->table] ?? null);
-            $this->model->setAllAvailableTables(array_keys($this->db_tables));
+            $this->model = new $model($this->table, $db_tables);
 
             $this->setItemsView(); // Fields to display, default '*' that is all
 
@@ -120,6 +122,17 @@ class CBaseController extends CDB
         }
     }
 
+
+    public function setAutoUser(bool $value = true)
+    {
+        $this->auto_user = $value;
+    }
+
+
+    public function getAutoUser() : bool
+    {
+        return $this->auto_user;
+    }
 
     /**
      * Return the name of required module (default: 'Base')
@@ -196,50 +209,42 @@ class CBaseController extends CDB
      * Import from DB all table names and update excluded/included table/controllers
      * 
      */
-    private function _setAllTables(): void
+    private function _getAllTables(): array
     {
+        $db_tables = [];
 
         if ($this->cache)
         {
             $this->cache->setArea('structures');
-            $this->db_tables = $this->cache->get('db_tables');
+            $db_tables = $this->cache->get('db_tables');
         }
 
-        if ($this->db_tables === null)
+        if (!$db_tables)
         {
-            $this->db_tables = [];
-            $this->getAllTables($this->db_tables);
-            if ($this->db_tables)
+            $db_tables = [];
+            $this->getAllTables($db_tables);
+            if ($db_tables)
             {
                 if ($this->cache)
-                    $this->cache->set('db_tables', $this->db_tables);
+                    $this->cache->set('db_tables', $db_tables);
             }
             else
                 throw new Exception("No table available");
         }
 
-        $this->setExcludedControllers();
+        return $db_tables;
     }
 
 
     /**
-     * Delete all controllers derived from DB tables
+     * Delete some controllers derived from DB tables
      * 
-     * @param array $controllers list of controllers derived from the DB to be excluded
+     * @param array $excluded_controllers list of controllers derived from the DB to be excluded
      * 
      */
-    public function setExcludedControllers(array $controllers = []): void
+    public function setExcludedControllers(array $excluded_controllers): void
     {
-        $this->excluded_controllers = $controllers;
-        if (isset($controllers) && count($controllers) > 0)
-            $this->db_tables = array_filter(
-                $this->db_tables,
-                function ($k) use ($controllers)
-                {
-                    return !in_array($k, $controllers);
-                },
-                ARRAY_FILTER_USE_KEY
-            );
+        $this->model->setExcludedControllers($excluded_controllers);
     }
 
 
@@ -255,13 +260,10 @@ class CBaseController extends CDB
      * @see setMapFieldNames()
      * 
      */
-    protected function setTable(string $table): void
+    protected function setTable(array $db_tables, string $table): void
     {
-        if (isset($this->db_tables) && !isset($this->db_tables[$table]) && $table!='all') // NOT exists
-            throw new Exception("Module ".ucfirst($table)." not exist");
-
         $order_by = $this->request->getOrderBy();
-        if (isset($order_by[0]) && !isset($this->db_tables[$table][strtolower($order_by[0])]))
+        if (isset($order_by[0]) && isset($db_tables[$table]) && !isset($db_tables[$table][strtolower($order_by[0])]))
             throw new Exception("The field to sort the list with does not exist in the table");                        
         
         $this->setDBTable($table); // Tabelle di default nel DB
@@ -346,7 +348,7 @@ class CBaseController extends CDB
     {
         if ($table === null)
             $table = $this->table;
-        if ($table == '*' || ($this->db_tables !== NULL && isset($this->db_tables[$table])))
+        if ($table == '*' || $this->model->existsTable($table))
             $this->related_field_names[$table] = $related_item_name;
     }
 
@@ -371,7 +373,7 @@ class CBaseController extends CDB
         $this->related_field_names = [];
         if (isset($list) && is_array($list))
             foreach ($list as $table => $related_item_name)
-                if ($table == '*' || ($this->db_tables !== NULL && isset($this->db_tables[$table])))
+                if ($table == '*' || $this->model->existsTable($table))
                     $this->related_field_names[$table] = $related_item_name;
     }
 
@@ -384,7 +386,7 @@ class CBaseController extends CDB
      */
     protected function setItemsView(?array $vitems = null): void
     {
-        if ($vitems === null && isset($this->db_tables[$this->table]))
+        if ($vitems === null && $this->model->existsTable($this->table))
             $this->items_view = implode(',', $this->model->getListItems()); // , *, "name,surname,private_email"';   
     }
 
@@ -429,7 +431,7 @@ class CBaseController extends CDB
                 list($operator, $value) = $filters['all'];
                 unset($filters['all']);
 
-                foreach ($this->db_tables[$this->table] as $name => $col)
+                foreach ($this->model->getAllAvailableTables() as $name => $col)
                     if (strstr($col['type'], 'VARCHAR'))
                     {
                         if ($start)
@@ -475,7 +477,7 @@ class CBaseController extends CDB
                                 break;
                         }
                     }
-                    $this->bind_params_types[] = $this->db_tables[$this->table][$name]['type'];
+                    $this->bind_params_types[] = $this->model->getFieldAttribute($name, 'type');
                 }
             }
         }
@@ -517,13 +519,13 @@ class CBaseController extends CDB
         $field_id_user = str_replace('[related_table]',USER_TABLE,RELATED_TABLE_ID);
         
         // Force the id_user to current id user value
-        if (isset($this->db_tables[$this->table][$field_id_user]))
+        if ($this->getAutoUser() && $this->model->existsField($field_id_user))
             $params[$field_id_user] = (($this->user!==null)?($this->user->getId()):(NULL));
 
         // Force eventual creation_date to current_date
-        if (isset($this->db_tables[$this->table][CREATION_DATE]))
+        if ($this->model->existsField(CREATION_DATE))
         {
-            if ($this->db_tables[$this->table][$field_id_user]['type']=='DATETIME')
+            if ($this->model->getFieldAttribute(CREATION_DATE,'type')=='DATETIME')
                 $params[CREATION_DATE] = $this->getCurrentDateTime();
             else
                 $params[CREATION_DATE] = $this->getCurrentDate();
@@ -536,8 +538,8 @@ class CBaseController extends CDB
 
             $item_types = [];
             foreach ($params as $key => $val)
-                if (isset($this->db_tables[$this->table][$key]['type']))
-                    $item_types[] = $this->db_tables[$this->table][$key]['type'];
+                if ($this->model->existsField($key)) 
+                    $item_types[] = $this->model->getFieldAttribute($key,'type');
                 else
                     throw new Exception('Item ' . $key . ' not valid');
 
@@ -566,10 +568,16 @@ class CBaseController extends CDB
             $conditions = $this->getConditions();
 
             $params = $this->request->getParameters();
+
+            // Force the id_user to current id user value
+            $field_id_user = str_replace('[related_table]',USER_TABLE,RELATED_TABLE_ID);
+            if ($this->getAutoUser() && $this->model->existsField($field_id_user))
+                $params[$field_id_user] = (($this->user!==null)?($this->user->getId()):(NULL));
+            
             $item_types = [];
             foreach ($params as $key => $val)
-                if (isset($this->db_tables[$this->table][$key]['type']))
-                    $item_types[] = $this->db_tables[$this->table][$key]['type'];
+                if ($this->model->existsField($key))
+                    $item_types[] = $this->model->getFieldAttribute($key,'type');
                 else
                     throw new Exception('Item ' . $key . ' not valid');
             array_unshift($this->bind_params_types, ...$item_types);
@@ -737,7 +745,7 @@ class CBaseController extends CDB
 
             // Elimina anche la cache nelle tabelle correlate
             $related_fieldname = str_replace('[related_table]', $this->table, RELATED_TABLE_ID);
-            foreach ($this->db_tables as $table_rel => $fields)
+            foreach ($this->model->getAllAvailableTables() as $table_rel => $fields)
                 if (isset($fields[$related_fieldname]))
                     $this->cache->clearArea($table_rel);
         }
@@ -856,7 +864,7 @@ class CBaseController extends CDB
     {
         try
         {
-            if ($this->db_tables !== null && !isset($this->db_tables[$this->table]))
+            if (!$this->model->existsTable($this->table))
                 throw new Exception('You must set a valid table name');
 
             $this->response->setStatusCode(CResponse::HTTP_STATUS_OK);
@@ -1067,7 +1075,7 @@ die;
     public function execOPTIONS(): array
     {
         if ($this->table == 'all')
-            return array_keys($this->db_tables);
+            return array_keys($this->model->getAllAvailableTables());
         else
             return $this->model->getFields();
     }
