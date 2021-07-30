@@ -50,11 +50,15 @@ class CBaseModel
         $this->table = $table;
         $this->column_list = $column_list;
 
+        
         if (isset($this->column_list))
             foreach($this->column_list as $field=>&$value)
             {
-                if ($field=='id')
+                if (str_replace('[table]',$this->table,ITEM_ID)===$field)
+                {
                     $value['rule'] = self::REGEX_INDEXES;
+                    $value['html_type'] = 'hidden';
+                }
                 else
                 switch($value['type'])
                 {
@@ -64,6 +68,7 @@ class CBaseModel
                     case 'MEDIUMINT':
                     case 'BIGINT':
                         $value['rule'] = self::REGEX_INT;
+                        $value['html_type'] = 'number';
                         break;
 
                     case 'INT UNSIGNED':
@@ -72,6 +77,7 @@ class CBaseModel
                     case 'MEDIUMINT UNSIGNED':
                     case 'BIGINT UNSIGNED':
                                 $value['rule'] = self::REGEX_UINT;
+                                $value['html_type'] = 'number';
                             break;
         
                     case 'NUMBER':
@@ -80,30 +86,37 @@ class CBaseModel
                     case 'DECIMAL':
                     case 'DEC':
                             $value['rule'] = self::REGEX_NUMBER;
-                        break;
+                            $value['html_type'] = 'decimal'; // number with step='0.01'
+                            break;
 
                     case 'BIT':
                         $value['rule'] = self::REGEX_BIT;
+                        $value['html_type'] = 'checkbox';
                         break;
                     
                     case 'TIMESTAMP':
                         $value['rule'] = self::REGEX_TIMESTAMP; // 1620344928
+                        $value['html_type'] = 'datetime-local';
                         break;
         
                     case 'DATETIME':
                         $value['rule'] = self::REGEX_DATETIME; // 2020-05-18 15:38
+                        $value['html_type'] = 'datetime-local';
                         break;
 
                     case 'TIME':
                         $value['rule'] = self::REGEX_TIME; // 15:38
+                        $value['html_type'] = 'time';
                         break;
 
                     case 'DATE':
                         $value['rule'] = self::REGEX_DATE; // 2020-05-18
+                        $value['html_type'] = 'date';
                         break;
 
                     case 'YEAR':
                         $value['rule'] = self::REGEX_YEAR; // 2020
+                        $value['html_type'] = 'number';
                         break;
 
                     case 'ENUM':
@@ -113,14 +126,53 @@ class CBaseModel
                     case 'SET':
                         $value['rule'] = '/['.$value['options'].']+/'; // red|green|yellow
                         break;
-        
-                    default: // tipo testuale
+
+                    case 'TEXT':
+                    case  'LOB':
+                    case 'BLOB':
+                    case 'CLOB':
+                        $value['rule'] = ''; 
+                        $value['html_type'] = 'textarea';
                         break;
-                }
+
+                    // case 'CHAR':
+                    // case 'VARCHAR':
+                    // case 'VARCHAR2':
+                    default: // textual type
+                        if (isset($value['max']) && $value['max']>60)
+                            $value['html_type'] = 'textarea';
+                        else
+                        {
+                            $value['html_type'] = 'text';
+
+                            // SPECIAL HTML T$field(changed by name)
+                            if (str_contains($field, 'color_')   || str_contains($field, '_color'))  $value['html_type'] = 'color';
+                            if (str_contains($field, 'email_')   || str_contains($field, '_email'))  $value['html_type'] = 'email';
+                            if (str_contains($field, 'password_')|| str_contains($field, '_password'))  $value['html_type'] = 'password';
+                            if (str_contains($field, 'url_')     || str_contains($field, '_url'))   $value['html_type'] = 'url';
+                            if (str_contains($field, 'file_')    || str_contains($field, '_file'))  $value['html_type'] = 'file';
+                            if (str_contains($field, 'phone_')   || str_contains($field, '_phone') || 
+                                str_contains($field, 'cellular_')|| str_contains($field, '_cellular'))  $value['html_type'] = 'tel';
+                            if (str_contains($field, 'image_')   || str_contains($field, '_image') ||
+                                str_contains($field, 'img_')     || str_contains($field, '_img')) $value['html_type'] = 'image';
+                        }
+                        break;
+                } // end switch
             }
 
 //        print_r($this->column_list);
     }
+
+
+    /**
+     * Import all table/modules avaiable
+     *
+     * @return array list of all table/modules avaiable
+     */
+    public function setAllAvailableTables(array $tables) : void
+    {
+        $this->all_tables = $tables;
+    }        
 
 
     /**
@@ -137,8 +189,6 @@ class CBaseModel
 
 
     /**
-     * Method getAdditionalConditions
-     *
      * Return a string contains all additional conditions for a GET/PUT/PATCH requests
      *
      * @return array list of column names of current table
@@ -150,11 +200,22 @@ class CBaseModel
         return $conditions;
     }
 
+    
+    /**
+     * Change any attributes of the field on OPTIONS request.
+     * This method can change the default attributes of the table fields, 
+     * for example a "select" type field can become a "hidden" type field 
+     *
+     * @param array list of field properties
+     */
+    public function changeFieldStructure(array &$struct) : void
+    {
+        // Usable from derived class
+    }
+
 
     /**
-     * Method setFilters
-     * 
-     * set all input's parameters
+     * Set all input's parameters
      *
      * @param array $filters all input's parameters
      *
@@ -278,6 +339,57 @@ class CBaseModel
         else
             throw new Exception("The field $field_name not exists");
     }
+
+
+    /**
+     * Provides the list of fields with all related attributes for the requested table
+     * 
+     * @return array the list of fields with related attributes
+     */
+    public function getFields() : array 
+    {
+        $related_table_from_id = '/^'.str_replace('[related_table]','([\S]*)',RELATED_TABLE_ID).'/';
+        
+        foreach($this->column_list as $name=>&$struct)
+        {
+            $struct['ref'] = '';
+            $struct['display_name'] = ucfirst(str_replace('_',' ',$name));
+
+            // if it is an index of an external record
+            $matches = [];
+            if ($struct['html_type']=='number' && preg_match($related_table_from_id, $struct['field'], $matches))
+            {
+                $rel_table = $matches[1];
+
+                $table_check = $rel_table;
+                if (!isset(RELATED_FIELD_NAMES[$table_check]) && isset(RELATED_FIELD_NAMES['*']))
+                    $table_check = '*';
+
+                if (isset(RELATED_FIELD_NAMES[$table_check]))
+                {
+                    $struct['html_type'] = 'select';
+                    $struct['display_name'] = ucfirst($rel_table);
+
+                    if (is_array(RELATED_FIELD_NAMES[$table_check]))
+                        $struct['ref'] = $rel_table.':'.str_replace('[table]',$rel_table,ITEM_ID).'-'.implode(',',RELATED_FIELD_NAMES[$table_check]);
+                    else
+                        $struct['ref'] = $rel_table.':'.str_replace('[table]',$rel_table,ITEM_ID).'-'.RELATED_FIELD_NAMES[$table_check];
+                }
+            }
+            $this->changeFieldStructure($struct);
+        }
+        
+        return $this->column_list; 
+    }
+
+    /**
+     * Check if the $table exists in the current DB
+     * 
+     * @param string $table name of table to check
+     *
+     * @return bool true if exists the table name in the current DB
+     */
+    public function existsTable($table) : bool { return isset($this->all_tables[$table]); }
 
 
     /**

@@ -103,8 +103,9 @@ function createTable(full_data)
 }
 
 
-function createForm(full_data) 
+function createForm(full_data, item) 
 {
+    console.log(item);
 /*
 <form class="was-validated">
   <div class="mb-3">
@@ -153,6 +154,12 @@ function createForm(full_data)
 */
 
     let htmlform = '<form>';
+//    for(let i in full_data.data)
+//        htmlform += full_data.data[i]['field'] + '=' + full_data.data[i]['html_type']+'<br>';
+    
+    // list of filed to popolate
+    let popolateLists = [];
+
     for(let i in full_data.data)
     {
 /*
@@ -188,58 +195,151 @@ function createForm(full_data)
         }
 
 */        
+        
         let size = parseInt(full_data.data[i]['max']);
+        let field = full_data.data[i]['field'];
+        let display_name = full_data.data[i]['display_name'];
+        let value = item.data[0][field];
+                
         switch(full_data.data[i]['html_type'])
         {
+            case 'hidden':
+                htmlform += '<input value="'+value+'" type="'+full_data.data[i]['html_type']+'" size="'+size+'" class="form-control" id="input_'+field+'" required>';
+                break;
+
+            case 'text':
             case 'number':
-                    htmlform += '<div class="form-check mb-3">' +
-                                    '<input type="number" size="'+size+'" class="form-text-input" id="validation'+full_data.data[i]['field']+'" required>' +
-                                    '<label class="form-check-label" for="validation'+full_data.data[i]['field']+'">Edit this field</label>' +
-                                    '<div class="invalid-feedback">Example invalid feedback text</div>' +
-                                 '</div>'+"\r\n";
-                    break;
-
-            case 'textarea':
-                if (size>80) 
-                    htmlform += '<div class="mb-3">' +
-                         '<label for="validation'+full_data.data[i]['field']+'" class="form-label">Textarea</label>' +
-                         '<textarea class="form-control is-invalid" id="validation'+full_data.data[i]['field']+'" required></textarea>' +
-                         '<div class="invalid-feedback">' +
-                         full_data.data[i]['field'] +
-                         '</div>' +
-                         '</div>'+"\r\n";
-                else
-                    htmlform += '<div class="form-check mb-3">' +
-                                    '<input type="text" size="'+size+'" class="form-text-input" id="validation'+full_data.data[i]['field']+'" required>' +
-                                    '<label class="form-check-label" for="validation'+full_data.data[i]['field']+'">Edit this field</label>' +
-                                    '<div class="invalid-feedback">Example invalid feedback text</div>' +
-                                 '</div>'+"\r\n";
-                        
-            break;
-
             case 'datetime': 
             case 'date': 
             case 'time': 
-                    htmlform += '<div class="form-check mb-3">' +
-                        '<input type="text" size="'+size+'" class="form-text-input" id="validation'+full_data.data[i]['field']+'" required>' +
-                        '<label class="form-text-label" for="validation'+full_data.data[i]['field']+'">Edit this field</label>' +
+                    htmlform += '<div class="mb-3 row">' +
+                                '<label class="col-sm-2 form-label" for="input_'+field+'">'+display_name+'</label>' +
+                                '<div class="col-sm-10"><input value="'+value+'" type="'+full_data.data[i]['html_type']+'" size="'+size+'" class="form-control" id="input_'+field+'" required></div>' +
+                                '</div>'+"\r\n";
+                    break;
+   
+                case 'textarea':
+                    htmlform += '<div class="mb-3 row">' +
+                         '<label for="input_'+field+'" class="col-sm-2 form-label">'+display_name+'</label>' +
+                         '<div class="col-sm-10"><textarea class="form-control" id="input_'+field+'" required>'+value+'</textarea></div>' +
+                         // '<div class="invalid-feedback">' + field + '</div>' +
+                         '</div>'+"\r\n";                        
+                    break;
+
+            case 'checkbox': 
+                    htmlform += '<div class="mb-3 row">' +
+                        '<label for="input_'+field+'" class="col-sm-2 col-form-label">'+display_name+'</label>' +
+                        '<div class="col-sm-10"><input value="'+value+'" type="checkbox" class="form-control" id="input_'+field+'"></div>' +
+                        // '<div class="invalid-feedback">Example invalid feedback text</div>' +
+                        '</div>'+"\r\n";
+                        break;
+
+            case 'radio': 
+                    htmlform += '<div class="mb-3 row">' +
+                        '<label for="input_'+field+'" class="col-sm-2 col-form-label">'+display_name+'</label>' +
+                        '<div class="col-sm-10"><input value="'+value+'" type="radio" class="form-radio-input" id="input_'+field+'"></div>' +
+                        // '<div class="invalid-feedback">Example invalid feedback text</div>' +
+                        '</div>'+"\r\n";
+                        break;
+
+            case 'select': 
+                    htmlform += '<div class="mb-3 row">' +
+                        '<label for="input_'+field+'" class="col-sm-2 col-form-label">'+display_name+'</label>' +
+                        '<div class="col-sm-10"><select class="form-control" id="input_'+field+'"></select></div>' +
+                        // '<div class="invalid-feedback">Example invalid feedback text</div>' +
+                        '</div>'+"\r\n";
+                        
+                        [rel_table,rel_sitems] = full_data.data[i]['ref'].split(':');
+                        [rel_id_name,rel_items] = rel_sitems.split('-');
+                        popolateLists.push(['select','input_'+field, rel_table, '', rel_id_name, rel_items]);
+                        break;
+
+            case 'checkbox-list': 
+                    htmlform += '<div class="mb-3 row">' +
+                        '<input type="checkbox" size="'+size+'" class="form-check-input" id="input_'+field+'" required>' +
+                        '<label for="input_'+field+'" class="col-sm-2 col-form-label">'+display_name+'</label>' +
+                        '<div class="col-sm-10"><input value="'+value+'" type="checkbox" class="form-checkbox-input" id="input_'+field+'"></div>' +
                         '<div class="invalid-feedback">Example invalid feedback text</div>' +
                         '</div>'+"\r\n";
                         break;
 
-            case 'ENUM': 
-                    htmlform += '<div class="form-check mb-3">' +
-                        '<input type="checkbox" size="'+size+'" class="form-check-input" id="validation'+full_data.data[i]['field']+'" required>' +
-                        '<label class="form-check-label" for="validation'+full_data.data[i]['field']+'">Edit this field</label>' +
+            case 'radio-list': 
+                    htmlform += '<div class="mb-3 row">' +
+                        '<input type="checkbox" size="'+size+'" class="form-check-input" id="input_'+field+'" required>' +
+                        '<label for="input_'+field+'" class="col-sm-2 col-form-label">'+display_name+'</label>' +
+                        '<div class="col-sm-10"><input value="'+value+'" type="radio" class="form-radio-input" id="input_'+field+'"></div>' +
                         '<div class="invalid-feedback">Example invalid feedback text</div>' +
                         '</div>'+"\r\n";
                         break;
-            case 'SET': break;
+            default: 
+                    htmlform += '<div class="mb-3 row"><h2>' + display_name + '</h2> ' + full_data.data[i]['html_type']
+                        '</div>'+"\r\n";
+                        break;
+
         }
-
     }
+
+    htmlform += '</form>';
+
+    document.querySelector('.results').innerHTML = htmlform;
+
+    for( let i in popolateLists)
+    {
+        let row = popolateLists[i];
+
+        switch(row[0])
+        {
+            case 'select':
+                           // id_obj, rel_table,  options, rel_id_name, items to display
+                rel_list = popolateSelect(row[1], row[2], row[3], row[4], row[5]);
+                break;
+        }
+    }
+
     return htmlform;
 }
+
+
+//
+// Get a list of table (Method GET). 
+// The page 2 is options '/p/2' or 'p/2,10' (page 2 with 10 elements per page)
+//
+function popolateSelect(id_obj, rel_table, options, rel_id_name, rel_display_fields)
+{
+    let displayed_fields_separator = ' ';
+    if (!options)
+        options = '';
+    else
+        options = '/' + options;
+
+    // document.querySelector('h3').innerHTML=table;
+    requestData('GET','/api/' + rel_table + '/' + options)
+        .then(res => {
+            if (res.status == 200)
+                res.json().then(data => 
+                    { 
+                        console.log(data);
+                        let frame_html = ''; 
+                        for(var x in data.data)
+                        {
+                            let field_value = '';
+                            if (rel_display_fields.includes(','))
+                            {
+                                let v = rel_display_fields.split(',');
+                                for(let y in v)
+                                    if (typeof(data.data[x][v[y]])!='undefined')
+                                        field_value += ((field_value=='')?(''):(displayed_fields_separator)) + data.data[x][v[y]];
+                            }
+                            else
+                                field_value = data.data[x][rel_display_fields];
+
+                            frame_html += '<option value="'+data.data[x][rel_id_name]+'">'+field_value+'</option>';
+                        }
+                        document.getElementById(id_obj).innerHTML = frame_html;
+                    });
+        });
+}
+
 
 //
 // Get a list of table (Method GET). 
@@ -261,10 +361,9 @@ function GetList(table, options)
 }
 
 
-
 //
 // Insert (Method POST)
-//
+//<
 function InsertRow(table, formData)
 {
     // let formData = new FormData();
@@ -286,16 +385,26 @@ function InsertRow(table, formData)
 //
 // Update Form
 //
-function UpdateRowForm(table)
+function UpdateRowForm(table, id)
 {
-    //
-    // Get Structure of table (Method OPTIONS)
-    //
-    requestData('OPTIONS','/api/'+table)
+    var record = null;
+    console.log(id);
+    requestData('GET','/api/'+table+'/'+id)
             .then(res => {
                 if (res.status==200)
-                    res.json().then(data => { document.querySelector('.results').innerHTML = createForm({'data':data});} );
+                {
+                    res.json().then(data => { record = data; } );
+                    //
+                    // Get Structure of table (Method OPTIONS)
+                    //
+                    requestData('OPTIONS','/api/'+table)
+                    .then(res2 => {
+                        if (res2.status==200)
+                            res2.json().then(data => { createForm({'data':data}, record);} );
+                    });
+                }
             });
+
 }
 
 
@@ -343,3 +452,5 @@ function DeleteRow(table, id)
             });
     }
 }
+
+
