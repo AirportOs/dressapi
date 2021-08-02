@@ -38,6 +38,7 @@ define('CREATION_DATE', 'creation_date');
 // id_[table] => [table]:name
 // NOTE: you can also set relationships in the controller with addRelatedFieldName()
 define('RELATED_FIELD_NAMES', ['page'=>['title','creation_date'], // the value can be an array of strings
+                               'contact'=>['email','city'],
                                '*'=>'name']);                     // or a simple string
 
 
@@ -111,11 +112,6 @@ define('USER_ITEM_USERNAME', 'username');
 
 // Password name of user table in your database
 define('USER_ITEM_PASSWORD', 'pwd');
-
-// In ACL system imports the permissions of the anonymous user for all users. 
-// If you don't want this effect you can set this value to 0. 
-define('ID_ROLE_ANONYMOUS', '2');
-
 
 // User Token
 define('SECRET_KEY', 'bGS6lzFqvvSQ8ALbOxatm7/Vk7mLQyzqaS34Q4oR1ew=');

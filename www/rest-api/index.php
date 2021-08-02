@@ -36,7 +36,7 @@ try
     {
         // import user permissions directly from the DB
         // if the appropriate acl, moduletable and role tables exist
-        $imported_permission = $user->importPermissionsByDB($request, $cache);
+        $imported_permission = $user->importACL($request, $cache);
 
         // If there are no permissions to import then it allows you to do everything
         // Create a role ('all') and accept all permissions
@@ -45,7 +45,8 @@ try
         if (!$imported_permission)
         {
             $user->setUserRole(['all']); // // Add role "all" to current user
-            $user->addRolePermission('all', '*', '*'); // Role=all, All modules, all permission
+            $powers = ['can_read'=>'YES','can_insert'=>'YES','can_update'=>'YES','can_delete'=>'YES'];
+            $user->addRolePermission('all', '*', $powers); // Role=all, All modules, all permission
         }
 
         // Create an appropriate Controller for the request 
@@ -55,9 +56,9 @@ try
 
         //
         // It excludes the management of the tables or modules listed below.
-        //
-        // IMPORTANT: you must remove all data sensible for privacy and security
-        $rest->setExcludedControllers(['user']);
+        // Not necessary if it is managed from ACL
+        // if (!$imported_permission && !$user->hasRole('Administrator'))
+        //    $rest->setExcludedControllers(['user']);
         
         if (defined('REQUIRED_ITEMS'))
             $rest->setItemsRequired(REQUIRED_ITEMS);            

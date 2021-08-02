@@ -21,7 +21,7 @@ use DressApi\Core\Cache\CFileCache as CCache;
 use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
 use DressApi\Modules\Base\CBaseController;
-use DressApi\Core\DBMS\CMySqlComposer as CComposer;
+use DressApi\Core\DBMS\CMySqlComposer as CSqlComposer;
 
 class CExampleController extends CBaseController
 {
@@ -49,7 +49,7 @@ class CExampleController extends CBaseController
         $data = [];
         try
         {
-            $sql = new CComposer();
+            $sql = new CSqlComposer();
 
             // Make your query here...for example a LEFT JOIN
             $sql = $sql->select('*')->from('metadata','m');

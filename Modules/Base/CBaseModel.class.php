@@ -24,7 +24,7 @@ class CBaseModel
     // array delle tabelle in cui è possibile effettuare operazioni
     protected array  $all_tables = [];
     protected ?array  $column_list = [];
-    protected string $current_table = '';
+    protected string $table = '';
 
     public const REGEX_INT = '/^[-]?[\d]+$/';
     public const REGEX_UINT = '/^[\d]+$/';
@@ -129,10 +129,12 @@ class CBaseModel
 
                     case 'ENUM':
                         $value['rule'] = '/['.$value['options'].']{1}/'; // red|green|yellow
+                        $value['html_type'] = 'radio-list';
                         break;
 
                     case 'SET':
                         $value['rule'] = '/['.$value['options'].']+/'; // red|green|yellow
+                        $value['html_type'] = 'checkbox-list';
                         break;
 
                     case 'TEXT':
@@ -396,7 +398,7 @@ class CBaseModel
 
             // if it is an index of an external record
             $matches = [];
-            if ($struct['html_type']=='number' && preg_match($related_table_from_id, $struct['field'], $matches))
+            if (isset($struct['html_type']) && $struct['html_type']=='number' && preg_match($related_table_from_id, $struct['field'], $matches))
             {
                 $rel_table = $matches[1];
 
@@ -418,7 +420,8 @@ class CBaseModel
             $this->changeFieldStructure($struct);
         }
         
-        return $this->column_list; 
+        return ['structure'=>$this->column_list,
+                'metadata'=>['table'=>$this->table,'key'=>str_replace('[table]',$related_table_from_id,ITEM_ID)],'related_tables'=>[] ]; 
     }
 
     /**
@@ -453,6 +456,7 @@ class CBaseModel
         return $this->column_list[$field_name] ?? []; 
     }
 
+    
     /**
      * Check if the field_name exists in the current DB table
      * 

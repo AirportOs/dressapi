@@ -1,3 +1,4 @@
+
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -15,7 +16,32 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `comment`
+-- Structure table `acl`
+--
+
+CREATE TABLE `acl` (
+  `id` int(11) NOT NULL,
+  `id_role` int(11) DEFAULT NULL COMMENT 'Role of the user',
+  `id_moduletable` int(11) DEFAULT NULL COMMENT 'contains the index of module or table name managed by the base module',
+  `can_read` enum('YES','NO') DEFAULT 'NO',
+  `can_insert` enum('YES','NO') DEFAULT 'NO',
+  `can_update` enum('YES','NO') DEFAULT 'NO',
+  `can_delete` enum('YES','NO') DEFAULT 'NO'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Data dump for the table `acl`
+--
+
+INSERT INTO `acl` (`id`, `id_role`, `id_moduletable`, `can_read`, `can_insert`, `can_update`, `can_delete`) VALUES
+(1, 1, NULL, 'YES', 'YES', 'YES', 'YES'),
+(2, NULL, 1, 'YES', 'NO', 'NO', 'NO'),
+(3, 2, 2, 'YES', 'NO', 'NO', 'NO');
+
+-- --------------------------------------------------------
+
+--
+-- Structure table `comment`
 --
 
 CREATE TABLE `comment` (
@@ -27,22 +53,22 @@ CREATE TABLE `comment` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dump dei dati per la tabella `comment`
+-- Data dump for the table `comment`
 --
 
 INSERT INTO `comment` (`id`, `comment`, `creation_date`, `id_user`, `id_page`) VALUES
 (1, 'oh yeah! It\'s a very good solution for a Rest API!', '2021-01-13', 101, 1),
-(2, 'I love its simplicity!', '2021-01-15', 102, 1);
+(1000, 'Yii is better than DressApi!', '2021-07-18', 2, 1);
 
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `contact`
+-- Structure table `contact`
 --
 
 CREATE TABLE `contact` (
   `id` int(11) NOT NULL,
-  `first_name` varchar(80) NOT NULL,
+  `name` varchar(80) NOT NULL,
   `surname` varchar(80) NOT NULL,
   `address` varchar(160) NOT NULL,
   `zip_code` varchar(10) NOT NULL,
@@ -52,18 +78,18 @@ CREATE TABLE `contact` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dump dei dati per la tabella `contact`
+-- Data dump for the table `contact`
 --
 
-INSERT INTO `contact` (`id`, `first_name`, `surname`, `address`, `zip_code`, `city`, `state`, `email`) VALUES
+INSERT INTO `contact` (`id`, `name`, `surname`, `address`, `zip_code`, `city`, `state`, `email`) VALUES
 (1, 'Joe', 'Sample', 'Via 1 Febbraio', '15005', 'Rome', 'Italy', 'jsample@userdressapi.com'),
 (2, 'Michael', 'Franks', 'The art of the tea street, 1046', '01975', 'Los Angeles', 'California', 'mfranks@userdressapi.com'),
-(3, 'Pasquale', 'Tufano', 'Via Roccavione, 21', '10047', 'Turin', 'Italy', 'ptufano@userdressapi.com');
+(3, 'Pasquale', 'Tufano', 'Via Roccavione, 216', '10047', 'Turin', 'Italy', 'ptufano@userdressapi.com');
 
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `moduletable`
+-- Structure table `moduletable`
 --
 
 CREATE TABLE `moduletable` (
@@ -73,7 +99,7 @@ CREATE TABLE `moduletable` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dump dei dati per la tabella `moduletable`
+-- Data dump for the table `moduletable`
 --
 
 INSERT INTO `moduletable` (`id`, `name`, `description`) VALUES
@@ -83,53 +109,7 @@ INSERT INTO `moduletable` (`id`, `name`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `acl`
---
-
-CREATE TABLE `acl` (
-  `id` int(11) NOT NULL,
-  `id_moduletable` int(11) DEFAULT NULL COMMENT 'contains the index of module or table name managed by the base module',
-  `id_role` int(11) NOT NULL COMMENT 'Role of the user',
-  `permission` enum('C','R','U','D') DEFAULT 'R' COMMENT 'C (create),R (read/head/options), U (update),D (delete)'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dump dei dati per la tabella `acl`
---
-
-INSERT INTO `acl` (`id`, `id_moduletable`, `id_role`, `permission`) VALUES
-#Administrator   // Can make all
-( 1, NULL, 1, NULL),
-
-#Anonymous       // Can read page and comment
-( 2, 1, 2, 'R'),
-( 3, 2, 2, 'R'),
-
-#Editor          // Full power: can read, update a page or a comment
-( 4, 1, 3, 'R'),
-( 5, 1, 3, 'U'), // page, editor
-( 6, 1, 3, 'D'),
-
-( 7, 2, 3, 'R'), // page, writer
-( 8, 2, 3, 'U'),
-( 9, 2, 3, 'D'),
-
-#Writer          // Can read, write, update a page
-(10, 2, 4, 'C'), // comment, anonymous/all
-(11, 2, 4, 'R'),
-(12, 2, 4, 'U'),
-
-#Commentator     // Can read a page and read or write a comment
-(13, 1, 4, 'R'),
-(14, 2, 4, 'C'),
-(15, 2, 4, 'R');
-
-
-
--- --------------------------------------------------------
-
---
--- Struttura della tabella `page`
+-- Structure table `page`
 --
 
 CREATE TABLE `page` (
@@ -141,7 +121,7 @@ CREATE TABLE `page` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dump dei dati per la tabella `page`
+-- Data dump for the table `page`
 --
 
 INSERT INTO `page` (`id`, `title`, `body`, `creation_date`, `id_user`) VALUES
@@ -151,7 +131,7 @@ INSERT INTO `page` (`id`, `title`, `body`, `creation_date`, `id_user`) VALUES
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `role`
+-- Structure table `role`
 --
 
 CREATE TABLE `role` (
@@ -161,7 +141,7 @@ CREATE TABLE `role` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dump dei dati per la tabella `role`
+-- Data dump for the table `role`
 --
 
 INSERT INTO `role` (`id`, `name`, `description`) VALUES
@@ -174,7 +154,7 @@ INSERT INTO `role` (`id`, `name`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `user`
+-- Structure table `user`
 --
 
 CREATE TABLE `user` (
@@ -189,7 +169,7 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dump dei dati per la tabella `user`
+-- Data dump for the table `user`
 --
 
 INSERT INTO `user` (`id`, `name`, `id_contact`, `domain`, `nickname`, `username`, `pwd`, `status`) VALUES
@@ -202,7 +182,7 @@ INSERT INTO `user` (`id`, `name`, `id_contact`, `domain`, `nickname`, `username`
 -- --------------------------------------------------------
 
 --
--- Struttura della tabella `user_role`
+-- Structure table `user_role`
 --
 
 CREATE TABLE `user_role` (
@@ -212,7 +192,7 @@ CREATE TABLE `user_role` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Dump dei dati per la tabella `user_role`
+-- Data dump for the table `user_role`
 --
 
 INSERT INTO `user_role` (`id`, `id_user`, `id_role`) VALUES
@@ -223,11 +203,17 @@ INSERT INTO `user_role` (`id`, `id_user`, `id_role`) VALUES
 (5, 103, 5);
 
 --
--- Indici per le tabelle scaricate
+-- Indici for the tables scaricate
 --
 
 --
--- Indici per le tabelle `comment`
+-- Indici for the tables `acl`
+--
+ALTER TABLE `acl`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indici for the tables `comment`
 --
 ALTER TABLE `comment`
   ADD PRIMARY KEY (`id`),
@@ -235,45 +221,38 @@ ALTER TABLE `comment`
   ADD KEY `id_page` (`id_page`);
 
 --
--- Indici per le tabelle `contact`
+-- Indici for the tables `contact`
 --
 ALTER TABLE `contact`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indici per le tabelle `moduletable`
+-- Indici for the tables `moduletable`
 --
 ALTER TABLE `moduletable`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indici per le tabelle `acl`
---
-ALTER TABLE `acl`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_role` (`id_role`);
-
---
--- Indici per le tabelle `page`
+-- Indici for the tables `page`
 --
 ALTER TABLE `page`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_user` (`id_user`);
 
 --
--- Indici per le tabelle `role`
+-- Indici for the tables `role`
 --
 ALTER TABLE `role`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indici per le tabelle `user`
+-- Indici for the tables `user`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indici per le tabelle `user_role`
+-- Indici for the tables `user_role`
 --
 ALTER TABLE `user_role`
   ADD PRIMARY KEY (`id`),
@@ -281,75 +260,76 @@ ALTER TABLE `user_role`
   ADD KEY `id_role` (`id_role`);
 
 --
--- AUTO_INCREMENT per le tabelle scaricate
+-- AUTO_INCREMENT for the tables
 --
 
 --
--- AUTO_INCREMENT per la tabella `comment`
+-- AUTO_INCREMENT for the table `acl`
+--
+ALTER TABLE `acl`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for the table `comment`
 --
 ALTER TABLE `comment`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1066;
 
 --
--- AUTO_INCREMENT per la tabella `contact`
+-- AUTO_INCREMENT for the table `contact`
 --
 ALTER TABLE `contact`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT per la tabella `moduletable`
+-- AUTO_INCREMENT for the table `moduletable`
 --
 ALTER TABLE `moduletable`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT per la tabella `acl`
---
-ALTER TABLE `acl`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
-
---
--- AUTO_INCREMENT per la tabella `page`
+-- AUTO_INCREMENT for the table `page`
 --
 ALTER TABLE `page`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT per la tabella `role`
+-- AUTO_INCREMENT for the table `role`
 --
 ALTER TABLE `role`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
--- AUTO_INCREMENT per la tabella `user`
+-- AUTO_INCREMENT for the table `user`
 --
 ALTER TABLE `user`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
 
 --
--- AUTO_INCREMENT per la tabella `user_role`
+-- AUTO_INCREMENT for the table `user_role`
 --
 ALTER TABLE `user_role`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
--- Limiti per le tabelle scaricate
+-- Limiti for the tables scaricate
 --
 
 --
--- Limiti per la tabella `comment`
+-- Limiti for the table `comment`
 --
 ALTER TABLE `comment`
   ADD CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`id_page`) REFERENCES `page` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 --
--- Limiti per la tabella `page`
+-- Limiti for the table `page`
 --
 ALTER TABLE `page`
   ADD CONSTRAINT `id_user` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Limiti per la tabella `user_role`
+-- Limiti for the table `user_role`
 --
 ALTER TABLE `user_role`
   ADD CONSTRAINT `user_role_ibfk_1` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,

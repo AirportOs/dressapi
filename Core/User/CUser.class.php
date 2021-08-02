@@ -18,7 +18,7 @@ namespace DressApi\Core\User;
 use Exception;
 use Firebase\JWT\JWT;
 use DressApi\Core\DBMS\CMySqlDB as CDB;
-use DressApi\Core\DBMS\CMySqlComposer as CComposer;
+use DressApi\Core\DBMS\CMySqlComposer as CSqlComposer;
 use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
 use DressApi\Core\Cache\CFileCache as CCache; // An alternative is CRedisCache
@@ -62,7 +62,7 @@ class CUser extends CDB
     {
         $ret = 0;
 
-        $sc = new CComposer();
+        $sc = new CSqlComposer();
 
         $sql = $sc->select(USER_ITEM_ID)->from(USER_TABLE)->
                     where(USER_ITEM_USERNAME."='$username' AND ".
@@ -294,11 +294,10 @@ class CUser extends CDB
      * @param string|int $role role of user where role can be "Admin", "Publisher" and anything else or a number 1=Admin, 2=Publisher, 3=Normal User
      *                         the role name and type depends from your app
      * @param string $module normally is the name of DB table but could be not in an custom extension 
-     * @param string Name of permission [GET, HEAD, POST, PATCH, PUT, DELETE, OPTIONS] 
-     *               or if you prefer you can use C.R.U.D.O. letters [C=POST, R=GET, U=PATCH|PUT, D=DELETE, O=OPTIONS].
-     *               Finally, you can use * for all valid permission (for example with Admin user)
+     * @param array $permissions list of permission (can_read, can_insert, can_delete, can_udate) 
+     *              
      */
-    public function addRolePermission( string|int $role, string $module, string $permission )
+    public function addRolePermission( string|int $role, string $module, array $permissions )
     {
         $module = strtolower($module);
 
@@ -308,47 +307,24 @@ class CUser extends CDB
         if (!isset($this->role_permissions[$role][$module]))
             $this->role_permissions[$role][$module] = [];
             
-        if (strlen($permission)==1)
-            switch($permission)
-            {
-                case 'C':
-                    $this->role_permissions[$role][$module][] = 'POST';
-                    $this->role_permissions[$role][$module][] = 'Upload'; // Is a special POST method
-                    $this->role_permissions[$role][$module][] = 'UPLOAD'; // Is a special POST method
-                    break;
+        if ($permissions['can_insert']=='YES')
+            $this->role_permissions[$role][$module][] = 'POST';
 
-                case 'R':
-                    $this->role_permissions[$role][$module][] = 'GET';
-                    $this->role_permissions[$role][$module][] = 'HEAD';
-                    $this->role_permissions[$role][$module][] = 'OPTIONS';
-                    break;
+        if ($permissions['can_read']=='YES')
+        {
+            $this->role_permissions[$role][$module][] = 'GET';
+            $this->role_permissions[$role][$module][] = 'HEAD';
+            $this->role_permissions[$role][$module][] = 'OPTIONS';
+        }
                         
-                case 'U':
-                    $this->role_permissions[$role][$module][] = 'PATCH';
-                    $this->role_permissions[$role][$module][] = 'PUT';
-                    break;
+        if ($permissions['can_update']=='YES')
+        {
+            $this->role_permissions[$role][$module][] = 'PATCH';
+            $this->role_permissions[$role][$module][] = 'PUT';
+        }
                         
-                case 'D':
-                    $this->role_permissions[$role][$module][] = 'DELETE';
-                    break;
-                        
-                case '*':
-                    $this->role_permissions[$role][$module][] = 'POST';
-                    $this->role_permissions[$role][$module][] = 'Upload';
-                    $this->role_permissions[$role][$module][] = 'UPLOAD'; // Is a special POST method
-                    $this->role_permissions[$role][$module][] = 'GET';
-                    $this->role_permissions[$role][$module][] = 'HEAD';
-                    $this->role_permissions[$role][$module][] = 'PATCH';
-                    $this->role_permissions[$role][$module][] = 'PUT';
-                    $this->role_permissions[$role][$module][] = 'DELETE';
-                    $this->role_permissions[$role][$module][] = 'OPTIONS';
-                    break;
-                    
-                default:
-                    $this->role_permissions[$role][$module][] = strtoupper($permission);
-                    break;
-            }
-
+        if ($permissions['can_delete']=='YES')
+            $this->role_permissions[$role][$module][] = 'DELETE';                        
     }
 
 
@@ -388,7 +364,7 @@ class CUser extends CDB
      * 
      * For example:
      * 
-     * The Roles must be in a specific table name "user"
+     * The "Role" table contains the possible roles:
      * 
      *  id    name
      *  ===================
@@ -399,7 +375,7 @@ class CUser extends CDB
      *   5    Joe Sample
      *
      *
-     * The Roles must be in a specific table name "role"
+     * The "User" table contains all the user subscribed:
      * 
      *  id    name
      *  ===================
@@ -412,13 +388,15 @@ class CUser extends CDB
      * 
      * 
      *  
-     *  id    module   role  permission
-     *  =================================
-     *   1    *         1        *
-     *   2    page      3        C 
-     *   3    page      2        R 
-     *   4    page      3        U 
-     *   5    page      4        D 
+     *  id    role     module   can_read    can_insert    can_update  can_delete
+     *  ========================================================================
+     *   1     1       *         YES            YES             YES         YES
+     *   2     2       page      YES             NO              NO          NO     
+     *   3     2       comment   YES             NO              NO          NO     
+     *   4     3       page      YES            YES             YES         YES 
+     *   5     3       comment   YES            YES             YES         YES 
+     *   6     4       page      YES            YES             YES          NO 
+     *   6     5       comment   YES            YES              NO          NO 
      * 
      * 
      * For identificate the roles of current user is necessary use a cross table like this
@@ -427,17 +405,17 @@ class CUser extends CDB
      *  =========================
      *   1    1                 1
      *   2    2                 2
-     *   3    3               101
+     *   3    3                 5
      *    
      */
-    public function importPermissionsByDB(CRequest $request, CCache $cache) : bool
+    public function importACL(CRequest $request, CCache $cache) : bool
     {
         $moduletable = $request->getModule(); 
-        $sql = "SELECT id_role,permission FROM acl ". 
-               "WHERE (id_role IN (SELECT id_role FROM user_role WHERE id_user=$this->id) OR id_role IS NULL OR id_role=".ID_ROLE_ANONYMOUS.") ".
-               "AND (id_moduletable IN (SELECT id FROM moduletable WHERE name='$moduletable') OR id_moduletable IS NULL) ";
+        $sql = "SELECT id_role,can_read,can_update,can_insert,can_delete FROM acl ". 
+               "WHERE (id_role IN (SELECT id_role FROM user_role WHERE id_user=$this->id) OR id_role IS NULL) ".
+               "AND (id_moduletable IS NULL OR id_moduletable IN (SELECT id FROM moduletable WHERE name='$moduletable')) ";
 
-        $hash = hash(PASSWORD_ENC_ALGORITHM, $sql);
+        $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
         if ($cache) 
             $data = $cache->get($hash);
@@ -446,7 +424,7 @@ class CUser extends CDB
         {
             $data = [];
             $this->getQueryDataTable($data, $sql);
-            if ($data === null )     
+            if ($data !== null )     
                 $cache->set($hash, $data);           
         }
 
@@ -455,10 +433,24 @@ class CUser extends CDB
             {
                 $role = $row['id_role'] ?? '*';
                 $this->addUserRole( $role );
-                $this->addRolePermission( $role, $moduletable, $row['permission'] ?? '*' );
+                $this->addRolePermission( $role, $moduletable, $row );
             }
 
         return $data !== null;
+    }
+
+    
+    /**
+     * 
+     * Check if a user have a role
+     * 
+     * @return bool true if the user have the role, false otherwise
+     */
+    public function hasRole(string $name) : bool
+    {
+
+        $sql = "SELECT count(id) FROM user_role WHERE id_user=$this->id AND id_role IN (SELECT id FROM role WHERE name='$name')";
+        return (bool)$this->getQueryDataValue($sql);
     }
 
 

@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
-    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="author" content="Pasquale Tufano">
     <title>DressApi Test</title>
 
     <!-- Bootstrap core CSS -->
@@ -39,7 +39,6 @@
 </head>
 
 <body>
-
     <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow">
         <a class="navbar-brand col-md-3 col-lg-2 me-0 px-3" href="#">DressApi</a>
         <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-bs-toggle="collapse"
@@ -92,8 +91,7 @@
                     </div>
 
 
-                    <h4 id="tableName"></h4>
-                    <span class="metadata"></span><br>
+                    <h2 id="tableName"></h2>
                     <div class="results"></div>
 
                 </div>
@@ -255,6 +253,21 @@
 
             </main>
         </div>
+
+        <button type="button" class="btn btn-primary invisible" id="liveToastBtn">Show notification</button>
+
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+          <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+              <strong class="me-auto">DressApi</strong>
+              <small>Just now</small>
+              <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-white">
+              Hello, world! This is a toast message.
+            </div>
+          </div>
+        </div>    
     </div>
 
     <script src="./assets/dist/js/bootstrap.bundle.min.js"></script>

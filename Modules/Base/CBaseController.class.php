@@ -19,7 +19,7 @@ namespace DressApi\Modules\Base;
 require_once __DIR__ . '/config.php'; // local module config
 
 use Exception;
-use DressApi\Core\DBMS\CMySqlComposer as CComposer;
+use DressApi\Core\DBMS\CMySqlComposer as CSqlComposer;
 use DressApi\Core\DBMS\CMySqlDB as CDB;
 use DressApi\Core\Cache\CFileCache as CCache;
 use DressApi\Core\User\CUser;
@@ -871,7 +871,7 @@ class CBaseController extends CDB
 
             $letter_table = 'a';
 
-            $sql = new CComposer();
+            $sql = new CSqlComposer();
 
             if ($this->request->getWithRelations() && $this->items_view!='*')
             {
@@ -1006,7 +1006,7 @@ die;
 
 
     /**
-     * Manager of HTTP Method PUT (update without full data required)
+     * Manager of HTTP Method PATCH (update without full data required)
      * Update of one or more records of the table
      *
      * @return array message result of update operation
@@ -1038,8 +1038,6 @@ die;
     {
         try
         {
-
-
             $this->response->setStatusCode(CResponse::HTTP_STATUS_BAD_REQUEST);
 
             $affected_rows = $this->_insertDB();
