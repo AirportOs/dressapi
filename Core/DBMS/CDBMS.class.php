@@ -565,6 +565,7 @@ abstract class CDBMS
      */
     public function getIdsArray(int|string $item = 0, int|string|null $idx = null): ?array
     {
+        $elements = [];
         $this->getDataTable($elements, $this->getDBResultBoth());
 
         if ($elements === [])

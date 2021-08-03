@@ -478,7 +478,6 @@ function DeleteRow(table, id)
     {
         requestData('DELETE','/api/'+table+'/'+id)
             .then(data => {
-                output.querySelector('.status').innerHTML = data.status+ ' (' + data.statusText + ')';
                 if (data.status==200)
                 {
                     data.json().then(res => {  GetList(table,list_options); setToast(res.message,'bg-success'); } );
