@@ -1073,7 +1073,12 @@ die;
     public function execOPTIONS(): array
     {
         if ($this->table == 'all')
-            return array_keys($this->model->getAllAvailableTables());
+        {
+            if ($this->user->canViewAllModules())
+                return array_keys($this->model->getAllAvailableTables());
+            else
+                return $this->user->getAllAvaiableModules();
+        }
         else
             return $this->model->getFields();
     }
@@ -1134,7 +1139,7 @@ die;
         {
             if (method_exists($this, $method))
             {
-                if ( $this->user===null || $this->user->checkPermission($this->table, $this->method))
+                if ( $this->user===null || $this->table==='all' || $this->user->checkPermission($this->table, $this->method))
                     $result = $this->{$method}();
                 else
                 {

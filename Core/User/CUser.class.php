@@ -31,6 +31,7 @@ class CUser extends CDB
     private string $token = '';
 
     protected CRequest $request;
+    protected CCache $cache;
 
     // List of user permissions  [usertype]
     private array $role_permissions = []; // [string|int ROLE][string PERMISSION];
@@ -42,11 +43,12 @@ class CUser extends CDB
     /**
      * Constructor
      */
-    public function __construct(CRequest $request) 
+    public function __construct(CRequest $request, CCache $cache) 
     {
         $this->id = 0;
         $this->username = 'nobody';
         $this->request = $request;
+        $this->cache = $cache;
     }
 
 
@@ -408,7 +410,7 @@ class CUser extends CDB
      *   3    3                 5
      *    
      */
-    public function importACL(CRequest $request, CCache $cache) : bool
+    public function importACL(CRequest $request) : bool
     {
         $moduletable = $request->getModule(); 
         $sql = "SELECT id_role,can_read,can_update,can_insert,can_delete FROM acl ". 
@@ -417,18 +419,18 @@ class CUser extends CDB
 
         $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
-        if ($cache) 
-            $data = $cache->get($hash);
+        if ($this->cache) 
+            $data = $this->cache->get($hash);
 
-        if ($data === null )
+        if ($data === null)
         {
             $data = [];
             $this->getQueryDataTable($data, $sql);
-            if ($data !== null )     
-                $cache->set($hash, $data);           
+            if ($data !== null)     
+                $this->cache->set($hash, $data);           
         }
 
-        if ($data !== null )
+        if ($data !== null)
             foreach($data as $row)
             {
                 $role = $row['id_role'] ?? '*';
@@ -451,6 +453,67 @@ class CUser extends CDB
 
         $sql = "SELECT count(id) FROM user_role WHERE id_user=$this->id AND id_role IN (SELECT id FROM role WHERE name='$name')";
         return (bool)$this->getQueryDataValue($sql);
+    }
+
+
+    /**
+     * 
+     * Check if a user can view all modules (as an Administrator)
+     * 
+     * @return bool true if the user can view all modules
+     */
+    public function canViewAllModules() : bool
+    {
+        $sql = "SELECT COUNT(*) FROM `acl` WHERE id_moduletable IS NULL ".
+               "AND (id_role IN (SELECT id_role FROM user_role WHERE id_user=$this->id) OR id_role IS NULL)";
+        
+        $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
+        $data = null;
+        if ($this->cache) 
+            $data = $this->cache->get($hash);
+
+        if ($data === null)
+        {
+            $data = (bool)$this->getQueryDataValue($sql);
+            if ($data !== null)     
+                $this->cache->set($hash, $data);           
+        }
+         
+        return (bool)$data;
+    }
+    
+
+    /**
+     * 
+     * Returns the list of modules available to the user
+     * 
+     * @return array the list of modules available to the user
+     */
+    public function getAllAvaiableModules() : array
+    {
+        $sql = "SELECT name FROM `acl`,`moduletable` mt ".
+               "WHERE (mt.id=acl.id_moduletable OR id_moduletable IS NULL) ".
+               "AND acl.can_read='YES' ".
+               "AND (id_role IN (SELECT id_role FROM user_role WHERE id_user=$this->id) OR id_role IS NULL)";
+
+        $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
+        
+        $data = [];
+        if ($this->cache) 
+            $data = $this->cache->get($hash);
+
+        if (!$data)
+        {
+            $this->query($sql);
+            $dat = $this->getIdsArray();
+            if ($dat !== null)
+            {
+                $data = $dat;
+                $this->cache->set($hash, $dat);           
+            }     
+        }
+               
+        return $data;
     }
 
 

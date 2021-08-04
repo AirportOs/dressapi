@@ -24,7 +24,7 @@ try
 
     CDB::connect(DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT);
 
-    $user = new CUser($request);
+    $user = new CUser($request, $cache);
     $valid_token = $user->verify();
 
     if ($valid_token != 'OK')
@@ -36,7 +36,7 @@ try
     {
         // import user permissions directly from the DB
         // if the appropriate acl, moduletable and role tables exist
-        $imported_permission = $user->importACL($request, $cache);
+        $imported_permission = $user->importACL($request);
 
         // If there are no permissions to import then it allows you to do everything
         // Create a role ('all') and accept all permissions
