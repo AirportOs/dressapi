@@ -64,7 +64,7 @@ define('DEFAULT_ORDER', 'DESC'); // DESC or ASC
 define('PWD_CRYPT', '@AShHK#Dfjdx45');
 
 // Default of total rows for each request
-define('DEFAULT_ITEMS_PER_PAGE', 20);
+define('DEFAULT_ITEMS_PER_PAGE', 2);
 
 // Max total rows for each request, if the value is greater it will be reset to MAX_ITEMS_PER_PAGE value
 define('MAX_ITEMS_PER_PAGE', 200);
@@ -125,8 +125,6 @@ define('PASSWORD_ENC_ALGORITHM', 'tiger192,4');
 //
 
 // On Debian
-define('CACHE_PATH', '/dev/shm/');
-
-// Others 
 // Preferably create a memory virtual disk
-// define('CACHE_PATH', '/var/www/');
+// Not used if you use Redis as cache
+define('CACHE_PATH', '/dev/shm/');

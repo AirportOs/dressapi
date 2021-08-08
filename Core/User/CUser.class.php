@@ -266,7 +266,7 @@ class CUser extends CDB
      */
     public function addUserRole( string|int $role )
     {
-        $this->user_roles = [$role];
+        $this->user_roles[] = $role;
     }
 
 
@@ -344,17 +344,54 @@ class CUser extends CDB
             if (isset($this->role_permissions[$user_role]))
             {
                 if (isset($this->role_permissions[$user_role][$module]) &&
-                    in_array($permission,$this->role_permissions[$user_role][$module]))
-                    return true;
+                    in_array($permission, $this->role_permissions[$user_role][$module]))
+                        return true;
                 else // check if it can access all modules
                 if (isset($this->role_permissions[$user_role]['*']) &&
                     in_array($permission,$this->role_permissions[$user_role]['*']))
-                    return true;
+                        return true;
             }
 
         return false;
     }
 
+
+    /**
+     * Role Condition for sql query
+     */
+    private function _setRoleConditions()
+    {
+        $role_conditions = '(id_role IS NULL)';
+        if (in_array('*',$this->user_roles))
+            $role_conditions = '';
+        else
+            if (count($this->user_roles)>0)
+                $role_conditions = '(id_role IN ('.implode(',',$this->user_roles).') OR id_role IS NULL) ';
+        
+        return $role_conditions;
+    }
+
+    private function _queryCache(string $sql, bool $as_ids_array = false, string $folder_cache = 'acl')
+    {
+        $hash = $folder_cache.'/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
+        $data = null;
+        if ($this->cache) 
+            $data = $this->cache->get($hash);
+
+        if ($data === null)
+        {
+            $data = [];
+            $this->query($sql);
+            if ($as_ids_array) 
+                $data = $this->getIDsArray();
+            else
+                $this->getDataTable($data);
+            if ($data !== null)     
+                $this->cache->set($hash, $data);           
+        }
+
+        return $data;
+    }
 
     /**
      * This method import automatically all permssions of the current user
@@ -413,9 +450,17 @@ class CUser extends CDB
     public function importACL(CRequest $request) : bool
     {
         $moduletable = $request->getModule(); 
-        $sql = "SELECT id_role,can_read,can_update,can_insert,can_delete FROM acl ". 
-               "WHERE (id_role IN (SELECT id_role FROM user_role WHERE id_user=$this->id) OR id_role IS NULL) ".
-               "AND (id_moduletable IS NULL OR id_moduletable IN (SELECT id FROM moduletable WHERE name='$moduletable')) ";
+
+        $sc = new CSqlComposer();
+        $sql = (string)$sc->select('id_role')->from('user_role')->where('id_user='.$this->id);       
+        $user_role = $this->_queryCache($sql, true);       
+
+        $role_conditions = (($user_role)?('(id_role IS NULL OR id_role IN ('.implode(',',$user_role).'))'):('FALSE'));
+
+        $sc->clear();
+        $sql = (string)$sc->select('id_role,can_read,can_update,can_insert,can_delete')->
+                    from('acl')->
+                    where("($role_conditions AND (id_moduletable IS NULL OR id_moduletable IN (SELECT id FROM moduletable WHERE name='$moduletable')))");
 
         $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
@@ -450,8 +495,10 @@ class CUser extends CDB
      */
     public function hasRole(string $name) : bool
     {
+        $sc = new CSqlComposer();
+        $sql = $sc->select('count(*)')->from('user_role')->
+                    where("id_user=$this->id AND id_role IN (SELECT id FROM role WHERE name='$name')");
 
-        $sql = "SELECT count(id) FROM user_role WHERE id_user=$this->id AND id_role IN (SELECT id FROM role WHERE name='$name')";
         return (bool)$this->getQueryDataValue($sql);
     }
 
@@ -464,9 +511,11 @@ class CUser extends CDB
      */
     public function canViewAllModules() : bool
     {
-        $sql = "SELECT COUNT(*) FROM `acl` WHERE id_moduletable IS NULL ".
-               "AND (id_role IN (SELECT id_role FROM user_role WHERE id_user=$this->id) OR id_role IS NULL)";
-        
+        $sc = new CSqlComposer();
+        $role_conditions = $this->_setRoleConditions();
+
+        $sql = $sc->select('count(*)')->from('acl')->where("$role_conditions AND id_moduletable IS NULL");
+
         $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
         if ($this->cache) 
@@ -491,10 +540,13 @@ class CUser extends CDB
      */
     public function getAllAvaiableModules() : array
     {
-        $sql = "SELECT name FROM `acl`,`moduletable` mt ".
-               "WHERE (mt.id=acl.id_moduletable OR id_moduletable IS NULL) ".
-               "AND acl.can_read='YES' ".
-               "AND (id_role IN (SELECT id_role FROM user_role WHERE id_user=$this->id) OR id_role IS NULL)";
+        $sc = new CSqlComposer();
+        $role_conditions = $this->_setRoleConditions();
+        if ($role_conditions!=='')
+            $role_conditions .= ' AND'; 
+        $sql = $sc->select('name')->from('acl')->
+                    leftJoin('moduletable', 'mt.id=acl.id_moduletable OR id_moduletable IS NULL', 'mt')->
+                    where("$role_conditions acl.can_read='YES'");
 
         $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         

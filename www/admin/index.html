@@ -34,7 +34,7 @@
         if (localStorage.token == null)
             document.location = './signin/';
 
-        let list_options = 'with-relations/order-by/id-DESC';
+        let list_options = 'with-relations';
     </script>
 </head>
 
@@ -46,11 +46,11 @@
             aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <!-- input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search" -->
+        <input class="form-control form-control-dark w-75" type="text" placeholder="Search" aria-label="Search">
+        <div class="nav-link px-3 text-white" id="username_viewer"></div>
         <div class="navbar-nav">
             <div class="nav-item text-nowrap">
-                <a class="nav-link px-3" href="#" onclick="localStorage.token=null;document.location='./signin/';">Sign
-                    out</a>
+                <a class="nav-link px-3" href="#" onclick="localStorage.token=null;document.location='./signin/';">Sign out</a>
             </div>
         </div>
     </header>
@@ -90,166 +90,14 @@
                     <div class="alert alert-primary invisible" role="alert" id="message">
                     </div>
 
+                    <div class="row">
+                        <div class="col-3"><h2 id="tableName"></h2></div>
+                        <div class="col-9" id="insertButton"> </div>
+                    </div>
 
-                    <h2 id="tableName"></h2>
                     <div class="results"></div>
 
                 </div>
-
-
-                <script>
-
-                    //
-                    // Get Structure of table (Method OPTIONS)
-                    //
-                    function GetTableStructure(table) {
-                        let output = document.getElementById('output');
-                        output.querySelector('.operation').innerHTML = 'Get the structure of <b>' + table + '</b> table';
-                        output.querySelector('.method').innerHTML = 'OPTIONS';
-                        output.querySelector('.request').innerHTML = '/api/' + table;
-                        output.querySelector('.parameters').innerHTML = '';
-                        output.querySelector('.accept').innerHTML = 'application/json';
-                        optionsData('/api/' + table)
-                            .then(res => {
-                                output.querySelector('.status').innerHTML = res.status + ' (' + res.statusText + ')';
-                                if (res.status == 200)
-                                    res.json().then(data => { document.querySelector('.results').innerHTML = createTable({ 'data': data }); });
-                            });
-                    }
-
-
-                    //
-                    // Get Structure of table (Method OPTIONS)
-                    //
-                    function GetAllTableStructures() {
-                        let output = document.getElementById('output');
-                        output.querySelector('.operation').innerHTML = 'Get the structure of <b>all</b> table';
-                        output.querySelector('.method').innerHTML = 'OPTIONS';
-                        output.querySelector('.request').innerHTML = '/api';
-                        output.querySelector('.parameters').innerHTML = '';
-                        output.querySelector('.accept').innerHTML = 'plain/text';
-                        optionsData('/api/all')
-                            .then(res => {
-                                output.querySelector('.status').innerHTML = res.status + ' (' + res.statusText + ')';
-                                if (res.status == 200)
-                                    res.json().then(data => { console.log(data); document.querySelector('.results').innerHTML = createTable(data); });
-                            });
-                    }
-
-                    //
-                    // Insert (Method POST)
-                    //
-                    function InsertRow(table, formData) {
-                        let output = document.getElementById('output');
-                        output.querySelector('.operation').innerHTML = 'Insert a row (id=1000) in <b>' + table + '</b> table';
-                        output.querySelector('.method').innerHTML = 'POST';
-                        output.querySelector('.request').innerHTML = '/api/' + table;
-                        output.querySelector('.parameters').innerHTML = '';
-                        output.querySelector('.accept').innerHTML = 'plain/text';
-
-                        // let formData = new FormData();
-                        // formData.append('id', 1000);
-                        // formData.append(table, 'Lumen is better than DressApi!');
-                        // formData.append('id_page', 1);
-
-                        postData('/api/' + table + '/', formData)
-                            .then(data => {
-                                output.querySelector('.status').innerHTML = data.status + ' (' + data.statusText + ')';
-                                // if (data.status==201)
-                                data.text().then(text => {
-                                    document.getElementById('message').innerHTML = '' + JSON.parse(text).message + '';
-                                    GetList('comment', list_options);
-                                });
-                            });
-                    }
-
-
-                    //
-                    // Update (Method PATCH)
-                    //
-                    function UpdateRow(table, formData) {
-                        // let formData = new FormData();
-                        // formData.append('id', 1000);
-                        // formData.append(table, 'Yii is better than DressApi!');
-                        // formData.append('id_page', 1);
-
-                        let output = document.getElementById('output');
-                        output.querySelector('.operation').innerHTML = 'Insert a row (id=1000) in <b>' + table + '</b> table';
-                        output.querySelector('.method').innerHTML = 'PATCH';
-                        output.querySelector('.request').innerHTML = '/api/' + table;
-                        output.querySelector('.parameters').innerHTML = '';
-                        output.querySelector('.accept').innerHTML = 'plain/text';
-                        postData('/api/' + table, formData)
-                            .then(data => {
-                                output.querySelector('.status').innerHTML = data.status + ' (' + data.statusText + ')';
-                                if (data.status == 200) {
-                                    data.text().then(text => { document.querySelector('.results').innerHTML = '<pre>' + text + '<pre>'; });
-                                }
-                                else
-                                    console.log('status: ' + data.status);
-                            });
-                    }
-
-
-                    //
-                    // Delete (Method DELETE)
-                    //
-                    function DeleteRow(table, id) {
-                        // let formData = new FormData();
-                        // formData.append('id', 1000);
-
-                        let output = document.getElementById('output');
-                        output.querySelector('.operation').innerHTML = 'Insert a row (id=1000) in <b>' + table + '</b> table';
-                        output.querySelector('.method').innerHTML = 'PATCH';
-                        output.querySelector('.request').innerHTML = '/api/' + table;
-                        output.querySelector('.parameters').innerHTML = '';
-                        output.querySelector('.accept').innerHTML = 'plain/text';
-                        deleteData('/api/' + table + '/' + id)
-                            .then(data => {
-                                output.querySelector('.status').innerHTML = data.status + ' (' + data.statusText + ')';
-                                if (data.status == 200) {
-                                    data.json().then(res => { GetList('comment', list_options); document.getElementById('message').innerHTML = res.message; });
-                                }
-                                else
-                                    console.log('status: ' + data.status);
-                            });
-                    }
-
-
-                    function setPage() {
-                        getData('/api/page')
-                            .then(res => {
-                                if (res.status == 200)
-                                    res.json().then(data => {
-                                        let sel = document.getElementById('id_page');
-
-                                        if (typeof (data) != 'undefined' && typeof (data.data) != 'undefined') {
-                                            let index = 0;
-                                            let select_empty = (sel.length == 0);
-                                            // popolate a select
-                                            for (let i in data.data) {
-                                                if (select_empty) {
-                                                    let el = document.createElement("option");
-                                                    el.textContent = data.data[i].title;
-                                                    el.value = data.data[i].id;
-                                                    sel.appendChild(el);
-                                                }
-                                                if (sel.value == data.data[i].id)
-                                                    index = i;
-                                                // console.log(data.data[i].title);
-                                            }
-                                            document.getElementById('id_page_in_add_comment').value = sel.value;
-                                            document.getElementById('page-title').innerHTML = data.data[index].title;
-                                            document.getElementById('page-body').innerHTML = data.data[index].body;
-                                        }
-
-                                        // Read all comments of current page
-                                        list_options = 'with-relations/id_page=' + sel.value + '/order-by/id-DESC';
-                                        GetList('comment', list_options);
-                                    });
-                            });
-                    }
-                </script>
 
             </main>
         </div>
@@ -264,7 +112,7 @@
               <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
             <div class="toast-body text-white">
-              Hello, world! This is a toast message.
+              Welcome to DressApi!
             </div>
           </div>
         </div>    
@@ -279,6 +127,7 @@
                 document.location('./signin/');
 
             document.getElementById('token').innerHTML = localStorage.token;
+            document.getElementById('username_viewer').innerHTML = localStorage.username;
 
 
             createMenuTables();

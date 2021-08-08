@@ -30,7 +30,7 @@ class CRequest
     protected array $order_by = [];      // Order table by Item and type order (ASC or DESC) - i.e.: order-by/id-DESC
 
     protected int $page = 1;
-    protected int $items_per_page = 20;
+    protected int $items_per_page = DEFAULT_ITEMS_PER_PAGE;
 
     protected string $http_autorization = '';
 

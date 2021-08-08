@@ -485,9 +485,7 @@ class CBaseModel
 
 
     /**
-     * Method checkValid
-     * 
-     * check if the input values are valid
+     * Check if the input values are valid
      * 
      * @param bool $all_required if true check all fields of DB table according to its type
      *
@@ -501,33 +499,37 @@ class CBaseModel
         $valid = 'OK';
         if (isset($this->column_list))
             foreach($this->column_list as $field)
-            if (!$all_required || isset($field['value']) || $field['field']=='id' )
-            {
-                if (isset($field['value']))
-                {
-                    if (is_array($field['value']) && count($field['value'])>1)
-                        $val = $field['value'][1];
+                if ($field['field']==str_replace('[table]',$this->table,ITEM_ID) && (!isset($field['value']) || $field['value']==''))
+                    continue;
+                else
+                    if (!$all_required || isset($field['value']))
+                    {
+                        if (isset($field['value']))
+                        {
+                            if (is_array($field['value']) && count($field['value'])>1)
+                                $val = $field['value'][1];
+                            else
+                                $val = $field['value'];
+                        }
+                        if (isset($field['rule']) && isset($field['value']) && 
+                            !preg_match($field['rule'], $val) && 
+                            (!isset($field['null']) || $field['null']=='NO' || $val!='NULL'))
+                            throw new Exception("The value '".str_replace('"','\"',$field['value'])."' for item '".$field['field']."' is not valid" );
+
+                        if (isset($field['max']) && isset($field['value']) && (int)$field['max']>0 && strlen($val)>(int)$field['max'])
+                            throw new Exception("The length of the ".$field['field']." field exceeds the maximum value of ".(strlen($val)-(int)$field['max'])." characters" );
+
+                        if ( isset($field['required']) )
+                        {
+                            if (!isset($field['value']))
+                                throw new Exception("The value of the ".$field['field']." is required" );
+                            
+                            if (isset($field['min']) && strlen($val)<(int)$field['min'])
+                                throw new Exception("The length of the ".$field['field']." must at least ".$field['min']." characters" );
+                        }
+                    }
                     else
-                        $val = $field['value'];
-                }
-                if (isset($field['rule']) && isset($field['value']) && !preg_match($field['rule'], $val ))
-                    throw new Exception("The value '".str_replace('"','\"',$field['value'])."' for item '".$field['field']."' is not valid" );
-
-                if (isset($field['max']) && isset($field['value']) && (int)$field['max']>0 && strlen($val)>(int)$field['max'])
-                    throw new Exception("The length of the ".$field['field']." field exceeds the maximum value of ".(strlen($val)-(int)$field['max'])." characters" );
-
-                if ( isset($field['required']) )
-                {
-                    if (!isset($field['value']))
-                        throw new Exception("The value of the ".$field['field']." is required" );
-                    
-                    if (isset($field['min']) && strlen($val)<(int)$field['min'])
-                        throw new Exception("The length of the ".$field['field']." must at least ".$field['min']." characters" );
-                }
-            }
-            else
-                throw new Exception($field['field'].' column value is required in the table '.$this->table);
-    
+                        throw new Exception($field['field'].' column value is required in the table '.$this->table);
     }
 
 } // end class

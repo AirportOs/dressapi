@@ -44,7 +44,7 @@ namespace DressApi\Core\DBMS
          */
         public function clear()
         {
-            $this->param = [];
+            $this->params = [];
             $this->params['ITEMS'] = '*';
             $this->page = 0;
             $this->elements_per_page = 0;

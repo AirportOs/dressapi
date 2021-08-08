@@ -73,9 +73,9 @@ async function requestData(method, url = '', data = null)
 }
 
 
-function createTable(full_data) 
+function createTable(full_data, options) 
 {
-    let table = '<div class="table-responsive"><table class="table table-striped table-sm">';
+    let html = '<div class="table-responsive"><table class="table table-striped table-sm">';
     let head = false;
     // console.log(full_data.data);
     if (typeof (full_data.data) != 'undefined') 
@@ -85,67 +85,72 @@ function createTable(full_data)
         {
             if (!head && typeof (data[i]) != 'string') 
             {
-                table += '<tr>';
+                html += '<tr>';
                 if (typeof (full_data.metadata) != 'undefined')
-                    table += '<th>Operations</th>';
+                    html += '<th>Operations</th>';
                 for (let col_name in data[i])
-                    table += '<th>' + col_name.toUpperCase() + '</th>';
+                    html += '<th>' + col_name.toUpperCase() + '</th>';
 
-                table += '</tr>';
+                html += '</tr>';
                 head = true;
             }
-            table += '<tr>';
+            html += '<tr>';
             if (typeof (full_data.metadata) != 'undefined')
             {
-                table += '<td><input type="button" class="btn btn-warning m-1" value="Upd" onclick="UpdateRowForm(\'' + full_data.metadata.table + '\', ' + data[i]['id'] + ')">';
-                table += '<input type="button" class="btn btn-danger m-1" value="Del" onclick="DeleteRow(\'' + full_data.metadata.table + '\', ' + data[i]['id'] + ')"></td>';
+                html += '<td><input type="button" class="btn btn-secondary m-1" value="Details" onclick="ViewRow(\'' + full_data.metadata.table + '\', \'' + full_data.metadata.key + '\', ' + data[i]['id'] + ')"></td>';
+                // html += '<input type="button" class="btn btn-warning m-1" value="Upd" onclick="UpdateRowForm(\'' + full_data.metadata.table + '\', ' + data[i]['id'] + ')">';
+                // html += '<input type="button" class="btn btn-danger m-1" value="Del" onclick="DeleteRow(\'' + full_data.metadata.table + '\', ' + data[i]['id'] + ')"></td>';
             }
             for (let col_name in data[i])
-                table += '<td>' + ((data[i][col_name]==null)?('ALL'):(data[i][col_name])) + '</td>';
+                html += '<td>' + ((data[i][col_name]==null)?('ALL'):(data[i][col_name])) + '</td>';
 
-            table += '</tr>';
+            html += '</tr>';
         }
     }
 
-    table += '</table></div>';
+    html += '</table></div>';
 
-/*
-<div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-  <div class="btn-group me-2" role="group" aria-label="First group">
-    <button type="button" class="btn btn-primary">1</button>
-    <button type="button" class="btn btn-primary">2</button>
-    <button type="button" class="btn btn-primary">3</button>
-    <button type="button" class="btn btn-primary">4</button>
-  </div>
-  <div class="btn-group me-2" role="group" aria-label="Second group">
-    <button type="button" class="btn btn-secondary">5</button>
-    <button type="button" class="btn btn-secondary">6</button>
-    <button type="button" class="btn btn-secondary">7</button>
-  </div>
-  <div class="btn-group" role="group" aria-label="Third group">
-    <button type="button" class="btn btn-info">8</button>
-  </div>
-</div>
-*/
-
+    console.log(full_data.metadata);
 
     if (typeof (full_data.metadata) != 'undefined') 
     {
+        document.getElementById('insertButton').innerHTML = '<input type="button" class="btn btn-success float-end" value="Add New" onclick="InsertRowForm(\''+full_data.metadata.table+'\')">';
+        
         document.getElementById('tableName').innerHTML = full_data.metadata.table;
-        table = 'Page ' + full_data.metadata.page + '/' + full_data.metadata.total_pages + ' - ' + full_data.metadata.items_per_page + ' items per page<br>' + table;
+        html = 'Page ' + full_data.metadata.page + '/' + full_data.metadata.total_pages + ' - ' + full_data.metadata.total_items + ' totale elements<br>' + html;
+        
+
+        // List of pages
+        html += '<div class="btn-page-selector" role="toolbar" aria-label="Page Selector">' +
+                '  <div class="btn-group me-2" role="group" aria-label="First group">';
+        
+        let start_page = Math.max(1,full_data.metadata.total_pages-10);
+        for(let p=start_page; p<=full_data.metadata.total_pages && p<=start_page+20; p++)
+            if (p==full_data.metadata.page)
+                html += '    <button type="button" class="btn btn-primary"><strong>'+p+'</strong></button>';
+            else
+                html += '    <button type="button" class="btn btn-secondary" onclick="GetList(\''+full_data.metadata.table+'\', \''+options+'/p/'+p+'\')">'+p+'</button>';
+        
+                html += '  </div>' +
+                '</div>';
+
+    
     }
 
-    return table;
+    document.querySelector('.results').innerHTML = html;
+
+    return true;
 }
 
 
 function createForm(full_data, item) 
 {
     // console.log(item);
+    document.getElementById('insertButton').innerHTML = '';
 
-    let htmlform = '<form id="update"><div style="background:#eee" class="card mb-3"><div class="card-body"><div class="row">';
+    let html = '<form id="editForm"><div style="background:#eee" class="card mb-3"><div class="card-body"><div class="row">';
 //    for(let i in full_data.structure)
-//        htmlform += full_data.structure[i]['field'] + '=' + full_data.structure[i]['html_type']+'<br>';
+//        html += full_data.structure[i]['field'] + '=' + full_data.structure[i]['html_type']+'<br>';
     
     // list of filed to popolate
     let popolateLists = [];
@@ -155,12 +160,12 @@ function createForm(full_data, item)
         let size = parseInt(full_data.structure[i]['max']);
         let field = full_data.structure[i]['field'];
         let display_name = full_data.structure[i]['display_name'];
-        let value = item.data[0][field];
-                
+        let value = ((item)?(item.data[0][field]):(''));
+// console.log(field); 
         switch(full_data.structure[i]['html_type'])
         {
             case 'hidden':
-                htmlform += '<input value="'+value+'" name="'+field+'" type="'+full_data.structure[i]['html_type']+'" size="'+size+'" class="form-control" id="input_'+field+'" required>';
+                html += '<input value="'+value+'" name="'+field+'" type="'+full_data.structure[i]['html_type']+'" size="'+size+'" class="form-control" id="input_'+field+'" required>';
                 break;
 
             case 'text':
@@ -174,14 +179,14 @@ function createForm(full_data, item)
             case 'password':
             case 'url':
             case 'tel':
-                    htmlform += '<div class="mb-3 row">' +
+                    html += '<div class="mb-3 row">' +
                                 '<label class="col-sm-2 form-label fw-bold fs-6" for="input_'+field+'">'+display_name+'</label>' +
                                 '<div class="col-sm-10"><input name="'+field+'" value="'+value+'" type="'+full_data.structure[i]['html_type']+'" size="'+size+'" class="form-control" id="input_'+field+'" required></div>' +
                                 '</div>'+"\r\n";
                     break;
    
                 case 'textarea':
-                    htmlform += '<div class="mb-3 row">' +
+                    html += '<div class="mb-3 row">' +
                          '<label for="input_'+field+'" class="col-sm-2 form-label fw-bold fs-6">'+display_name+'</label>' +
                          '<div class="col-sm-10"><textarea name="'+field+'" class="form-control" id="input_'+field+'" required>'+value+'</textarea></div>' +
                          // '<div class="invalid-feedback">' + field + '</div>' +
@@ -189,7 +194,7 @@ function createForm(full_data, item)
                     break;
 
             case 'checkbox': 
-                    htmlform += '<div class="mb-3 row">' +
+                    html += '<div class="mb-3 row">' +
                         '<label for="input_'+field+'" class="col-sm-2 col-form-label fw-bold fs-6">'+display_name+'</label>' +
                         '<div class="col-sm-10"><input name="'+field+'" value="'+value+'" type="checkbox" class="form-control" id="input_'+field+'"></div>' +
                         // '<div class="invalid-feedback">Example invalid feedback text</div>' +
@@ -197,7 +202,7 @@ function createForm(full_data, item)
                         break;
 
             case 'select': 
-                    htmlform += '<div class="mb-3 row">' +
+                    html += '<div class="mb-3 row">' +
                         '<label for="input_'+field+'" class="col-sm-2 col-form-label fw-bold fs-6">'+display_name+'</label>' +
                         '<div class="col-sm-10"><select name="'+field+'" class="form-control" id="input_'+field+'"></select></div>' +
                         // '<div class="invalid-feedback">Example invalid feedback text</div>' +
@@ -205,11 +210,11 @@ function createForm(full_data, item)
                         
                         [rel_table,rel_sitems] = full_data.structure[i]['ref'].split(':');
                         [rel_id_name,rel_items] = rel_sitems.split('-');
-                        popolateLists.push(['select','input_'+field, rel_table, '', rel_id_name, rel_items, value]);
+                        popolateLists.push(['select','input_'+field, rel_table, '', rel_id_name, rel_items, value, full_data.structure[i]['null']]);
                         break;
 
             case 'datalist': 
-                    htmlform += '<div class="mb-3 row">' +
+                    html += '<div class="mb-3 row">' +
                         '<label for="input_'+field+'" class="col-sm-2 col-form-label fw-bold fs-6">'+display_name+'</label>' +
                         '<div class="col-sm-10"><datalist name="'+field+'" class="form-control" id="input_'+field+'"></datalist></div>' +
                         // '<div class="invalid-feedback">Example invalid feedback text</div>' +
@@ -217,50 +222,54 @@ function createForm(full_data, item)
                         
                         [rel_table,rel_sitems] = full_data.structure[i]['ref'].split(':');
                         [rel_id_name,rel_items] = rel_sitems.split('-');
-                        popolateLists.push(['datalist','input_'+field, rel_table, '', rel_id_name, rel_items, value]);
+                        popolateLists.push(['datalist','input_'+field, rel_table, '', rel_id_name, rel_items, value, full_data.structure[i]['null']=='YES']);
                         break;
 
             case 'checkbox-list-ex': 
-                    htmlform += '<div class="mb-3 row">' +
+                    html += '<div class="mb-3 row">' +
                         '<label for="input_'+field+'" class="col-sm-2 col-form-label fw-bold fs-6">'+display_name+'</label>' +
                         '<div class="col-sm-10" id="input_'+field+'">';
                         
                     let vcbl = full_data.structure[i]['options'].split('|');
                     for( var x in vcbl)
-                         htmlform += '<input type="checkbox" name="'+field+'[]" value="'+vcbl[x]+'" class="form-check-input"'+((value==vcbl[x])?(' checked'):(''))+'>&nbsp;' + vcbl[x] + '<br>'; 
+                         html += '<input type="checkbox" name="'+field+'[]" value="'+vcbl[x]+'" class="form-check-input"'+((value==vcbl[x])?(' checked'):(''))+'>&nbsp;' + vcbl[x] + '<br>'; 
                         
-                    htmlform += '</div></div>' +"\r\n";
+                    html += '</div></div>' +"\r\n";
                         break;
 
             case 'radio-list': 
-                    htmlform += '<div class="mb-3 row">' +
+                    html += '<div class="mb-3 row">' +
                         '<label for="input_'+field+'" class="col-sm-2 col-form-label fw-bold fs-6">'+display_name+'</label>' +
                         '<div class="col-sm-10" id="input_'+field+'">';
                         
                     let vrl = full_data.structure[i]['options'].split('|');
                     for( var x in vrl)
-                         htmlform += '<input type="radio" name="'+field+'" value="'+vrl[x]+'" class="form-check-input"'+((value==vrl[x])?(' checked'):(''))+'>&nbsp;' + vrl[x] + '&nbsp;&nbsp;'; 
+                         html += '<input type="radio" name="'+field+'" value="'+vrl[x]+'" class="form-check-input"'+((value==vrl[x])?(' checked'):(''))+'>&nbsp;' + vrl[x] + '&nbsp;&nbsp;'; 
                         
-                    htmlform += '</div></div>' +"\r\n";
+                    html += '</div></div>' +"\r\n";
                         break;
 
             default: 
-                    htmlform += '<div class="mb-3 row"><h2>' + display_name + '</h2> ' + full_data.structure[i]['html_type'] + '</div>'+"\r\n";
+                    html += '<div class="mb-3 row"><h2>' + display_name + '</h2> ' + full_data.structure[i]['html_type'] + '</div>'+"\r\n";
                         break;
 
         }
     }
-    htmlform += '</div></div></div>';
+    html += '</div></div></div>';
 
-    htmlform += '<div class="row position-relative">';
-    htmlform += '  <input value="Update" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="UpdateRow(\''+full_data.metadata.table+'\', document.getElementById(\'update\'), '+item.data[0][full_data.metadata.key]+' )">';
-    htmlform += '  <input value="Back" type="button" class="btn btn-secondary col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="GetList(\''+full_data.metadata.table+'\', \'wr/ob/'+full_data.metadata.key+'-DESC\')">';
-    htmlform += '  <input value="Delete" type="button" class="btn btn-danger col-sm-3 col-lg-2 m-3 top-50 end-0" onclick="DeleteRow(\''+full_data.metadata.table+'\','+item.data[0][full_data.metadata.key]+')">';
-    htmlform += '<br></div>';
+    html += '<div class="row position-relative">';
+    if (item)
+        html += '  <input value="Update" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="UpdateRow(\''+full_data.metadata.table+'\', document.getElementById(\'editForm\'), '+item.data[0][full_data.metadata.key]+' )">';
+    else
+        html += '  <input value="Insert" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="InsertRow(\''+full_data.metadata.table+'\', document.getElementById(\'editForm\') )">';
+    html += '  <input value="Go to List" type="button" class="btn btn-secondary col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="GetList(\''+full_data.metadata.table+'\', \'wr/ob/'+full_data.metadata.key+'-DESC\')">';
+    if (item)
+        html += '  <input value="Delete" type="button" class="btn btn-danger col-sm-3 col-lg-2 m-3 top-50 end-0" onclick="DeleteRow(\''+full_data.metadata.table+'\','+item.data[0][full_data.metadata.key]+')">';
+    html += '<br></div>';
 
-    htmlform += '</form>';
+    html += '</form>';
 
-    document.querySelector('.results').innerHTML = htmlform;
+    document.querySelector('.results').innerHTML = html;
 
     for( let i in popolateLists)
     {
@@ -271,7 +280,7 @@ function createForm(full_data, item)
             case 'datalist':
             case 'select':
                            // id_obj, rel_table,  options, rel_id_name, items to display
-                popolateSelect(row[0],row[1], row[2], row[3], row[4], row[5], row[6]);
+                popolateSelect(row[0],row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
                 break;
 
             case 'checkbox-list-ex':
@@ -284,14 +293,14 @@ function createForm(full_data, item)
         }
     }
 
-    return htmlform;
+    return html;
 }
 
 //
 // Get a list of table (Method GET). 
 // The page 2 is options '/p/2' or 'p/2,10' (page 2 with 10 elements per page)
 //
-function popolateSelect(type, id_obj, rel_table, options, rel_id_name, rel_display_fields, value)
+function popolateSelect(type, id_obj, rel_table, options, rel_id_name, rel_display_fields, value, with_null)
 {
     let displayed_fields_separator = ' ';
     if (!options)
@@ -307,6 +316,9 @@ function popolateSelect(type, id_obj, rel_table, options, rel_id_name, rel_displ
                     { 
                         // console.log(data);
                         let frame_html = ''; 
+                        
+                        if (with_null) 
+                            frame_html += '<option value="NULL">ALL</option>';
                         for(var x in data.data)
                         {
                             let field_value = '';
@@ -385,9 +397,29 @@ function GetList(table, options)
     requestData('GET','/api/' + table + options)
         .then(res => {
             if (res.status == 200)
-                res.json().then(data => { document.querySelector('.results').innerHTML = createTable(data); });
+                res.json().then(data => { createTable(data); });
         });
 }
+
+
+//
+// Update Form
+//
+function InsertRowForm(table)
+{
+    //
+    // Get Structure of table (Method OPTIONS)
+    //
+    requestData('OPTIONS','/api/'+table)
+    .then(res2 => {
+        if (res2.status==200)
+            res2.json().then(data => { createForm(data);} );
+        else
+            setToast('Operation failed with status '+res2.status,'bg-danger'); 
+        });
+
+}
+
 
 
 //
@@ -399,17 +431,54 @@ function InsertRow(table, formData)
     // formData.append('id', 1000);
     // formData.append(table, 'Lumen is better than DressApi!');
     // formData.append('id_page', 1);
-
-    postData('/api/'+table+'/',formData)
+    requestData('POST', '/api/'+table+'/',formData)
             .then(data => {
                 if (data.status==201)
                     data.json().then(res => { 
-                                                setToast('Operation failed with status '+res.message,'bg-success');
+                                                setToast('Item entered successfully','bg-success');
                                                 GetList(table,list_options);
                                              } );
                 else
                     setToast('Operation failed with status '+data.status,'bg-danger'); 
             });
+}
+
+
+//
+// View Single Row
+//
+function ViewRow(table, key, id)
+{
+    requestData('GET','/api/'+table+'/'+id+'/wr')
+            .then(res => {
+                if (res.status==200)
+                {
+                    res.json().then(data => { ViewDetails(data,key,id);} );
+                }
+            });
+
+}
+
+
+//
+// View Details
+//
+function ViewDetails(data, key, id)
+{
+    let html = '<div class="table-responsive m-1"><table class="table table-striped ">';
+    for(let i in data.data[0])
+        html += '<tr><th class="bg-info">'+i+'</th><td>'+data.data[0][i]+'<td></tr>';
+    html += '</table></div>';
+
+    html += '<div class="row">';
+    html += '  <input value="Modify" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="UpdateRowForm(\''+data.metadata.table+'\','+id+' )">';
+    html += '  <input value="Go to List" type="button" class="btn btn-secondary col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="GetList(\''+data.metadata.table+'\', \'wr/ob/'+key+'-DESC\')">';
+    html += '  <input value="Delete" type="button" class="btn btn-danger col-sm-3 col-lg-2 m-3 top-50 end-0" onclick="DeleteRow(\''+data.metadata.table+'\','+id+')">';
+    html += '<br></div>';
+    
+    document.querySelector('.results').innerHTML = html;
+
+    document.getElementById('insertButton').innerHTML = '';    
 }
 
 
@@ -439,7 +508,6 @@ function UpdateRowForm(table, id)
             });
 
 }
-
 
 
 //

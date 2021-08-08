@@ -753,29 +753,6 @@ class CBaseController extends CDB
 
 
     /**
-     * Import all Uploaded files
-     *
-     * @return array message result of upload operation
-     */
-    public function execUPLOAD(): array
-    {
-        try
-        {
-            $filenames = $this->_inputFile();
-
-            if ($filenames && $this->response->getStatusCode() == CResponse::HTTP_STATUS_OK)
-                $ret = ['message' => 'Operation completed successfully (uploaded: $filenames)'];
-        }
-        catch (Exception $ex)
-        {
-            $ret = ['message' => $ex->getMessage()];
-        }
-
-        return $ret;
-    }
-
-
-    /**
      * Get a content in cache if exists
      * 
      * @param string $key the content that uniquely identifies the cache
@@ -845,6 +822,7 @@ class CBaseController extends CDB
             'total_pages' => $total_pages,
             'items_per_page' => $items_per_page,
             'table' => $this->table,
+            'key' => str_replace('[table]', $this->table, ITEM_ID)
         ];
 
         if ($this->cache && $cache_key && $data['data'] !== null && count($data['data']) > 0)
@@ -1038,6 +1016,8 @@ die;
     {
         try
         {
+            $filename = $this->_inputFile();
+
             $this->response->setStatusCode(CResponse::HTTP_STATUS_BAD_REQUEST);
 
             $affected_rows = $this->_insertDB();

@@ -354,7 +354,7 @@
                     .then(res => {
                         output.querySelector('.status').innerHTML = res.status+ ' (' + res.statusText + ')';
                         if (res.status==200)
-                            res.json().then(data => { document.querySelector('.results').innerHTML = createTable({'data':data});} );
+                            res.json().then(data => { document.querySelector('.results').innerHTML = createTable({'data':data.structure});} );
                     });
         }                
 

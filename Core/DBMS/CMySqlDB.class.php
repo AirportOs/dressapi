@@ -306,10 +306,10 @@ class CMySqlDB extends CDBMS
                 $table = $this->table;
 
             $items_keys = array_keys($items);
-            array_walk($items_keys, function (&$value, $key)
-            {
-                $value = "`$value`=?";
-            });
+            array_walk($items_keys, function (&$value, $key) { $value = "`$value`=?"; });
+            
+            // Set valid Null
+            array_walk($items, function (&$value, $key) { if (strtoupper($value)=='NULL') $value = NULL; });
 
             $items_values = array_values($items);
 
