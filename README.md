@@ -11,7 +11,35 @@ Although it is structured as an **MVC** (Model, View, Controller) but it does no
 The View is only a data output in JSON, XML or TEXT format, than genarally you don't need to customize.
 The most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code and only if you need to customize it can you create a specific model.
 
-## Configure your First App
+## Why use DressApi?
+
+Surely the possibility of not writing code can be an excellent reason to choose DressApi but it is not the only peculiarity that makes it different from other frameworks. The special features of DressApi can be summarized below:
+
+* It is native to **PHP 8**, so it uses the latest PHP features such as type declaration.
+
+* It automatically **manages the relationships between the tables**, in most cases there is no need to make complicated queries with joins in the selections to get more meaningful names instead of indexes.
+
+* It includes a file-based or Redis **Cache** that can automatically update itself when it is needed, for example even when a related table's values ​​change.
+
+* It uses an **advanced query system** that includes for example the major and minor operators and also the special operator ~ which indicates that a text must be included in a certain field.
+
+* It already contains a default **paging system**
+
+* A **deferred connection system** allows you to connect to the DB only if necessary. This mode saves a lot of time especially when used in conjunction with the caching system: in this way the framework responds very quickly with the minimum of resources required.
+
+* Include **JWT (JSON Web Token) for the authetication**. JWT is a proposed Internet standard for creating data encrypted by a public/private key
+
+* **Strict input control**. The types of the DB fields are known and therefore can be checked before making an insertion or modification without adding a line of code. However, it is possible to associate a regular expression for each single field of the record to be inserted/modified.
+
+* Especially for new databases **DressApi provides a complete system of ACL (Access Control List)** to define users, roles and possible CRUD operations for each role and eg each table.
+
+* It is structured to be **independent of the database**, not only for the drivers/library but also in the use of the SQL dialect. At the moment only MySQL has been implemented but it is expected in the future the use of other databases such as Oracle, PostgreSQL and MS SQL for which the equivalent library has yet to be written.
+
+* It is **highly customizable**. It is possible to create customized modules and, for more complex cases, it is possible to completely abstract from the basic logic while using various facilities such as high-level DB management, cache, JWT, ACL and more.
+
+* **It contains an API usage example (Admin)** that can be used as a starting point or as an example to study. It includes a database to import and a couple of instructions to add to the Apache configuration.
+
+## Configure your First App and GO!
 
 This is the configuration file to set up to get a complete API from your DB! This is all you will probably need to do!
 
@@ -148,36 +176,6 @@ define('PASSWORD_ENC_ALGORITHM', 'tiger192,4');
 define('CACHE_PATH', '/dev/shm/');
 
 ```
-
-## Why use DressApi?
-
-Surely the possibility of not writing code can be an excellent reason to choose DressApi but it is not the only peculiarity that makes it different from other frameworks. The special features of DressApi can be summarized below:
-
-* It is native to **PHP 8**, so it uses the latest PHP features such as type declaration.
-
-* It automatically **manages the relationships between the tables**, in most cases there is no need to make complicated queries with joins in the selections to get more meaningful names instead of indexes.
-
-* It includes a file-based or Redis **Cache** that can automatically update itself when it is needed, for example even when a related table's values ​​change.
-
-* It uses an **advanced query system** that includes for example the major and minor operators and also the special operator ~ which indicates that a text must be included in a certain field.
-
-* It already contains a default **paging system**
-
-* A **deferred connection system** allows you to connect to the DB only if necessary. This mode saves a lot of time especially when used in conjunction with the caching system: in this way the framework responds very quickly with the minimum of resources required.
-
-* Include **JWT (JSON Web Token) for the authetication**. JWT is a proposed Internet standard for creating data encrypted by a public/private key
-
-* **Strict input control**. The types of the DB fields are known and therefore can be checked before making an insertion or modification without adding a line of code. However, it is possible to associate a regular expression for each single field of the record to be inserted/modified.
-
-* Especially for new databases **DressApi provides a complete system of ACL (Access Control List)** to define users, roles and possible CRUD operations for each role and eg each table.
-
-* It is structured to be **independent of the database**, not only for the drivers/library but also in the use of the SQL dialect. At the moment only MySQL has been implemented but it is expected in the future the use of other databases such as Oracle, PostgreSQL and MS SQL for which the equivalent library has yet to be written.
-
-* It is **highly customizable**. It is possible to create customized modules and, for more complex cases, it is possible to completely abstract from the basic logic while using various facilities such as high-level DB management, cache, JWT, ACL and more.
-
-* **It contains an API usage example (Admin)** that can be used as a starting point or as an example to study. It includes a database to import and a couple of instructions to add to the Apache configuration.
-
-
 
 ## Prerequisites
 
