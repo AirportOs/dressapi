@@ -171,7 +171,7 @@ class CResponse
      * 
      * @param mixed $result data to tranform
      *  
-     * @ string all data results
+     * @return string all data results
      */
     public function output(mixed $result): string
     {
@@ -206,7 +206,7 @@ class CResponse
      * @param int $code
      * @param string $message messaggio da inviare
      *  
-     * @ string with error
+     * @return string with error
      */
     public function error(int $code, string $message): string
     {

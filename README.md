@@ -337,14 +337,6 @@ To indicate one, add one of these options:
 -H 'Accept: application/debug'
 ```
 
-## Other features
-
-* **DressApi use a cache** based on file (normally on virtual disk on memory) or on Redis and is integrated to the application.
-This means it deletes interested parties (**including relations**) when there is an update.
-
-* **Deferred connection of the DB**: if the request is already in cache it does not make any connection to the database.
-In this way it saves unnecessary resources and is more efficient.
-
 ## License
 
 DressApi is under Apache 2.0 license, you can use for free for personal and commercial projects.
