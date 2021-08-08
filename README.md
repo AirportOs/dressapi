@@ -177,8 +177,6 @@ Surely the possibility of not writing code can be an excellent reason to choose 
 
 * **It contains an API usage example (Admin)** that can be used as a starting point or as an example to study. It includes a database to import and a couple of instructions to add to the Apache configuration.
 
-
-
 ## Prerequisites
 
 * LAMP platform with **PHP 8.0** or more recent
