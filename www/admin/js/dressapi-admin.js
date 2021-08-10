@@ -23,7 +23,7 @@ function createHTMLMenu(data)
         a.className = "nav-link"+((i==0)?(' active'):(''));
         a.href = '#';
         a.areaCurrent = table;
-        a.addEventListener('click', () => { GetList(table, list_options); });
+        a.addEventListener('click', () => { GetList(table, list_options); document.getElementById('search_on_table').value=''; });
         a.innerHTML = '<span data-feather="get_list"></span>' + table;
 
         let li = document.createElement('li');
@@ -97,6 +97,7 @@ function createTable(full_data, options)
             html += '<tr>';
             if (typeof (full_data.metadata) != 'undefined')
             {
+                localStorage.current_table = full_data.metadata.table;
                 html += '<td><input type="button" class="btn btn-secondary m-1" value="Details" onclick="ViewRow(\'' + full_data.metadata.table + '\', \'' + full_data.metadata.key + '\', ' + data[i]['id'] + ')"></td>';
                 // html += '<input type="button" class="btn btn-warning m-1" value="Upd" onclick="UpdateRowForm(\'' + full_data.metadata.table + '\', ' + data[i]['id'] + ')">';
                 // html += '<input type="button" class="btn btn-danger m-1" value="Del" onclick="DeleteRow(\'' + full_data.metadata.table + '\', ' + data[i]['id'] + ')"></td>';
@@ -110,7 +111,7 @@ function createTable(full_data, options)
 
     html += '</table></div>';
 
-    console.log(full_data.metadata);
+//    console.log(full_data.metadata);
 
     if (typeof (full_data.metadata) != 'undefined') 
     {
@@ -138,7 +139,7 @@ function createTable(full_data, options)
     }
 
     document.querySelector('.results').innerHTML = html;
-
+    
     return true;
 }
 

@@ -431,14 +431,15 @@ class CBaseController extends CDB
                 list($operator, $value) = $filters['all'];
                 unset($filters['all']);
 
-                foreach ($this->model->getAllAvailableTables() as $name => $col)
-                    if (strstr($col['type'], 'VARCHAR'))
+                $available_tables = $this->model->getAllAvailableTables();
+                foreach ($available_tables[$this->table] as $name => $col)
+                    if (str_contains($col['type'], 'TEXT') || str_contains($col['type'], 'CHAR'))
                     {
                         if ($start)
                             $start = false;
                         else
                             $conditions .= ' OR';
-                        $conditions .= " (`a.$name` LIKE ?)";
+                        $conditions .= " (a.$name LIKE ?)";
                         $this->bind_params_values[] = "%$value%";
                         $this->bind_params_types[] = $col['type'];
                     }
@@ -859,7 +860,7 @@ class CBaseController extends CDB
                 if (isset($fields))
                     foreach($fields as &$field) // $field = id_area
                     {
-                        $matches = []; //  /^([\S]*)_id/
+                        $matches = [];
                         $related_table_from_id = '/^'.str_replace('[related_table]','([\S]*)',RELATED_TABLE_ID).'/';
                         
                         if (preg_match($related_table_from_id, $field, $matches))
@@ -1052,15 +1053,29 @@ die;
      */
     public function execOPTIONS(): array
     {
-        if ($this->table == 'all')
+        $data = [];
+
+        $cache_key = $this->_getCacheKey('structures/'.$this->table.'.options');
+        $data = $this->_getCachedData($cache_key);
+        if (!$data)
         {
-            if ($this->user->canViewAllModules())
-                return array_keys($this->model->getAllAvailableTables());
+            if ($this->table == 'all')
+            {
+                if ($this->user->canViewAllModules())
+                    $data = array_keys($this->model->getAllAvailableTables());
+                else
+                    $data = $this->user->getAllAvaiableModules();
+            }
             else
-                return $this->user->getAllAvaiableModules();
+            {
+                $data = $this->model->getFields();
+            }
+
+            if ($this->cache && $cache_key && $data && count($data) > 0)
+                $this->cache->set($cache_key, $data);    
         }
-        else
-            return $this->model->getFields();
+
+        return $data;
     }
 
 

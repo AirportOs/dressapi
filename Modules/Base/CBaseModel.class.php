@@ -36,6 +36,10 @@ class CBaseModel
     public const REGEX_DATE = '/^\d{4}\-\d{2}\-\d{2}$/'; // 2021-05-18
     public const REGEX_YEAR = '/^\d{4}$/'; // 2021
 
+    public const REGEX_PHONE = '/^[+][0-9\s\.]/'; 
+    public const REGEX_EMAIL = '/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/i';
+    public const REGEX_URL   = '/^(http|https?:\/\/(?:www\.|(?!www))[^\s\.]+\.[^\s]{2,3}|www\.[^\s]+\.[^\s]{2,3})$/';
+
     public const REGEX_INDEXES = '/[\d,]+/';  // indici numerici separati da virgole
     
     /**
@@ -149,22 +153,36 @@ class CBaseModel
                     // case 'VARCHAR':
                     // case 'VARCHAR2':
                     default: // textual type
+                        $value['rule'] = ''; 
                         if (isset($value['max']) && $value['max']>60)
-                            $value['html_type'] = 'textarea';
+                                $value['html_type'] = 'textarea';
                         else
                         {
                             $value['html_type'] = 'text';
 
                             // SPECIAL HTML T$field(changed by name)
                             if (str_contains($field, 'color_')   || str_contains($field, '_color'))  $value['html_type'] = 'color';
-                            if (str_contains($field, 'email_')   || str_contains($field, '_email'))  $value['html_type'] = 'email';
                             if (str_contains($field, 'password_')|| str_contains($field, '_password'))  $value['html_type'] = 'password';
-                            if (str_contains($field, 'url_')     || str_contains($field, '_url'))   $value['html_type'] = 'url';
                             if (str_contains($field, 'file_')    || str_contains($field, '_file'))  $value['html_type'] = 'file';
-                            if (str_contains($field, 'phone_')   || str_contains($field, '_phone') || 
-                                str_contains($field, 'cellular_')|| str_contains($field, '_cellular'))  $value['html_type'] = 'tel';
                             if (str_contains($field, 'image_')   || str_contains($field, '_image') ||
                                 str_contains($field, 'img_')     || str_contains($field, '_img')) $value['html_type'] = 'image';
+                            
+                            if (str_contains($field, 'phone_') || str_contains($field, '_phone') || 
+                                str_contains($field, 'cellular_')|| str_contains($field, '_cellular'))  
+                            {
+                                $value['html_type'] = 'tel';
+                                $value['rule'] = self::REGEX_PHONE;
+                            }
+                            if (str_contains($field, 'url_') || str_contains($field, '_url'))   
+                            {
+                                $value['html_type'] = 'url';
+                                $value['rule'] = self::REGEX_URL;
+                            }
+                            if (str_contains($field, 'email_') || str_contains($field, '_email'))  
+                            {
+                                $value['html_type'] = 'email';
+                                $value['rule'] = self::REGEX_EMAIL;
+                            }
                         }
                         break;
                 } // end switch
@@ -419,9 +437,18 @@ class CBaseModel
             }
             $this->changeFieldStructure($struct);
         }
+
+        // searches for tables that contain the related field
+        $related_item = str_replace('[related_table]',$this->table,RELATED_TABLE_ID);
+        $related_tables = [];
+        foreach($this->all_tables as $tab=>$items)
+            if (isset($items[$related_item]) )
+                $related_tables[] = $tab;
         
         return ['structure'=>$this->column_list,
-                'metadata'=>['table'=>$this->table,'key'=>str_replace('[table]',$related_table_from_id,ITEM_ID)],'related_tables'=>[] ]; 
+                'metadata'=>['table'=>$this->table,
+                             'key'=>str_replace('[table]',$related_table_from_id,ITEM_ID)],
+                             'related_tables'=>$related_tables ]; 
     }
 
     /**
