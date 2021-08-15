@@ -128,3 +128,14 @@ define('PASSWORD_ENC_ALGORITHM', 'tiger192,4');
 // Preferably create a memory virtual disk
 // Not used if you use Redis as cache
 define('CACHE_PATH', '/dev/shm/');
+
+
+
+//
+// MAIL SERVER CONFIGURATION
+//
+define('MAIL_TO_REPLY','<YOUR EMAIL>');
+define('MAIL_USERNAME','<YOUR EMAIL USERNAME');
+define('MAIL_PASSWORD','<YOUR EMAIL PASSWORD>');
+define('MAIL_HOST','smtp.gmail.com'); // 'smtp.googlemail.com'
+define('MAIL_PORT',465);

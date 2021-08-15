@@ -260,7 +260,7 @@ class CMySqlDB extends CDBMS
                 foreach ($types as $db_type)
                     $stypes .= $this->convertDBType2BindType($db_type);
 
-            $sql = "INSERT INTO $table (" . implode(",", $items_keys) . ") " . "VALUES (" . implode(",", $items_qvalues) . ")";
+            $sql = "INSERT INTO $table (" . implode(",", $items_keys) . ") VALUES (" . implode(",", $items_qvalues) . ")";
 
             try
             {
@@ -268,7 +268,9 @@ class CMySqlDB extends CDBMS
                 if ($items_values !== null)
                     $stmt->bind_param($stypes, ...$items_values);
                 $ret = $stmt->execute();
-                if (!$ret) 
+                if ($ret) 
+                    $this->last_id = $stmt->insert_id;
+                else
                    self::notice("on update records ($sql): " . $stmt->error);
                 $stmt->close();
             }
@@ -427,6 +429,7 @@ class CMySqlDB extends CDBMS
      * @param null $table name of the reference table
      * @return ?int if the operation was successful, it returns the id of the last element inserted
      */
+/*    
     public function getLastID(?string $table = null): ?int
     {
         $last_id = null;
@@ -448,7 +451,7 @@ class CMySqlDB extends CDBMS
         // var_dump( $last_id );
         return $last_id;
     }
-
+*/
 
     /**
      * Returns how many rows were affected by the last operation performed

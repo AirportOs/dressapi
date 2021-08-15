@@ -23,6 +23,13 @@ use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
 use DressApi\Core\Cache\CFileCache as CCache; // An alternative is CRedisCache
 
+use DressApi\Core\Mail\CMail;
+
+//Import PHPMailer classes into the global namespace
+//These must be at the top of your script, not inside a function
+//use PHPMailer\PHPMailer\PHPMailer;
+// use PHPMailer\PHPMailer\SMTP;
+// use PHPMailer\PHPMailer\Exception;
 
 class CUser extends CDB
 {
@@ -84,9 +91,11 @@ class CUser extends CDB
      * 
      * @return string a user token if the user exists, otherwise is a string 'Invalid login'
      */
-    public function authenticate(string $username, string $password) : string
+    public function authenticate(array $params) : string
     {
         $token = 'Invalid login';
+        $username = $params['dusername']; 
+        $password = $params['dpassword'];
         // Validate the credentials against a database, or other data store.
         // ...
         // For the purposes of this example, we'll assume that they're valid
@@ -201,7 +210,7 @@ class CUser extends CDB
     /**
      * @return [type]
      */
-    public function verify()
+    public function run()
     {
         // Parameters
         $params = $this->request->getParameters();
@@ -210,8 +219,11 @@ class CUser extends CDB
         $method = $this->request->getMethod();
 
         // Verifica del login
-        if ($method=='POST' && isset($params['username']) && isset($params['password']))
-            return $this->authenticate($params['username'], $params['password']);
+        if ($method=='POST' && isset($params['do']) && $params['do']=='subscribe')
+            return $this->subscribe($params);
+        else
+        if ($method=='POST' && isset($params['do']) && $params['do']=='login')
+            return $this->authenticate($params);
         else
         {
             if (USER_TABLE!='')
@@ -574,7 +586,107 @@ class CUser extends CDB
      */
     public function subscribe()
     {
-        throw new Exception("subscribe todo");
+        // CONTACT
+        // id,name,surname,address,zip_code,city,state,email
+        $params = $this->request->getParameters();
+
+        if (strlen($params['dusername'])<8)
+            throw new Exception('The username must be at least 8 characters');
+        else
+        {
+            $sc = new CSqlComposer();
+            $sc->select('count(*)')->from('user')->where('username=\''.str_replace("'","''",$params['dusername']).'\'');
+            if ($this->getQueryDataValue($sc))
+                throw new Exception('The username already exists');
+        }
+        if (strlen($params['name'])==0) throw new Exception('The name can\'t be empty');
+        if (strlen($params['surname'])==0) throw new Exception('The surname can\'t be empty');
+        if (strlen($params['address'])==0) throw new Exception('The address can\'t be empty');
+        if (strlen($params['zip_code'])==0) throw new Exception('The zip_code can\'t be empty');
+        if (strlen($params['city'])==0) throw new Exception('The city can\'t be empty');
+        if (strlen($params['email'])==0) throw new Exception('The email can\'t be empty');
+        else
+        {
+            $m = [];
+            if (!preg_match('/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/i', $params['email'], $m ))
+                throw new Exception('The email address is not valid');
+            else
+            {
+                $sc = new CSqlComposer();
+                $sc->select('count(*)')->from('contact')->where('email=\''.str_replace("'","''",$params['email']).'\'');
+                if ($this->getQueryDataValue($sc))
+                    throw new Exception('The email address already exists');
+            }
+        }
+
+
+        $contact = [];
+        $contact['name'] = $params['name'];
+        $contact['surname'] = $params['surname'];
+        $contact['address'] = $params['address'];
+        $contact['zip_code'] = $params['zip_code'];
+        $contact['city'] = $params['city'];
+        $contact['state'] = $params['state'];
+        $contact['email'] = $params['email'];
+
+        $types = [];
+        $types[] = 'VARCHAR';
+        $types[] = 'VARCHAR';
+        $types[] = 'VARCHAR';
+        $types[] = 'VARCHAR';
+        $types[] = 'VARCHAR';
+        $types[] = 'VARCHAR';
+        $types[] = 'VARCHAR';
+
+        if ($this->insertRecord('contact', $contact, $types))
+        {
+            // USER
+            // id, name, id_contact, domain, nickname, username, pwd, status
+            $user = [];
+            $user['name'] =  $contact['name'][0].'.'.$contact['surname'];
+            $user['id_contact'] = $this->getLastID();
+            $user['domain'] = DOMAIN_NAME;
+            $user['nickname'] = $params['nickname'];
+            $user['username'] = $params['dusername'];            
+
+            // Random password
+            $data = '!?*#@123456789ABCDEFGHIJKLMNPQRSTUVWXYZabcefghijklmnpqrstuvwxyz';
+            $clear_pwd = substr(str_shuffle($data), 0, 8);
+            $user['pwd'] =  hash(PASSWORD_ENC_ALGORITHM, $clear_pwd);
+            $user['status'] = 'Verified';
+            // $user['status'] = 'Subscribed';
+            
+            $types = [];
+            $types[] = 'VARCHAR';
+            $types[] = 'INT';
+            $types[] = 'VARCHAR';
+            $types[] = 'VARCHAR';
+            $types[] = 'VARCHAR';
+            $types[] = 'VARCHAR';
+            $types[] = 'VARCHAR';
+            $ret = $this->insertRecord('user', $user, $types);    
+            if ($ret)
+            {
+                $mail = new \DressApi\Core\Mail\CMail();
+                $body_html = "Hi ".$user['name'].",\n\n<br><br>Your account is:\n\n<br><br>".
+                             "USERNAME: ".$user['username']."\n\n<br><br>".
+                             "PASSWORD: $clear_pwd\n<br>";
+                $mail->setFrom(MAIL_TO_REPLY);
+                $mail->send($contact['email'], $contact['name'].' '.$contact['surname'], DOMAIN_NAME.": your account", $body_html);
+                // $clear_pwd;
+            }
+        }
+        else
+            throw new Exception("Error on subscribe");
+
+
+            
+
+        // USER
+        // id, name, id_contact, domain, nickname, username, pwd, status
+        
+
+      //   throw new Exception("subscribe todo");
     }
 
 

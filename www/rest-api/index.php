@@ -25,7 +25,7 @@ try
     CDB::connect(DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT);
 
     $user = new CUser($request, $cache);
-    $valid_token = $user->verify();
+    $valid_token = $user->run();
 
     if ($valid_token != 'OK')
     {

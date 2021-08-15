@@ -60,8 +60,6 @@ class CRequest
     protected function setMethod()
     {
         $this->method = ((isset($_SERVER['REQUEST_METHOD'])) ? (strtoupper($_SERVER['REQUEST_METHOD'])) : ('GET'));
-        if ($this->method=='POST' && isset($_FILES) && count($_FILES))
-            $this->method=='UPLOAD'; // Virtual method: is a POST but with file in uploaded
     }
 
     

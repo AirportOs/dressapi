@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>Signin Template · Bootstrap v5.0</title>
+
+  
+
+    <!-- Bootstrap core CSS -->
+    <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+
+    
+    <!-- Custom styles for this template -->
+    <link href="../css/sign.css" rel="stylesheet">
+  </head>
+  <body class="text-center">
+    
+    <main class="form-subscribe">
+        <h1>Subscribe</h1>
+            <form name="signup" method="post">
+                <input type="hidden" name="do" value="subscribe">
+                <div style="background:#eee" class="card mb-3">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="mb-3 row"><label class="col-sm-3 form-label fw-bold fs-6" for="input_nickname">Nick Name</label><div class="col-sm-9"><input name="nickname" value="Joe" type="text" size="60" class="form-control" id="input_nickname" required=""></div></div>
+                            <div class="mb-3 row"><label class="col-sm-3 form-label fw-bold fs-6" for="input_username">Username</label><div class="col-sm-9"><input name="dusername" value="Joe" type="text" size="60" class="form-control" id="input_username" required=""></div></div>
+                            <div class="mb-3 row"><label class="col-sm-3 form-label fw-bold fs-6" for="input_name">Name</label><div class="col-sm-9"><input name="name" value="Joe" type="text" size="60" class="form-control" id="input_name" required=""></div></div>
+                            <div class="mb-3 row"><label class="col-sm-3 form-label fw-bold fs-6" for="input_surname">Surname</label><div class="col-sm-9"><input name="surname" value="Sample" type="text" size="60" class="form-control" id="input_surname" required=""></div></div>
+                            <div class="mb-3 row"><label class="col-sm-3 form-label fw-bold fs-6" for="input_address">Address</label><div class="col-sm-9"><textarea name="address" class="form-control" id="input_address" required="">Via 1 Febbraio</textarea></div></div>
+                            <div class="mb-3 row"><label class="col-sm-3 form-label fw-bold fs-6" for="input_zip_code">Zip code</label><div class="col-sm-9"><input name="zip_code" value="15005" type="text" size="10" class="form-control" id="input_zip_code" required=""></div></div>
+                            <div class="mb-3 row"><label class="col-sm-3 form-label fw-bold fs-6" for="input_city" >City</label><div class="col-sm-9"><input name="city" value="Turin" type="text" size="60" class="form-control" id="input_city" required=""></div></div>
+                            <div class="mb-3 row"><label class="col-sm-3 form-label fw-bold fs-6" for="input_state">State</label><div class="col-sm-9"><input name="state" value="Italy" type="text" size="30" class="form-control" id="input_state" required=""></div></div>
+                            <div class="mb-3 row"><label class="col-sm-3 form-label fw-bold fs-6" for="input_email">Email</label><div class="col-sm-9"><input name="email" value="jsample@userdressapi.com" type="text" size="60" class="form-control" id="input_email" required=""></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row position-relative">  
+                    <input value="Subscribe" type="submit" class="btn btn-warning col-sm-5 col-lg-4 m-3 top-50 start-0">  
+                </div>
+            </form>
+    </main>
+
+    <script>
+        // Sign In with POST method implementation:
+        async function sign(url = '', data = {}) 
+        {
+            // Default options are marked with *
+            const response = await fetch(url, 
+            {
+        /*            
+                headers: new Headers({
+                                        'Content-Type': 'application/x-www-form-urlencoded'
+                                    }), 
+        */
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                mode: 'cors', // no-cors, *cors, same-origin
+                cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+                credentials: 'same-origin', // include, *same-origin, omit
+                redirect: 'follow', // manual, *follow, error
+                referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                body: data // body data type must match "Content-Type" header
+            });
+            return response; // parses JSON response into native JavaScript objects
+        }
+
+        var f = document.forms['signup'];
+        f.addEventListener('submit', (e) => {
+                    let fdata = new URLSearchParams([...(new FormData(f))]);
+                    localStorage.username = f['dusername'].value;        
+                    sign('/api/account/', fdata)
+                        .then(data => {
+                            if (data.status==200)
+                            {
+                                data.text().then(token => 
+                                {
+                                    localStorage.token = token;
+                                    // console.log('Token: '+localStorage.token);
+                                    // document.location = '../';
+                                });
+        
+                            }
+                            else
+                                console.log('status: '+ data.status);
+                        }) // end then
+                        e.stopPropagation();
+                        e.preventDefault();
+                        return false;
+                    });
+
+
+    </script>
+    
+  </body>
+</html>

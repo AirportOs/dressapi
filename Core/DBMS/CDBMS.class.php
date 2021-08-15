@@ -38,8 +38,10 @@ abstract class CDBMS
     protected static array  $dbname         = [];   // DB names
     protected static array  $results        = [];   // pointer to the result of a DB
     protected string        $table          = '';   // contains the name of a table
+    protected int           $last_id = 0;           // last id inserted
 
     protected static mixed  $stmt           = null;
+
 
     // DB connection parameters
     protected static string $database_name;
@@ -251,7 +253,7 @@ abstract class CDBMS
     abstract public function deleteRecord(?string $table, string $conditions, array $conditions_values, array $types): bool;
 
 
-        /**
+    /**
      * Returns the from value of the next id to use in the insert
      * NOTE: in Mysql you can set the primary key as autoincrement, 
      *       than is not needed to set the table and it returns always null
@@ -266,10 +268,9 @@ abstract class CDBMS
     /**
      * Returns the ID of the last inserted item
      *
-     * @param null $table name of the reference table
      * @return ?int if the operation was successful, it returns the id of the last element inserted
      */
-    abstract public function getLastID(?string $table = null): ?int;
+    public function getLastID(): int { return $this->last_id; }
 
 
     /**

@@ -5,3 +5,4 @@ docs/*
 .phpdoc/*
 phpDocumentor.phar
 logs/*.log
+config.php

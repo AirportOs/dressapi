@@ -23,7 +23,7 @@ class CBaseModel
 {
     // array delle tabelle in cui è possibile effettuare operazioni
     protected array  $all_tables = [];
-    protected ?array  $column_list = [];
+    protected ?array $column_list = [];
     protected string $table = '';
 
     public const REGEX_INT = '/^[-]?[\d]+$/';
@@ -450,6 +450,7 @@ class CBaseModel
                              'key'=>str_replace('[table]',$related_table_from_id,ITEM_ID)],
                              'related_tables'=>$related_tables ]; 
     }
+
 
     /**
      * Check if the $table exists in the current DB
