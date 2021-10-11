@@ -550,7 +550,7 @@ abstract class CDBMS
      *               or null in which the result is not valid 
      *               (e.g. if the index is outside the range of the table)
      */
-    public function getQueryFetchRow(string $sql, ?int $pos_row = null): array
+    public function getQueryFetchRow(string $sql, ?int $pos_row = null): ?array
     {
         return (($this->query($sql) !== null) ? 
             $this->getFetchRow($pos_row): null);

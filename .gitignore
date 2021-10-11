@@ -6,3 +6,4 @@ docs/*
 phpDocumentor.phar
 logs/*.log
 config.php
+dresser.txt

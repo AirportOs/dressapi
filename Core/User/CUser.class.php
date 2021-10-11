@@ -68,10 +68,8 @@ class CUser extends CDB
      * 
      * @return ?int a user id if exists, otherwise is 0
      */
-    public function checkValidUser(string $username, string $password) : array|null
+    public function checkValidUser(string $username, string $password) : ?int
     {
-        $ret = 0;
-
         $sc = new CSqlComposer();
 
         $sql = $sc->select(USER_ITEM_ID.','.USER_ITEM_NAME)->from(USER_TABLE)->
@@ -80,8 +78,14 @@ class CUser extends CDB
                           "status='Verified'");
 
         // echo "\n$sql\n";
-        $this->Query($sql);
-        return $this->getFetchRow();
+        $v = $this->getQueryFetchRow($sql);
+        if ($v) 
+            [$this->id,$this->name] = $v;
+        {
+            $this->id = 0;
+            $this->name = '';    
+        }
+        return $this->id;
     }
 
 
@@ -101,7 +105,7 @@ class CUser extends CDB
         // Validate the credentials against a database, or other data store.
         // ...
         // For the purposes of this example, we'll assume that they're valid
-        [$this->id,$this->name] = $this->checkValidUser($username, $password);
+        $this->id = $this->checkValidUser($username, $password);
 
         if ($this->id<1) 
         {
