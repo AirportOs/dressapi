@@ -34,6 +34,7 @@ use DressApi\Core\Mail\CMail;
 class CUser extends CDB
 {
     private ?int $id = 0;
+    private string $name = 'Anonymous';
     private string $username = 'nobody';
     private string $token = '';
 
@@ -67,19 +68,20 @@ class CUser extends CDB
      * 
      * @return ?int a user id if exists, otherwise is 0
      */
-    public function checkValidUser(string $username, string $password) : ?int
+    public function checkValidUser(string $username, string $password) : array|null
     {
         $ret = 0;
 
         $sc = new CSqlComposer();
 
-        $sql = $sc->select(USER_ITEM_ID)->from(USER_TABLE)->
+        $sql = $sc->select(USER_ITEM_ID.','.USER_ITEM_NAME)->from(USER_TABLE)->
                     where(USER_ITEM_USERNAME."='$username' AND ".
                           USER_ITEM_PASSWORD."='". hash(PASSWORD_ENC_ALGORITHM, $password)."' AND ".
                           "status='Verified'");
 
         // echo "\n$sql\n";
-        return $this->getQueryDataValue($sql);
+        $this->Query($sql);
+        return $this->getFetchRow();
     }
 
 
@@ -99,7 +101,7 @@ class CUser extends CDB
         // Validate the credentials against a database, or other data store.
         // ...
         // For the purposes of this example, we'll assume that they're valid
-        $this->id = $this->checkValidUser($username, $password);
+        [$this->id,$this->name] = $this->checkValidUser($username, $password);
 
         if ($this->id<1) 
         {
@@ -120,6 +122,7 @@ class CUser extends CDB
                 'exp'  => $expire,                      // Expire
                 'data' => [                             // Data related to the signer user
                     'username' => $username,            // User name
+                    'name' => $this->name,
                     'id'  => $this->id
                 ]
             ];
@@ -190,7 +193,7 @@ class CUser extends CDB
 
 
     /**
-     * @return [type]
+     * @return ?int get the id of current user
      */
     public function getId() : ?int
     {
@@ -199,7 +202,7 @@ class CUser extends CDB
 
 
     /**
-     * @return [type]
+     * @return string get the username of current user
      */
     public function getUsername() : string
     {
@@ -208,9 +211,9 @@ class CUser extends CDB
 
 
     /**
-     * @return [type]
+     * @return string OK if is done
      */
-    public function run()
+    public function run() : string
     {
         // Parameters
         $params = $this->request->getParameters();

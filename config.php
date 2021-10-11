@@ -104,8 +104,11 @@ define('DBMS_TYPE', 'MySql'); // Oracle, PostgreSQL,...
 //       and the authentication is not necessary!
 define('USER_TABLE', 'user');
 
-// Name of user id in your database
+// id user in your database
 define('USER_ITEM_ID', 'id');
+
+// Name of user in your database
+define('USER_ITEM_NAME', 'name');
 
 // Username name of user table in your database
 define('USER_ITEM_USERNAME', 'username');
