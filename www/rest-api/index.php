@@ -74,7 +74,7 @@ try
 }
 catch (Exception $ex)
 {
-    print "\n".$response->error(($ex->getCode())?$ex->getCode():CResponse::HTTP_STATUS_BAD_REQUEST, $ex->getMessage())."\n";
+    print $response->error(($ex->getCode())?$ex->getCode():CResponse::HTTP_STATUS_BAD_REQUEST, $ex->getMessage());
 }
 
 // track request into log file by logger
