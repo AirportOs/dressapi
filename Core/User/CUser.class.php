@@ -81,6 +81,7 @@ class CUser extends CDB
         $v = $this->getQueryFetchRow($sql);
         if ($v) 
             [$this->id,$this->name] = $v;
+        else
         {
             $this->id = 0;
             $this->name = '';    
