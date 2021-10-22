@@ -523,13 +523,16 @@ function UpdateRow(table, formData, id)
     
     requestData('PATCH','/api/'+table+'/'+id, formData)
         .then(data => {
-                        if (data.status==200)
-                            data.json().then(data => 
-                                {
-                                    setToast(data.message,'bg-success'); 
-                                } );
-                        else
-                            setToast('Operation failed with status '+data.status,'bg-danger'); 
+                        let msg = 'Operation '+((data.status==200)?'successful':'failed'); // +' with status '+data.status;
+                        let jsonprom = data.json();
+                        jsonprom.then(dta => 
+                            {
+                                if (dta.message && dta.message.length) 
+                                    msg = dta.message;
+                                setToast(msg,(data.status==200)?'bg-success':'bg-danger'); 
+                            } );
+                        if (!jsonprom)
+                         setToast(msg,'bg-danger'); 
                     }
             );
 }
