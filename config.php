@@ -1,8 +1,11 @@
 <?php
 define('DOMAIN_NAME', 'DressApi.com');
 
+define('DEFAULT_CHARSET', 'utf-8');
+
 // Output
 define('DEFAULT_FORMAT_OUTPUT', 'json'); // json, xml, plain (text/csv), debug
+define('ACCEPTED_FORMAT_OUTPUT', ['json','html','xml','text']); // json, xml, plain (text/csv), debug
 
 
 // Level of log info

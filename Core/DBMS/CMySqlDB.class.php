@@ -930,7 +930,10 @@ class CMySqlDB extends CDBMS
                 if (strpos($a['Type'], "("))
                     list($type, $opt,) = explode('(', $a['Type']);
                 else
+                {
                     $type = $a['Type'];
+                    $opt = false;
+                }
 
                 $v = ['field' => $name, 'type' => strtoupper($type), 'null' => $a['Null']];
 

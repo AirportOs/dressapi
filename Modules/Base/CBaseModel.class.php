@@ -540,6 +540,7 @@ class CBaseModel
                                 $val = $field['value'];
                         }
                         if (isset($field['rule']) && isset($field['value']) && 
+                            $field['rule']!='' && 
                             !preg_match($field['rule'], $val) && 
                             (!isset($field['null']) || $field['null']=='NO' || $val!='NULL'))
                             throw new Exception("The value '".str_replace('"','\"',$field['value'])."' for item '".$field['field']."' is not valid" );
