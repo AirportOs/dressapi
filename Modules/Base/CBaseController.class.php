@@ -72,7 +72,7 @@ class CBaseController extends CDB
 
         $this->response->setStatusCode(CResponse::HTTP_STATUS_BAD_REQUEST);
 
-        $this->table = $this->request->getModule();
+        $this->table = CRequest::getTable();
 
         // Verify if the method (GET,POST,DELETE,...) is implemented
         $this->method = $this->request->getMethod();
@@ -469,8 +469,12 @@ class CBaseController extends CDB
                         switch ($operator)
                         {
                             case '~':
+                            case '#':
                                 $conditions .= " a.$name LIKE ?";
-                                $this->bind_params_values[] = "%$value%";
+                                if ($operator=='~') 
+                                    $this->bind_params_values[] = "%$value%";
+                                else
+                                    $this->bind_params_values[] = "$value";
                                 break;
                             default:
                                 $conditions .= " a.$name$operator?";
@@ -806,10 +810,10 @@ class CBaseController extends CDB
         // $s = (string)$sql;
         
         $data = [];
-        $data['data'] = [];
+        $data['elements'] = [];
 
 
-        $this->getQueryDataTable($data['data'], $sql, $this->bind_params_values, $this->bind_params_types);
+        $this->getQueryDataTable($data['elements'], $sql, $this->bind_params_values, $this->bind_params_types);
 
         $sql->select('COUNT(*)')->paging(0, 0);
 
@@ -826,7 +830,7 @@ class CBaseController extends CDB
             'key' => str_replace('[table]', $this->table, ITEM_ID)
         ];
 
-        if ($this->cache && $cache_key && $data['data'] !== null && count($data['data']) > 0)
+        if ($this->cache && $cache_key && $data['elements'] !== null && count($data['elements']) > 0)
             $this->cache->set($cache_key, $data);
 
         return $data;
@@ -1134,7 +1138,7 @@ die;
         {
             if (method_exists($this, $method))
             {
-                if ( $this->user===null || $this->table==='all' || $this->user->checkPermission($this->table, $this->method))
+                if ( $this->user===null || $this->table==='all' || $this->user->checkPermission(CRequest::getModule(), $this->method))
                     $result = $this->{$method}();
                 else
                 {

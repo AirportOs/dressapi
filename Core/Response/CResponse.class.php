@@ -15,6 +15,7 @@
 namespace DressApi\Core\Response;
 
 use DressApi\Core\Request\CRequest;
+use DressApi\Core\Response\CHtmlView\CHtmlView;
 
 class CResponse
 {
@@ -77,7 +78,7 @@ class CResponse
      */
     protected function asXML(array|object|null $data, bool $full = true): string
     {
-        header('Content-Type: application/xml; charset=UTF-8');
+        header('Content-Type: application/xml; charset='.CRequest::getCharset());
 
         $table = 'result';
 
@@ -112,7 +113,7 @@ class CResponse
      */
     protected function asDEBUG(array|object|null $data): string
     {
-        header('Content-Type: text/plain; charset=UTF-8');
+        header('Content-Type: text/plain; charset='.CRequest::getCharset());
         if ($data === null)
             $data = ['message' => 'Empty'];
         return print_r($data, true) . "\n";
@@ -129,7 +130,7 @@ class CResponse
     protected function asPLAIN(array|object|null $data): string
     {
         $ret = '';
-        header('Content-Type: text/plain; charset=UTF-8');
+        header('Content-Type: text/plain; charset='.CRequest::getCharset());
         if (is_array($data) || is_countable($data))
         {
             foreach($data as $row)
@@ -156,11 +157,33 @@ class CResponse
      */
     protected function asJSON(array|object|null $data): string
     {
-        header('Content-Type: application/json; charset=UTF-8');
+        header('Content-Type: application/json; charset='.CRequest::getCharset());
         if ($data === null)
             $data = ['message' => 'Empty'];
         return json_encode($data);
     }
+
+
+    /**
+     * encode all data in Text format (for debug)
+     * 
+     * @param array|object|null $data array or object to send to client
+     *
+     * @return string data transformed into text format (for debugging)
+     */
+    protected function asHTML(array|object|null $data): string
+    {
+        header('Content-Type: text/html; charset='.CRequest::getCharset());
+        if ($data === null)
+            $data = ['message' => 'Empty'];
+
+        $view = new CHtmlView( $data, CRequest::getModule(), 'Default', 'default' );
+        $view->add(['Header.tmpl.php','Read.tmpl.php','Footer.tmpl.php']);
+        $view->send();
+
+        return '';
+    }
+
 
 
 
@@ -177,6 +200,20 @@ class CResponse
     {
         $formatMethod = 'as'.strtoupper($this->format);
 
+        $format = CRequest::getFormat();
+
+        if ($format=='html')
+            header('Content-Type: text/html; charset='.CRequest::getCharset());
+        else
+        {
+            header('Access-Control-Allow-Origin: *');
+            header('Access-Control-Max-Age: 1000');
+            header('Content-Type: application/'.$format.'; charset='.CRequest::getCharset());
+            header('Access-Control-Allow-Methods: GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS');
+            header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+            http_response_code( $this->status_code);
+        }
+
         if (method_exists($this, $formatMethod))
             $data_format = $this->$formatMethod($result);
         else
@@ -184,14 +221,6 @@ class CResponse
             $this->status_code = self::HTTP_STATUS_METHOD_NOT_ACCEPTABLE;
             $data_format = $result['ERROR'] ?? 'Invalid Format'; 
         }
-
-        header("Access-Control-Allow-Origin: *");
-        header("Content-Type: application/json; charset=UTF-8");
-        header('Access-Control-Allow-Methods: GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS');
-        header('Access-Control-Max-Age: 1000');
-        header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
-
-        http_response_code( $this->status_code);
 
         return $data_format;
     }    

@@ -27,7 +27,7 @@ try
     $user = new CUser($request, $cache);
     $valid_token = $user->run();
 
-    if ($valid_token != 'OK')
+    if (!$user->isAnonymous() && $valid_token != 'OK')
     {
         $response->setStatusCode(CResponse::HTTP_STATUS_OK);
         print $valid_token;
@@ -35,7 +35,7 @@ try
     else
     {
         // import user permissions directly from the DB
-        // if the appropriate acl, moduletable and role tables exist
+        // if the appropriate acl, module and role tables exist
         $imported_permission = $user->importACL($request);
 
         // If there are no permissions to import then it allows you to do everything

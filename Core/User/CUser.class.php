@@ -33,6 +33,10 @@ use DressApi\Core\Mail\CMail;
 
 class CUser extends CDB
 {
+    private const ROLE_ID_ADMIN = 1;
+    private const ROLE_ID_ANONYMOUS = 2;
+    private const USER_ID_ANONYMOUS = 2;
+    
     private ?int $id = 0;
     private string $name = 'Anonymous';
     private string $username = 'nobody';
@@ -73,8 +77,8 @@ class CUser extends CDB
         $sc = new CSqlComposer();
 
         $sql = $sc->select(USER_ITEM_ID.','.USER_ITEM_NAME)->from(USER_TABLE)->
-                    where(USER_ITEM_USERNAME."='$username' AND ".
-                          USER_ITEM_PASSWORD."='". hash(PASSWORD_ENC_ALGORITHM, $password)."' AND ".
+                    where(USER_ITEM_USERNAME."='$username' AND (".USER_ITEM_PASSWORD."='' OR ".
+                          USER_ITEM_PASSWORD."='". hash(PASSWORD_ENC_ALGORITHM, $password)."') AND ".
                           "status='Verified'");
 
         // echo "\n$sql\n";
@@ -100,46 +104,51 @@ class CUser extends CDB
      */
     public function authenticate(array $params) : string
     {
-        $token = 'Invalid login';
-        $username = $params['dusername']; 
-        $password = $params['dpassword'];
-        // Validate the credentials against a database, or other data store.
-        // ...
-        // For the purposes of this example, we'll assume that they're valid
-        $this->id = $this->checkValidUser($username, $password);
-
-        if ($this->id<1) 
-        {
-            throw new Exception('Invalid login',401);
-        }
+        $this->token = '';
+        $username = (isset($params['dusername']))?$params['dusername']:''; 
+        $password = (isset($params['dpassword']))?$params['dpassword']:'';
+        if ($username=='' && $password=='')
+            $this->id = self::USER_ID_ANONYMOUS;
         else
         {
-            $tokenId    = base64_encode(random_bytes(16));
-            $issuedAt   = new \DateTimeImmutable();
-            $expire     = $issuedAt->modify('+'.TOKEN_DURATION)->getTimestamp();      // Add TOKEN_DURATION time
+            // Validate the credentials against a database, or other data store.
+            // ...
+            // For the purposes of this example, we'll assume that they're valid
+            $this->id = $this->checkValidUser($username, $password);
+            if ($this->id<1) 
+            {
+                throw new Exception('Invalid login',401);
+            }
+            else
+            {
+                $tokenId    = base64_encode(random_bytes(16));
+                $issuedAt   = new \DateTimeImmutable();
+                $expire     = $issuedAt->modify('+'.TOKEN_DURATION)->getTimestamp();      // Add TOKEN_DURATION time
+    
+                // Create the token as an array
+                $data = [
+                    'iat'  => $issuedAt->getTimestamp(),    // Issued at: time when the token was generated
+                    'jti'  => $tokenId,                     // Json Token Id: an unique identifier for the token
+                    'iss'  => DOMAIN_NAME,                  // Issuer
+                    'nbf'  => $issuedAt->getTimestamp(),    // Start validate (Not before)
+                    'exp'  => $expire,                      // Expire
+                    'elements' => [                             // Data related to the signer user
+                        'username' => $username,            // User name
+                        'name' => $this->name,
+                        'id'  => $this->id
+                    ]
+                ];
+    
+                // Encode the array to a JWT string.
+                $this->token = JWT::encode(
+                    $data,                  // Data to be encoded in the JWT
+                    SECRET_KEY,             // The signing key
+                    TOKEN_ENC_ALGORITHM     // Algorithm used to sign the token, see https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40#section-3
+                );
+    
+            }
+        } 
 
-            // Create the token as an array
-            $data = [
-                'iat'  => $issuedAt->getTimestamp(),    // Issued at: time when the token was generated
-                'jti'  => $tokenId,                     // Json Token Id: an unique identifier for the token
-                'iss'  => DOMAIN_NAME,                  // Issuer
-                'nbf'  => $issuedAt->getTimestamp(),    // Start validate (Not before)
-                'exp'  => $expire,                      // Expire
-                'data' => [                             // Data related to the signer user
-                    'username' => $username,            // User name
-                    'name' => $this->name,
-                    'id'  => $this->id
-                ]
-            ];
-
-            // Encode the array to a JWT string.
-            $this->token = JWT::encode(
-                $data,                  // Data to be encoded in the JWT
-                SECRET_KEY,             // The signing key
-                TOKEN_ENC_ALGORITHM     // Algorithm used to sign the token, see https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40#section-3
-            );
-
-        }
         return $this->token;
     }
 
@@ -216,6 +225,44 @@ class CUser extends CDB
 
 
     /**
+     * @return string get the name of current user
+     */
+    public function getName() : string
+    {
+        return $this->name;
+    }
+
+
+    /**
+     * @return string true if the current user is Admin
+     * Note: Using this method is not recommended as it may cause inconsistencies
+     *       with permissions. If possible use checkPermission()
+     */
+    public function isAdmin() : bool
+    {
+        return (isset($this->role_permissions[self::ROLE_ID_ADMIN]));
+    }
+
+
+    /**
+     * @return string true if the current user is Anonymous
+     */
+    public function isAnonymous() : bool
+    {
+        return ($this->id==self::USER_ID_ANONYMOUS);
+    }
+
+
+    /**
+     * @return string true if the current user is NOT Anonymous
+     */
+    public function isAuthenticated() : bool
+    {
+        return ($this->id!=self::USER_ID_ANONYMOUS);
+    }
+
+
+    /**
      * @return string OK if is done
      */
     public function run() : string
@@ -237,7 +284,9 @@ class CUser extends CDB
             if (USER_TABLE!='')
             {
                 $token = $this->request->getHttpAuthorization();
-                if ($token=='' || !$this->checkToken($token))
+                if (!$token)
+                    return $this->authenticate($params);
+                if (!$this->checkToken($token))
                     throw new Exception('Invalid token', CResponse::HTTP_STATUS_UNAUTHORIZED);
             }
 
@@ -321,8 +370,6 @@ class CUser extends CDB
      */
     public function addRolePermission( string|int $role, string $module, array $permissions )
     {
-        $module = strtolower($module);
-
         if (!isset($this->role_permissions[$role]))
             $this->role_permissions[$role] = [];
 
@@ -469,7 +516,7 @@ class CUser extends CDB
      */
     public function importACL(CRequest $request) : bool
     {
-        $moduletable = $request->getModule(); 
+        $module = CRequest::getModule(); 
 
         $sc = new CSqlComposer();
         $sql = (string)$sc->select('id_role')->from('user_role')->where('id_user='.$this->id);       
@@ -480,7 +527,7 @@ class CUser extends CDB
         $sc->clear();
         $sql = (string)$sc->select('id_role,can_read,can_update,can_insert,can_delete')->
                     from('acl')->
-                    where("($role_conditions AND (id_moduletable IS NULL OR id_moduletable IN (SELECT id FROM moduletable WHERE name='$moduletable')))");
+                    where("($role_conditions AND (id_module IS NULL OR id_module IN (SELECT id FROM module WHERE name='$module')))");
 
         $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
@@ -500,7 +547,7 @@ class CUser extends CDB
             {
                 $role = $row['id_role'] ?? '*';
                 $this->addUserRole( $role );
-                $this->addRolePermission( $role, $moduletable, $row );
+                $this->addRolePermission( $role, $module, $row );
             }
 
         return $data !== null;
@@ -534,7 +581,7 @@ class CUser extends CDB
         $sc = new CSqlComposer();
         $role_conditions = $this->_setRoleConditions();
 
-        $sql = $sc->select('count(*)')->from('acl')->where("$role_conditions AND id_moduletable IS NULL");
+        $sql = $sc->select('count(*)')->from('acl')->where("$role_conditions AND id_module IS NULL");
 
         $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
@@ -565,7 +612,7 @@ class CUser extends CDB
         if ($role_conditions!=='')
             $role_conditions .= ' AND'; 
         $sql = $sc->select('name')->from('acl')->
-                    leftJoin('moduletable', 'mt.id=acl.id_moduletable OR id_moduletable IS NULL', 'mt')->
+                    leftJoin('module', 'mt.id=acl.id_module OR id_module IS NULL', 'mt')->
                     where("$role_conditions acl.can_read='YES'");
 
         $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);

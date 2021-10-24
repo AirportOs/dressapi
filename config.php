@@ -1,7 +1,12 @@
 <?php
-define('DOMAIN_NAME', 'DressApi.com');
+define('DOMAIN_NAME', 'dressapi.com');
 
-define('DEFAULT_CHARSET', 'utf-8');
+// Only for HTML
+define('DEFAULT_PAGE_TITLE', 'dressapi.com - TEST');
+define('DEFAULT_PAGE_DESCRIPTION', 'Demo of dressapi');
+
+
+define('DEFAULT_CHARSET', 'UTF-8');
 
 // Output
 define('DEFAULT_FORMAT_OUTPUT', 'json'); // json, xml, plain (text/csv), debug
@@ -40,8 +45,8 @@ define('CREATION_DATE', 'creation_date');
 // id_page => page:title 
 // id_[table] => [table]:name
 // NOTE: you can also set relationships in the controller with addRelatedFieldName()
-define('RELATED_FIELD_NAMES', ['page'=>['title','creation_date'], // the value can be an array of strings
-                               'contact'=>['email','city'],
+define('RELATED_FIELD_NAMES', ['Page'=>['title','creation_date'], // the value can be an array of strings
+                               'Contact'=>['email','city'],
                                '*'=>'name']);                     // or a simple string
 
 
@@ -54,9 +59,8 @@ define('REQUIRED_ITEMS', ['student'=> // table
                              ['periodicy' => '/[daily|weekly|monthly]/'],
                              ['name'=>'age','min'=>17],
                              ['name'=>'vote','min'=>18, 'max'=>30],
-                             
-                           ]
-                        ]);
+                            ]
+                         ]);
 
 
 
@@ -124,7 +128,6 @@ define('SECRET_KEY', 'bGS6lzFqvvSQ8ALbOxatm7/Vk7mLQyzqaS34Q4oR1ew=');
 define('TOKEN_ENC_ALGORITHM', 'HS512'); 
 define('TOKEN_DURATION', '2 months'); // minutes, hours, days, months, years
 define('PASSWORD_ENC_ALGORITHM', 'tiger192,4');
-
 
 //
 // CACHE ON FILE

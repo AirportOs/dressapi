@@ -24,9 +24,9 @@ class CPageModel extends \DressApi\Modules\Base\CBaseModel
      *
      * @return array list of column names of current table
      */
-    public function getListItems() : array
+    public function NOUSEgetListItems() : array
     {
-        return ['id','id_user','title','body','creation_date'];
+        return ['id','id_user','title','body','description','visible','status','creation_date'];
     }        
  
 } // end class

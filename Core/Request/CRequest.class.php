@@ -17,10 +17,7 @@ namespace DressApi\Core\Request;
 use Exception;
 
 class CRequest
-{
-    protected string $module;            // name of the module (or table) to display
-    protected string $method;            // method get, head, post, puth, patch, delete OR options 
-    
+{   
     protected string $sets;              // input parameters
     protected array  $params;            // values ​​to register input / update
     protected array $filters;            // filters or input/update parameters
@@ -34,13 +31,17 @@ class CRequest
 
     protected string $http_autorization = '';
 
+    protected static string $module;            // name of the module (or table) to display
+    protected static string $table;            // name of the db table
+    protected static string $method;            // method get, head, post, puth, patch, delete OR options 
     protected static string $format = DEFAULT_FORMAT_OUTPUT;
-    protected static string $charset = 'UTF-8';
+    protected static string $charset = DEFAULT_CHARSET;
 
     public function __construct()
     {
         $this->with_relations = false;
-        $this->module = '';
+        self::$module = '';
+        self::$table = '';
 
         $this->setHttpAuthorization();
         $this->setMethod();
@@ -59,7 +60,7 @@ class CRequest
 
     protected function setMethod()
     {
-        $this->method = ((isset($_SERVER['REQUEST_METHOD'])) ? (strtoupper($_SERVER['REQUEST_METHOD'])) : ('GET'));
+        self::$method = ((isset($_SERVER['REQUEST_METHOD'])) ? (strtoupper($_SERVER['REQUEST_METHOD'])) : ('GET'));
     }
 
     
@@ -94,12 +95,15 @@ class CRequest
         {
             if (strpos($this->request, '/') === false) // if only one filter is the module/table
             {
-                $this->module = $this->request;
+                self::$table = strtolower($this->request);
+                self::$module = ucfirst(self::$table);
             }
             else
             {
                 $filt = explode('/', $this->request);
-                $this->module = array_shift($filt); // first is an table/controller
+                
+                self::$table = strtolower(array_shift($filt));
+                self::$module = ucfirst(self::$table);
 
                 if (count($filt) > 0) // second is an id ("*" for all id)
                 {
@@ -107,12 +111,14 @@ class CRequest
                     if ($probably_id == '*' || preg_match('/^[\d,]+$/', $probably_id) === 1)
                     {
                         array_shift($filt);
-                        $this->filters[str_replace('[table]', $this->module, ITEM_ID)] = ['=', $probably_id];
+                        $this->filters[str_replace('[table]', self::$module, ITEM_ID)] = ['=', $probably_id];
                     }
                 }
                 $next_is_page = false;
                 if (count($filt) > 0)
                 {
+                    $operators = ['<=', '>=', '<>', '=', '~', '#', '<', '>'];
+
                     foreach ($filt as $f)
                     {
                         if ($f == 'with-relations' || $f == 'wr')
@@ -174,15 +180,30 @@ class CRequest
                         }
 
                         // Other filters
-                        $operators = ['<=', '>=', '<>', '=', '~', '<', '>'];
-
+                        $found = false;
                         foreach ($operators as $operator)
                             if (strpos($f, $operator) !== false) // must contain the operator
                             {
                                 list($name, $value) = explode($operator, $f);
                                 $this->filters[$name] = [$operator, $value];
+                                $found = true;
                                 break;
                             }
+                        if (!$found) // if not found then is a name of element
+                        {
+                            if (isset(RELATED_FIELD_NAMES['*']))
+                                $related_item = RELATED_FIELD_NAMES['*']; 
+                            if (isset(RELATED_FIELD_NAMES[self::$module]))
+                                $related_item = RELATED_FIELD_NAMES[self::$module];
+                            if (isset($related_item))
+                            {
+                                if (is_array($related_item))
+                                    $item_name = $related_item[0];
+                                else
+                                    $item_name = RELATED_FIELD_NAMES[$related_item];
+                                $this->filters[$item_name] = ['#',str_replace('-','_',$f)]; // _ is a wildcard
+                            }
+                        }
                     }
                 }
             }
@@ -198,31 +219,48 @@ class CRequest
      */
     protected function setFormat(string $format = null): void
     {
+        self::$charset = DEFAULT_CHARSET;
         if ($format == null)
         {
             $format = DEFAULT_FORMAT_OUTPUT;
             if (isset($_SERVER['HTTP_ACCEPT']))
             {
                 $h = $_SERVER['HTTP_ACCEPT'];
-                list($app, $format) = explode('/', $_SERVER['HTTP_ACCEPT']);    
-                if (strpos($format,';'))
-                {
-                    list($format,$charset) = explode(';', $format);    
-                    if (strpos($charset,'charset=')) list($app,$this->charset) = explode('=', $charset);    
+                if (strpos($h,';')) 
+                { 
+                    list($h,$charset) = explode(';', $h);
+                    if (strpos($charset,'charset=')) 
+                        list($app,self::$charset) = explode('=', strtoupper($charset));
                 }
 
+                if (strpos($h,','))
+                    $browser_accepted_list = explode(',', $h);
+                else
+                    $browser_accepted_list = [$h];
+
+                foreach( $browser_accepted_list as $browser_accepted)
+                {
+                    list($app, $fmt) = explode('/', $browser_accepted);    
+                    if (in_array($fmt,ACCEPTED_FORMAT_OUTPUT))
+                    {
+                        $format = $fmt;
+                        break;    
+                    }
+                }
             }
         }
 
         self::$format = ( ($format == '*') ? (DEFAULT_FORMAT_OUTPUT) : (strtolower($format)) );
     }
 
-    public static function getFormat() : string       { return self::$format; }
+    public static function getFormat() : string  { return self::$format; }
+    public static function getCharset() : string { return self::$charset; }
+    public static function getModule() : string       { return self::$module; }
+    public static function getTable() : string       { return self::$table; }
+    public static function getMethod() : string       { return self::$method; }
 
     public function getHttpAuthorization() : string { return $this->http_autorization; }
     public function getRequest() : string      { return $this->request; }
-    public function getModule() : string       { return $this->module; }
-    public function getMethod() : string       { return $this->method; }
     public function getSets() : string         { return $this->sets; }
     public function getFilters() : array      { return $this->filters ?? []; }
     public function getParameters() : array   { return $this->params ?? []; }
@@ -231,7 +269,6 @@ class CRequest
     public function getItemsPerPage() : int    { return $this->items_per_page; }
     public function getFilter($name) : ?string { return $this->filters[$name] ?? null; }
     public function getParameter($name) : ?string { return $this->params[$name] ?? null; }
-    public function getCharset() : string { return $this->charset; }
     public function getOrderBy() : array     { return $this->order_by ?? []; }
 
 }

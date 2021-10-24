@@ -16,5 +16,6 @@
 
 
 spl_autoload_register(function ($class) {
+    // $s = str_replace('\\','/',__DIR__.'/../'.substr($class,strpos($class,'\\')+1)).'.class.php';
     require_once str_replace('\\','/',__DIR__.'/../'.substr($class,strpos($class,'\\')+1)).'.class.php'; // Compositore di query
 });
