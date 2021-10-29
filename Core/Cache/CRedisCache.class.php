@@ -147,18 +147,22 @@ class CRedisCache
     }
 
 
-    /**
+/**
      * get
      *
      * Writes a message to a cache-specific log file
      *
      * @param string $s message to write on file log
+     * @param string $area_name name of area (null or not declared is the implicit "current area") 
      *
      * @return mixed The cached item: it can be a scalar value, an object or an array
      */
-    public function get(string $name): mixed
+    public function get(string $name, ?string $area_name = null): mixed
     {
         $ret = null;
+        if ($area_name!==null)
+            $this->setArea($area_name);
+
         if ($this->redis)
         {
             try
@@ -183,11 +187,15 @@ class CRedisCache
      * Check if a key exists and is in the cache
      *
      * @param string $name message to write on file log
+     * @param string $area_name name of area (null or not declared is the implicit "current area") 
      *
      * @return bool true if the key $name exists
      */
-    public function exists(string $name): bool
+    public function exists(string $name, ?string $area_name = null): bool
     {
+        if ($area_name!==null)
+            $this->setArea($area_name);
+        
         return ($this->redis && $this->redis->get($this->getName($name)) != null);
     }
 
@@ -214,9 +222,14 @@ class CRedisCache
      *
      * @param string $name key of the item to be stored
      * @param mixed $value value to be stored
+     * @param string $area_name name of area (null or not declared is the implicit "current area")
+     *  
      */
-    public function set(string $name, mixed $value): void
+    public function set(string $name, mixed $value, ?string $area_name = null): void
     {
+        if ($area_name!==null)
+            $this->setArea($area_name);
+
         $redisname = $this->getName($name);
         if ($this->redis)
             $this->redis->set($redisname, serialize($value)); // base64_encode(serialize($value))
