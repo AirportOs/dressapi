@@ -31,9 +31,10 @@ class CRequest
 
     protected string $http_autorization = '';
 
-    protected static string $module;            // name of the module (or table) to display
+    protected static string $module;           // name of the module to display
     protected static string $table;            // name of the db table
-    protected static string $method;            // method get, head, post, puth, patch, delete OR options 
+    protected static string $method;           // method get, head, post, puth, patch, delete OR options 
+    protected static string $htmlframe;        // type of form (new or modify) only for HTML response
     protected static string $format = DEFAULT_FORMAT_OUTPUT;
     protected static string $charset = DEFAULT_CHARSET;
 
@@ -42,6 +43,7 @@ class CRequest
         $this->with_relations = false;
         self::$module = '';
         self::$table = '';
+        self::$htmlframe = 'Read';
 
         $this->setHttpAuthorization();
         $this->setMethod();
@@ -179,6 +181,24 @@ class CRequest
                             continue;
                         }
 
+                        if ($f == 'insert-form' || $f == 'modify-form')
+                        {
+                            self::$htmlframe = str_replace('-f','F',ucfirst($f));
+                            continue;
+                        }
+
+                        if ($f == 'insert' || $f == 'modify' || $f=='delete')
+                        {
+                            self::$method = match ($f) 
+                            {
+                                'insert' => 'POST',
+                                'modify' => 'PUT',
+                                'delete' => 'DELETE',
+                            };
+                            continue;
+                        }
+
+
                         // Other filters
                         $found = false;
                         foreach ($operators as $operator)
@@ -255,9 +275,10 @@ class CRequest
 
     public static function getFormat() : string  { return self::$format; }
     public static function getCharset() : string { return self::$charset; }
-    public static function getModule() : string       { return self::$module; }
-    public static function getTable() : string       { return self::$table; }
-    public static function getMethod() : string       { return self::$method; }
+    public static function getModule() : string  { return self::$module; }
+    public static function getTable() : string   { return self::$table; }
+    public static function getMethod() : string  { return self::$method; }
+    public static function getHtmlFrame() : string    { return self::$htmlframe; }
 
     public function getHttpAuthorization() : string { return $this->http_autorization; }
     public function getRequest() : string      { return $this->request; }

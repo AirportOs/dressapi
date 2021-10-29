@@ -16,6 +16,7 @@ namespace DressApi\Core\Response\CHtmlView;
 
 use DressApi\Core\DBMS\CMySqlComposer as CSqlComposer;
 use DressApi\Core\DBMS\CMySqlDB as CDB;
+use DressApi\Modules\Base\CBaseController;
 
 class CHtmlView
 {
@@ -125,7 +126,7 @@ class CHtmlView
      */
     public function send() : string
     {
-        global $user;
+        global $user, $controller;
 
         $output = '';
 

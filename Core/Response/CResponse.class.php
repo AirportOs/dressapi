@@ -178,7 +178,9 @@ class CResponse
             $data = ['message' => 'Empty'];
 
         $view = new CHtmlView( $data, CRequest::getModule(), 'Default', 'default' );
-        $view->add(['Header.tmpl.php','Read.tmpl.php','Footer.tmpl.php']);
+
+        $view->add(['Header.tmpl.php',CRequest::getHtmlFrame().'.tmpl.php','Footer.tmpl.php']);
+
         $view->send();
 
         return '';
