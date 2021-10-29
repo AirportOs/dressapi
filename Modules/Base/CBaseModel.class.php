@@ -26,6 +26,8 @@ class CBaseModel
     protected ?array $column_list = [];
     protected string $table = '';
 
+    private mixed $cache; // CCache, CFileCache or CRedisCache
+
     public const REGEX_INT = '/^[-]?[\d]+$/';
     public const REGEX_UINT = '/^[\d]+$/';
     public const REGEX_NUMBER = '/^\-?\d*\.?\d*$/';
@@ -50,9 +52,10 @@ class CBaseModel
      *
      * @return void
      */
-    public function __construct( string $table, array $all_tables )
+    public function __construct( string $table, array $all_tables, mixed $cache )
     {
         $this->table = $table;
+        $this->cache = $cache;
 
         if ($all_tables && isset($all_tables[$this->table]))
         {
@@ -407,48 +410,58 @@ class CBaseModel
      */
     public function getFields() : array 
     {
-        $related_table_from_id = '/^'.str_replace('[related_table]','([\S]*)',RELATED_TABLE_ID).'/';
-        
-        foreach($this->column_list as $name=>&$struct)
+        if ($this->cache && $this->cache->exists('fields','structures'))
+            $fields = $this->cache->get('fields');
+        else
         {
-            $struct['ref'] = '';
-            $struct['display_name'] = ucfirst(str_replace('_',' ',$name));
-
-            // if it is an index of an external record
-            $matches = [];
-            if (isset($struct['html_type']) && $struct['html_type']=='number' && preg_match($related_table_from_id, $struct['field'], $matches))
+            $related_table_from_id = '/^'.str_replace('[related_table]','([\S]*)',RELATED_TABLE_ID).'/';
+        
+            foreach($this->column_list as $name=>&$struct)
             {
-                $rel_table = $matches[1];
-
-                $table_check = $rel_table;
-                if (!isset(RELATED_FIELD_NAMES[$table_check]) && isset(RELATED_FIELD_NAMES['*']))
-                    $table_check = '*';
-
-                if (isset(RELATED_FIELD_NAMES[$table_check]))
+                $struct['ref'] = '';
+                $struct['display_name'] = ucfirst(str_replace('_',' ',$name));
+    
+                // if it is an index of an external record
+                $matches = [];
+                if (isset($struct['html_type']) && $struct['html_type']=='number' && preg_match($related_table_from_id, $struct['field'], $matches))
                 {
-                    $struct['html_type'] = ((!isset($this->all_tables[$rel_table]))?('hidden'):('select'));
-                    $struct['display_name'] = ucfirst($rel_table);
-
-                    if (is_array(RELATED_FIELD_NAMES[$table_check]))
-                        $struct['ref'] = $rel_table.':'.str_replace('[table]',$rel_table,ITEM_ID).'-'.implode(',',RELATED_FIELD_NAMES[$table_check]);
-                    else
-                        $struct['ref'] = $rel_table.':'.str_replace('[table]',$rel_table,ITEM_ID).'-'.RELATED_FIELD_NAMES[$table_check];
+                    $rel_table = $matches[1];
+    
+                    $table_check = $rel_table;
+                    if (!isset(RELATED_FIELD_NAMES[$table_check]) && isset(RELATED_FIELD_NAMES['*']))
+                        $table_check = '*';
+    
+                    if (isset(RELATED_FIELD_NAMES[$table_check]))
+                    {
+                        $struct['html_type'] = ((!isset($this->all_tables[$rel_table]))?('hidden'):('select'));
+                        $struct['display_name'] = ucfirst($rel_table);
+    
+                        if (is_array(RELATED_FIELD_NAMES[$table_check]))
+                            $struct['ref'] = $rel_table.':'.str_replace('[table]',$rel_table,ITEM_ID).'-'.implode(',',RELATED_FIELD_NAMES[$table_check]);
+                        else
+                            $struct['ref'] = $rel_table.':'.str_replace('[table]',$rel_table,ITEM_ID).'-'.RELATED_FIELD_NAMES[$table_check];
+                    }
                 }
+                $this->changeFieldStructure($struct);
             }
-            $this->changeFieldStructure($struct);
+    
+            // searches for tables that contain the related field
+            $related_item = str_replace('[related_table]',$this->table,RELATED_TABLE_ID);
+            $related_tables = [];
+            foreach($this->all_tables as $tab=>$items)
+                if (isset($items[$related_item]) )
+                    $related_tables[] = $tab;            
+
+            $fields = ['structure'=>$this->column_list,
+                       'metadata'=>['table'=>$this->table,
+                       'key'=>str_replace('[table]',$related_table_from_id,ITEM_ID)],
+                       'related_tables'=>$related_tables ]; 
+            
+            if ($fields && $this->cache)
+                $this->cache->set('fields', $fields);
         }
 
-        // searches for tables that contain the related field
-        $related_item = str_replace('[related_table]',$this->table,RELATED_TABLE_ID);
-        $related_tables = [];
-        foreach($this->all_tables as $tab=>$items)
-            if (isset($items[$related_item]) )
-                $related_tables[] = $tab;
-        
-        return ['structure'=>$this->column_list,
-                'metadata'=>['table'=>$this->table,
-                             'key'=>str_replace('[table]',$related_table_from_id,ITEM_ID)],
-                             'related_tables'=>$related_tables ]; 
+        return $fields; 
     }
 
 
