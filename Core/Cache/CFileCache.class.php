@@ -123,12 +123,16 @@ class CFileCache
      * Writes a message to a cache-specific log file
      *
      * @param string $s message to write on file log
+     * @param string $area_name name of area (null or not declared is the implicit "current area") 
      *
      * @return mixed The cached item: it can be a scalar value, an object or an array
      */
-    public function get(string $name): mixed
+    public function get(string $name, ?string $area_name = null): mixed
     {
         $ret = null;
+        if ($area_name!==null)
+            $this->setArea($area_name);
+
         if ($this->exists($name))
         {
             try
@@ -153,11 +157,15 @@ class CFileCache
      * Check if a key exists and is in the cache
      *
      * @param string $name message to write on file log
+     * @param string $area_name name of area (null or not declared is the implicit "current area") 
      *
      * @return bool true if the key $name exists
      */
-    public function exists(string $name): bool
+    public function exists(string $name, ?string $area_name = null): bool
     {
+        if ($area_name!==null)
+            $this->setArea($area_name);
+        
         return (file_exists($this->getName($name)));
     }
 
@@ -176,36 +184,22 @@ class CFileCache
         return $this->CACHE_PATH . (($this->area_name != '') ? ($this->area_name . '/') : ('')) . $name . '.cache';
     }
 
+
     /**
-     * Create all folder's Path on file system if not exist
+     * set Method
      * 
-     * @param string $path path to create
-     * @param mixed $value value to be stored
-     */
-    private function _createPathIfNotExists(string $path)
-    {
-        if (!is_dir($path))
-        {
-            // mkdir($this->CACHE_PATH,0777,true);
-            mkdir($path, 0755, true);
-            chown($path, 'apache');
-            chgrp($path, 'apache');
-            chown($path, 'www-data');
-            chgrp($path, 'www-data');
-            // $this->WriteDebug("$zone $prefix_zone $domain");
-            // $this->WriteDebug(debug_backtrace());
-        }
-    }
-
-
-    /**
      * Sets the value of an item to be stored
      *
      * @param string $name key of the item to be stored
      * @param mixed $value value to be stored
+     * @param string $area_name name of area (null or not declared is the implicit "current area")
+     *  
      */
-    public function set(string $name, mixed $value): void
+    public function set(string $name, mixed $value, ?string $area_name = null): void
     {
+        if ($area_name!==null)
+            $this->setArea($area_name);
+        
         $filename = $this->getName($name);
         if (strstr($filename, '/'))
         {
@@ -281,5 +275,27 @@ class CFileCache
         $path =  $this->CACHE_PATH . (($this->area_name != '') ? ($this->area_name . '/') : (''));
 
         return ((is_dir($path)) ? (scandir($path)) : (false));
+    }
+
+
+    /**
+     * Create all folder's Path on file system if not exist
+     * 
+     * @param string $path path to create
+     * @param mixed $value value to be stored
+     */
+    private function _createPathIfNotExists(string $path)
+    {
+        if (!is_dir($path))
+        {
+            // mkdir($this->CACHE_PATH,0777,true);
+            mkdir($path, 0755, true);
+            chown($path, 'apache');
+            chgrp($path, 'apache');
+            chown($path, 'www-data');
+            chgrp($path, 'www-data');
+            // $this->WriteDebug("$zone $prefix_zone $domain");
+            // $this->WriteDebug(debug_backtrace());
+        }
     }
 }
