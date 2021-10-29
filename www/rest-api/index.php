@@ -51,8 +51,8 @@ try
 
         // Create an appropriate Controller for the request 
         // (if you use additional modules besides CBaseController, i.e.: CExampleController)
-        $controller = CBaseController::GetModuleController();
-        $rest = new $controller($request, $response, $user, $cache);
+        $controller_name = CBaseController::GetModuleController();
+        $controller = new $controller_name($request, $response, $user, $cache);
 
         //
         // It excludes the management of the tables or modules listed below.
@@ -61,13 +61,13 @@ try
         //    $rest->setExcludedControllers(['user']);
         
         if (defined('REQUIRED_ITEMS'))
-            $rest->setItemsRequired(REQUIRED_ITEMS);            
+            $controller->setItemsRequired(REQUIRED_ITEMS);            
 
         // sets all the related tables with an array and the method setRelatedFieldNames()
         if (defined('RELATED_FIELD_NAMES'))
-            $rest->setRelatedFieldNames(RELATED_FIELD_NAMES);  
+            $controller->setRelatedFieldNames(RELATED_FIELD_NAMES);  
 
-        print $rest->exec();
+        print $controller->exec();
     }
 
     //        CDB::disconnect();

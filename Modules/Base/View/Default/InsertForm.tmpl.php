@@ -1,3 +1,3 @@
+INSERT FORM!!!
 <?php
-include "EditForm.tmpl.php";
-?>
+include __DIR__."/EditForm.tmpl.php";
