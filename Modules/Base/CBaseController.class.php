@@ -107,7 +107,7 @@ class CBaseController extends CDB
             }
 
             $model = self::GetModuleModel();
-            $this->model = new $model($this->table, $db_tables);
+            $this->model = new $model($this->table, $db_tables, $this->cache);
 
             $this->setItemsView(); // Fields to display, default '*' that is all
 
@@ -1198,5 +1198,18 @@ die;
     {
         $this->cache_per_user = $cache_per_user;
     }
+ 
     
+    /**
+     *
+     * Get the current Model Object (CBaseModel or sons)
+     * 
+     * @return the current model
+     * 
+     */
+    public function getCurrentModel()
+    {
+        return $this->model;
+    }
+
 } // end class
