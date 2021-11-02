@@ -17,7 +17,7 @@
 
 </pre>
 
-<h2>EDITOR</h2>
+<!-- h2>EDITOR</h2>
 <div id="editor" contenteditable="true" placeholder='write something'>
 write something here....
-</div>
+</div -->
