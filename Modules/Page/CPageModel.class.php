@@ -26,7 +26,7 @@ class CPageModel extends \DressApi\Modules\Base\CBaseModel
      */
     public function getListItems() : array
     {
-        return ['id','id_user','title','body','description','visible','status','creation_date'];
+        return ['id','title','body','description','visible','status','creation_date'];
     }        
  
   
@@ -39,11 +39,9 @@ class CPageModel extends \DressApi\Modules\Base\CBaseModel
      */
     public function changeStructureTable(array &$columns) : void
     {
-        // i.e.: Change only if is a Administrator
-        // this operation is not required because you can use CBaseController::setAutoUser
-        // global $user;
-        // if (!$user->isAdmin())
-        //    $columns['id_user']['html_type'] = 'hidden';
+        global $user;
+        if (!$user->isAdmin())
+            $columns['id_user']['html_type'] = 'hidden';
     }
 
 
