@@ -77,10 +77,10 @@ function createTable(full_data, options)
 {
     let html = '<div class="table-responsive"><table class="table table-striped table-sm">';
     let head = false;
-    // console.log(full_data.data);
-    if (typeof (full_data.data) != 'undefined') 
+    // console.log(full_data.elements);
+    if (typeof (full_data.elements) != 'undefined') 
     {
-        let data = full_data.data;
+        let data = full_data.elements;
         for (let i in data) 
         {
             if (!head && typeof (data[i]) != 'string') 
@@ -161,7 +161,7 @@ function createForm(full_data, item)
         let size = parseInt(full_data.structure[i]['max']);
         let field = full_data.structure[i]['field'];
         let display_name = full_data.structure[i]['display_name'];
-        let value = ((item)?(item.data[0][field]):(''));
+        let value = ((item)?(item.elements[0][field]):(''));
 // console.log(field); 
         switch(full_data.structure[i]['html_type'])
         {
@@ -211,7 +211,7 @@ function createForm(full_data, item)
                         
                         [rel_table,rel_sitems] = full_data.structure[i]['ref'].split(':');
                         [rel_id_name,rel_items] = rel_sitems.split('-');
-                        popolateLists.push(['select','input_'+field, rel_table, '', rel_id_name, rel_items, value, full_data.structure[i]['null']]);
+                        popolateLists.push(['select','input_'+field, rel_table, '/page/1,500', rel_id_name, rel_items, value, (full_data.structure[i]['null']=='YES')]);
                         break;
 
             case 'datalist': 
@@ -223,7 +223,7 @@ function createForm(full_data, item)
                         
                         [rel_table,rel_sitems] = full_data.structure[i]['ref'].split(':');
                         [rel_id_name,rel_items] = rel_sitems.split('-');
-                        popolateLists.push(['datalist','input_'+field, rel_table, '', rel_id_name, rel_items, value, full_data.structure[i]['null']=='YES']);
+                        popolateLists.push(['datalist','input_'+field, rel_table, '/page/1,500', rel_id_name, rel_items, value, full_data.structure[i]['null']=='YES']);
                         break;
 
             case 'checkbox-list-ex': 
@@ -260,12 +260,12 @@ function createForm(full_data, item)
 
     html += '<div class="row position-relative">';
     if (item)
-        html += '  <input value="Update" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="UpdateRow(\''+full_data.metadata.table+'\', document.getElementById(\'editForm\'), '+item.data[0][full_data.metadata.key]+' )">';
+        html += '  <input value="Update" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="UpdateRow(\''+full_data.metadata.table+'\', document.getElementById(\'editForm\'), '+item.elements[0][full_data.metadata.key]+' )">';
     else
         html += '  <input value="Insert" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="InsertRow(\''+full_data.metadata.table+'\', document.getElementById(\'editForm\') )">';
     html += '  <input value="Go to List" type="button" class="btn btn-secondary col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="GetList(\''+full_data.metadata.table+'\', \'wr/ob/'+full_data.metadata.key+'-DESC\')">';
     if (item)
-        html += '  <input value="Delete" type="button" class="btn btn-danger col-sm-3 col-lg-2 m-3 top-50 end-0" onclick="DeleteRow(\''+full_data.metadata.table+'\','+item.data[0][full_data.metadata.key]+')">';
+        html += '  <input value="Delete" type="button" class="btn btn-danger col-sm-3 col-lg-2 m-3 top-50 end-0" onclick="DeleteRow(\''+full_data.metadata.table+'\','+item.elements[0][full_data.metadata.key]+')">';
     html += '<br></div>';
 
     html += '</form>';
@@ -320,20 +320,20 @@ function popolateSelect(type, id_obj, rel_table, options, rel_id_name, rel_displ
                         
                         if (with_null) 
                             frame_html += '<option value="NULL">ALL</option>';
-                        for(var x in data.data)
+                        for(var x in data.elements)
                         {
                             let field_value = '';
                             if (rel_display_fields.includes(','))
                             {
                                 let v = rel_display_fields.split(',');
                                 for(let y in v)
-                                    if (typeof(data.data[x][v[y]])!='undefined')
-                                        field_value += ((field_value=='')?(''):(displayed_fields_separator)) + data.data[x][v[y]];
+                                    if (typeof(data.elements[x][v[y]])!='undefined')
+                                        field_value += ((field_value=='')?(''):(displayed_fields_separator)) + data.elements[x][v[y]];
                             }
                             else
-                                field_value = data.data[x][rel_display_fields];
+                                field_value = data.elements[x][rel_display_fields];
 
-                            frame_html += '<option value="'+data.data[x][rel_id_name]+'"'+((value==data.data[x][rel_id_name])?(' selected'):(''))+'>'+field_value+'</option>';
+                            frame_html += '<option value="'+data.elements[x][rel_id_name]+'"'+((value==data.elements[x][rel_id_name])?(' selected'):(''))+'>'+field_value+'</option>';
                         }
                         document.getElementById(id_obj).innerHTML = frame_html;
                     });
@@ -361,20 +361,20 @@ function popolateList(type, id_obj, rel_table, options, rel_id_name, rel_display
                     { 
                         // console.log(data);
                         let frame_html = ''; 
-                        for(var x in data.data)
+                        for(var x in data.elements)
                         {
                             let field_value = '';
                             if (rel_display_fields.includes(','))
                             {
                                 let v = rel_display_fields.split(',');
                                 for(let y in v)
-                                    if (typeof(data.data[x][v[y]])!='undefined')
-                                        field_value += ((field_value=='')?(''):(displayed_fields_separator)) + data.data[x][v[y]];
+                                    if (typeof(data.elements[x][v[y]])!='undefined')
+                                        field_value += ((field_value=='')?(''):(displayed_fields_separator)) + data.elements[x][v[y]];
                             }
                             else
-                                field_value = data.data[x][rel_display_fields];
+                                field_value = data.elements[x][rel_display_fields];
 
-                            frame_html += '<input value="'+data.data[x][rel_id_name]+'" type="'+type+'" class="form-radio-input" id="input_'+field_value.replaceAll(' ','_')+'">';
+                            frame_html += '<input value="'+data.elements[x][rel_id_name]+'" type="'+type+'" class="form-radio-input" id="input_'+field_value.replaceAll(' ','_')+'">';
                             frame_html += ' <label for="input_'+field_value.replaceAll(' ','_')+'" class="col-sm-2 col-form-label fw-bold fs-6">'+field_value+'</label><br>';
                         }
                         document.getElementById(id_obj).innerHTML = frame_html;
@@ -467,8 +467,8 @@ function ViewRow(table, key, id)
 function ViewDetails(data, key, id)
 {
     let html = '<div class="table-responsive m-1"><table class="table table-striped ">';
-    for(let i in data.data[0])
-        html += '<tr><th class="bg-info">'+i+'</th><td>'+data.data[0][i]+'<td></tr>';
+    for(let i in data.elements[0])
+        html += '<tr><th class="bg-info">'+i+'</th><td>'+data.elements[0][i]+'<td></tr>';
     html += '</table></div>';
 
     html += '<div class="row">';

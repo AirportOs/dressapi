@@ -187,14 +187,15 @@ class CUser extends CDB
         if ( $ret == true )
         {
             JWT::$leeway += 60;
-            $token = JWT::decode((string)$jwt, SECRET_KEY, [TOKEN_ENC_ALGORITHM]);
+            $atoken = JWT::decode((string)$jwt, SECRET_KEY, [TOKEN_ENC_ALGORITHM]);
             $now = new \DateTimeImmutable();
     
-            $this->id = $token->data->id; 
-            $this->username = $token->data->username; 
-            if ($token->iss !== DOMAIN_NAME ||
-                $token->nbf > $now->getTimestamp() ||
-                $token->exp < $now->getTimestamp())
+            $this->id = $atoken->elements->id; 
+            $timestamp = $now->getTimestamp();
+            $this->username = $atoken->elements->username; 
+            if ($atoken->iss !== DOMAIN_NAME ||
+                $atoken->nbf > $timestamp ||
+                $atoken->exp < $timestamp)
             {
                 // header('HTTP/1.1 401 Unauthorized');
                 throw new Exception('Unauthorized',401);    
@@ -287,7 +288,10 @@ class CUser extends CDB
                 if (!$token)
                     return $this->authenticate($params);
                 if (!$this->checkToken($token))
+                {
+                    sleep(2); // 2 seconds delay
                     throw new Exception('Invalid token', CResponse::HTTP_STATUS_UNAUTHORIZED);
+                }
             }
 
             return 'OK';

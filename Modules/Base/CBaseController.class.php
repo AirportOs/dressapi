@@ -72,6 +72,8 @@ class CBaseController extends CDB
 
         $this->response->setStatusCode(CResponse::HTTP_STATUS_BAD_REQUEST);
 
+        $this->setAutoUser();
+
         $this->table = CRequest::getTable();
 
         // Verify if the method (GET,POST,DELETE,...) is implemented
@@ -125,7 +127,7 @@ class CBaseController extends CDB
 
     public function setAutoUser(bool $value = true)
     {
-        $this->auto_user = $value;
+        $this->auto_user = (($this->user->isAdmin())?(false):($value));
     }
 
 

@@ -268,11 +268,23 @@ class CBaseModel
      * This method can change the default attributes of the table fields, 
      * for example a "select" type field can become a "hidden" type field 
      *
-     * @param array list of field properties
+     * @param $columns array list of field properties
      */
-    public function changeFieldStructure(array &$struct) : void
+    public function changeStructureTable(array &$columns) : void
     {
         // Usable from derived class
+    }
+
+
+    /**
+     * Change items values
+     *
+     * @param array $values all $values of table
+     *
+     * @return void
+     */
+    protected function changeItemValues(array &$values)
+    {        
     }
 
 
@@ -285,6 +297,7 @@ class CBaseModel
      */
     public function setFilters(array $filters)
     {        
+        $this->changeItemValues($filters);
         foreach($this->column_list as $value)
         {
             $field_name = $value['field']; 
@@ -408,7 +421,7 @@ class CBaseModel
      * 
      * @return array the list of fields with related attributes
      */
-    public function getFields() : array 
+    final public function getFields() : array 
     {
         if ($this->cache && $this->cache->exists('fields','structures'))
             $fields = $this->cache->get('fields');
@@ -442,8 +455,8 @@ class CBaseModel
                             $struct['ref'] = $rel_table.':'.str_replace('[table]',$rel_table,ITEM_ID).'-'.RELATED_FIELD_NAMES[$table_check];
                     }
                 }
-                $this->changeFieldStructure($struct);
             }
+            $this->changeStructureTable($this->column_list);
     
             // searches for tables that contain the related field
             $related_item = str_replace('[related_table]',$this->table,RELATED_TABLE_ID);
