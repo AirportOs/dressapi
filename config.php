@@ -71,7 +71,7 @@ define('DEFAULT_ORDER', 'DESC'); // DESC or ASC
 define('PWD_CRYPT', '@AShHK#Dfjdx45');
 
 // Default of total rows for each request
-define('DEFAULT_ITEMS_PER_PAGE', 2);
+define('DEFAULT_ITEMS_PER_PAGE', 50);
 
 // Max total rows for each request, if the value is greater it will be reset to MAX_ITEMS_PER_PAGE value
 define('MAX_ITEMS_PER_PAGE', 200);
