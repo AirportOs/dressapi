@@ -8,8 +8,8 @@ It is then possible to customize any aspect of the API by creating customized mo
 The name "DressApi" means it "dress up" your database, substantially it provides a quick REST API, to your db schema.
 DressApi maps your database as an **ORM** (Object-relational mapping) and it does it dynamically.
 Although it is structured as an **MVC** (Model, View, Controller) but it does not need to define a model for each table but reads it and manages it automatically from the DB. However, you can create a Model to define some details about its data structure.
-The View is only a data output in JSON, XML or TEXT format, than genarally you don't need to customize.
-The most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code and only if you need to customize it can you create a specific model.
+The View is only a data output in JSON, XML, HTML or TEXT format, than generally you don't need to customize.
+The most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code.
 
 ## Why use DressApi?
 
@@ -25,13 +25,13 @@ Surely the possibility of not writing code can be an excellent reason to choose 
 
 * It already contains a default **paging system**
 
-* A **deferred connection system** allows you to connect to the DB only if necessary. This mode saves a lot of time especially when used in conjunction with the caching system: in this way the framework responds very quickly with the minimum of resources required.
+* A **lazy connection system** allows you to connect to the DB only if necessary. This mode saves a lot of time especially when used in conjunction with the caching system: in this way the framework responds very quickly with the minimum of resources required.
 
 * Include **JWT (JSON Web Token) for the authetication**. JWT is a proposed Internet standard for creating data encrypted by a public/private key
 
 * **Strict input control**. The types of the DB fields are known and therefore can be checked before making an insertion or modification without adding a line of code. However, it is possible to associate a regular expression for each single field of the record to be inserted/modified.
 
-* Especially for new databases **DressApi provides a complete system of ACL (Access Control List)** to define users, roles and possible CRUD operations for each role and eg each table.
+* Especially for new databases **DressApi provides a complete system of ACL (Access Control List)** to define users, roles and possible CRUD operations for each role and each table.
 
 * It is structured to be **independent of the database**, not only for the drivers/library but also in the use of the SQL dialect. At the moment only MySQL has been implemented but it is expected in the future the use of other databases such as Oracle, PostgreSQL and MS SQL for which the equivalent library has yet to be written.
 
