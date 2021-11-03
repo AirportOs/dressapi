@@ -55,10 +55,10 @@ define('RELATED_FIELD_NAMES', ['Page'=>['title','creation_date'], // the value c
 // NOTE: you can also set required items in the controller with addItemRequired();
 //       i.e: $this->addItemRequired('vote', ['name'=>'vote','min'=>18, 'max'=>30], 'student' );
 define('REQUIRED_ITEMS', ['student'=> // table
-                            [ // item=>rules
-                             ['periodicy' => '/[daily|weekly|monthly]/'],
-                             ['name'=>'age','min'=>17],
-                             ['name'=>'vote','min'=>18, 'max'=>30],
+                            [ // item,rule
+                             ['name'=>'periodicy', 'rule'=>'/[daily|weekly|monthly]/'],
+                             ['name'=>'age',       'min'=>17],
+                             ['name'=>'vote',      'min'=>18, 'max'=>30],
                             ]
                          ]);
 

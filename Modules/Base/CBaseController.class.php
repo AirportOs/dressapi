@@ -323,9 +323,17 @@ class CBaseController extends CDB
         {
             foreach ($list[$this->table] as $field)
             {
-                $this->model->setRequired($field['name'], true, ((isset($field['min'])) ? ($field['min']) : (null)), ((isset($field['max'])) ? ($field['max']) : (null)));
-                if (isset($field['rule']))
-                    $this->model->setRule($field['name'], $field['rule']);
+                try
+                {
+                    $this->model->setRequired($field['name'], true, ((isset($field['min'])) ? ($field['min']) : (null)), ((isset($field['max'])) ? ($field['max']) : (null)));
+                    if (isset($field['rule']))
+                        $this->model->setRule($field['name'], $field['rule']);    
+                }
+                catch(Exception $ex)
+                {
+                    print $ex->getMessage();
+                    exit;
+                }
             }
         }
     }
