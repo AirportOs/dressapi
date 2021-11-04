@@ -405,25 +405,62 @@ class CUser extends CDB
      * Set a User Role (Normally detected by DB)
      * 
      * @param string $module normally is the name of DB table but could be not in an custom extension 
-     * @param string Name of permission [Get, Post, Patch, Put, Delete, Options] 
-     *               or if you prefer you can use C.R.U.D. letters [C=Post, R=Get/Head/Options, U=Patch|Put, D=Delete].
-     *               Finally, you can use * for all valid permission (for example with Admin user)
+     * @param string $method method of operation [GET, POST, PATCH. PUT, DELETE, OPTIONS, HEAD] 
+     *               Each method corresponds to a C.R.U.D. permission 
+     *               [C=Create=POST, R=Read=GET/HEAD/OPTIONS, U=Update=PATCH|PUT, D=DELETE].
+     * @return true if the current user have the permission for this method
      */
-    public function checkPermission(string $module, string $permission)
+    public function checkPermission(string $module, string $method)
     {
         foreach($this->user_roles as $user_role)
             if (isset($this->role_permissions[$user_role]))
             {
                 if (isset($this->role_permissions[$user_role][$module]) &&
-                    in_array($permission, $this->role_permissions[$user_role][$module]))
+                    in_array($method, $this->role_permissions[$user_role][$module]))
                         return true;
                 else // check if it can access all modules
                 if (isset($this->role_permissions[$user_role]['*']) &&
-                    in_array($permission,$this->role_permissions[$user_role]['*']))
+                    in_array($method,$this->role_permissions[$user_role]['*']))
                         return true;
             }
 
         return false;
+    }
+
+
+    /**
+     * Set a User Role (Normally detected by DB)
+     * 
+     * @param string $module normally is the name of DB table but could be not in an custom extension 
+     * 
+     * return array contains all permissions for selected module
+     */
+    public function getPermissions(string $module)
+    {
+        $permissions = [];
+        foreach($this->user_roles as $role)
+        {
+            $quit = false;
+            do // specific module and * if exists
+            {
+                if (isset($this->role_permissions[$role]) && isset($this->role_permissions[$role][$module]))
+                {
+                    $rp = &$this->role_permissions[$role][$module];
+                    
+                    if (in_array('GET',$rp))    $permissions['can_read']   = 'can_read';
+                    if (in_array('POST',$rp))   $permissions['can_insert'] = 'can_insert';
+                    if (in_array('PATCH',$rp))  $permissions['can_update'] = 'can_update';
+                    if (in_array('DELETE',$rp)) $permissions['can_delete'] = 'can_delete';
+                }
+    
+                if ($module=='*')
+                    $quit = true;
+                else
+                    $module = '*';
+            }while($quit);
+        }
+
+        return $permissions;
     }
 
 

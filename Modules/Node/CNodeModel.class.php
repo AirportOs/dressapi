@@ -7,14 +7,15 @@
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale
  * @url https://dressapi.com
+ * @year 2021
  * 
  * Class for a personalization items for response GET
  */
-namespace DressApi\Modules\Page;
+namespace DressApi\Modules\Node;
 
 use Exception;
 
-class CPageModel extends \DressApi\Modules\Base\CBaseModel
+class CNodeModel extends \DressApi\Modules\Base\CBaseModel
 {   
             
     /**

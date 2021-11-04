@@ -944,7 +944,10 @@ die;
             $cache_key = $this->_getCacheKey($sql);
             $data = $this->_getCachedData($cache_key);
             if ($data===null)
-                $data = $this->_getContentFromDB($sql, (string)$cache_key);     
+                $data = $this->_getContentFromDB($sql, (string)$cache_key);
+
+            if ( $this->user!==null)
+                $data['permissions'] = $this->user->getPermissions(CRequest::getModule());
         }
         catch (Exception $ex)
         {
@@ -1086,7 +1089,7 @@ die;
             }
 
             if ($this->cache && $cache_key && $data && count($data) > 0)
-                $this->cache->set($cache_key, $data);    
+                $this->cache->set($cache_key, $data);
         }
 
         return $data;

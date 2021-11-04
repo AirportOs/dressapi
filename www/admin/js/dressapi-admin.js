@@ -115,7 +115,8 @@ function createTable(full_data, options)
 
     if (typeof (full_data.metadata) != 'undefined') 
     {
-        document.getElementById('insertButton').innerHTML = '<input type="button" class="btn btn-success float-end" value="Add New" onclick="InsertRowForm(\''+full_data.metadata.table+'\')">';
+        if (typeof(full_data.permissions)!='undefined' && typeof(full_data.permissions.can_insert)!='undefined')
+            document.getElementById('insertButton').innerHTML = '<input type="button" class="btn btn-success float-end" value="Add New" onclick="InsertRowForm(\''+full_data.metadata.table+'\')">';
         
         document.getElementById('tableName').innerHTML = full_data.metadata.table;
         html = 'Page ' + full_data.metadata.page + '/' + full_data.metadata.total_pages + ' - ' + full_data.metadata.total_items + ' totale elements<br>' + html;
@@ -472,9 +473,11 @@ function ViewDetails(data, key, id)
     html += '</table></div>';
 
     html += '<div class="row">';
-    html += '  <input value="Modify" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="UpdateRowForm(\''+data.metadata.table+'\','+id+' )">';
+    if (data.permissions.can_update)
+        html += '  <input value="Modify" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="UpdateRowForm(\''+data.metadata.table+'\','+id+' )">';
     html += '  <input value="Go to List" type="button" class="btn btn-secondary col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="GetList(\''+data.metadata.table+'\', \'wr/ob/'+key+'-DESC\')">';
-    html += '  <input value="Delete" type="button" class="btn btn-danger col-sm-3 col-lg-2 m-3 top-50 end-0" onclick="DeleteRow(\''+data.metadata.table+'\','+id+')">';
+    if (data.permissions.can_update)
+        html += '  <input value="Delete" type="button" class="btn btn-danger col-sm-3 col-lg-2 m-3 top-50 end-0" onclick="DeleteRow(\''+data.metadata.table+'\','+id+')">';
     html += '<br></div>';
     
     document.querySelector('.results').innerHTML = html;
