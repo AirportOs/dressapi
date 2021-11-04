@@ -35,30 +35,7 @@ CREATE TABLE `acl` (
 
 INSERT INTO `acl` (`id`, `id_role`, `id_module`, `can_read`, `can_insert`, `can_update`, `can_delete`) VALUES
 (1, 1, NULL, 'YES', 'YES', 'YES', 'NO'),
-(2, NULL, 1, 'YES', 'NO', 'NO', 'NO'),
-(3, 2, 2, 'YES', 'NO', 'NO', 'NO');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `comment`
---
-
-CREATE TABLE `comment` (
-  `id` int(11) NOT NULL,
-  `comment` varchar(300) NOT NULL,
-  `creation_date` date NOT NULL DEFAULT current_timestamp(),
-  `id_user` int(11) DEFAULT NULL,
-  `id_page` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `comment`
---
-
-INSERT INTO `comment` (`id`, `comment`, `creation_date`, `id_user`, `id_page`) VALUES
-(1001, 'oh yeah! It\'s a very good solution for a Rest API!', '2021-01-13', 101, 1),
-(1002, 'Yii is better than DressApi!', '2021-07-18', 1, 1);
+(2, NULL, 1, 'YES', 'NO', 'NO', 'NO');
 
 -- --------------------------------------------------------
 
@@ -105,34 +82,62 @@ CREATE TABLE `module` (
 --
 
 INSERT INTO `module` (`id`, `name`, `title`, `description`) VALUES
-(1, 'Page', 'Page Module', 'Description of Page Module'),
-(2, 'Comment', '', '');
+(1, 'Node', 'Node Module', 'Description of Node Module');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `page`
+-- Table structure for table `node`
 --
 
-CREATE TABLE `page` (
+CREATE TABLE `node` (
   `id` int(11) NOT NULL,
+  `id_nodetype` int(11) NOT NULL,
   `title` varchar(180) NOT NULL,
   `body` text NOT NULL,
   `description` varchar(160) NOT NULL,
   `visible` enum('no','yes') NOT NULL DEFAULT 'no',
   `status` enum('draft','reserved','public') NOT NULL DEFAULT 'draft',
   `creation_date` date NOT NULL DEFAULT current_timestamp(),
-  `id_user` int(11) NOT NULL
+  `id_user` int(11) NOT NULL,
+  `id_parent_node` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
--- Dumping data for table `page`
+-- Dumping data for table `node`
 --
 
-INSERT INTO `page` (`id`, `title`, `body`, `description`, `visible`, `status`, `creation_date`, `id_user`) VALUES
-(1, 'Welcome to DressApi: the new ORM REST API', 'The name \"Dress\" means it \"dress\" up your database, substantially it provides a quick REST API, to your db schema. \r\nORM means Object-relational mapping and DressApi maps your database dynamically. Although it is structured as an MVC (Model, View, Controller) it does not need to define a model for each table in the DB but if it automatically reads it from the DB. \r\nThe most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code.', 'Example of use DressApi x', 'no', 'draft', '2021-01-13', 1),
-(2, 'DressApi is new but contains long experience inside', 'I have a very long experience in programming with various languages, for the web I have always preferred PHP.\r\nIn about twenty years of developing web applications, I have always developed and used a personal framework that adopts the dynamic ORM logic and has evolved over time. Now a large part of the code has been rewritten from scratch in the most modern view of the REST API but the idea has remained the same and the experience has certainly allowed to create a solid and functional platform.', '', 'no', 'draft', '2021-01-15', 103),
-(3, 'title test', 'I have a very long experience in programming with various languages, for the web I have always preferred PHP.\r\nIn about twenty years of developing web applications, I have always developed and used a personal framework that adopts the dynamic ORM logic and has evolved over time. Now a large part of the code has been rewritten from scratch in the most modern view of the REST API but the idea has remained the same and the experience has certainly allowed to create a solid and functional platform.', 'Title Test OK!', 'no', 'draft', '2021-01-15', 103);
+INSERT INTO `node` (`id`, `id_nodetype`, `title`, `body`, `description`, `visible`, `status`, `creation_date`, `id_user`, `id_parent_node`) VALUES
+(1, 3, 'Welcome to DressApi: the new ORM REST API', 'The name \"Dress\" means it \"dress\" up your database, substantially it provides a quick REST API, to your db schema. \nORM means Object-relational mapping and DressApi maps your database dynamically. Although it is structured as an MVC (Model, View, Controller) it does not need to define a model for each table in the DB but if it automatically reads it from the DB. \nThe most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code.', 'Example of use DressApi', 'no', 'draft', '2021-01-13', 1, NULL),
+(2, 3, 'DressApi is new but contains long experience inside', 'I have a very long experience in programming with various languages, for the web I have always preferred PHP.\r\nIn about twenty years of developing web applications, I have always developed and used a personal framework that adopts the dynamic ORM logic and has evolved over time. Now a large part of the code has been rewritten from scratch in the most modern view of the REST API but the idea has remained the same and the experience has certainly allowed to create a solid and functional platform.', '', 'no', 'draft', '2021-01-15', 103, NULL),
+(3, 3, 'title test', 'I have a very long experience in programming with various languages, for the web I have always preferred PHP.\nIn about twenty years of developing web applications, I have always developed and used a personal framework that adopts the dynamic ORM logic and has evolved over time. Now a large part of the code has been rewritten from scratch in the most modern view of the REST API but the idea has remained the same and the experience has certainly allowed to create a solid and functional platform.', 'Title Test OK!', 'no', 'draft', '2021-01-15', 115, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `nodetype`
+--
+
+CREATE TABLE `nodetype` (
+  `id` int(11) NOT NULL,
+  `name` varchar(120) NOT NULL,
+  `description` varchar(250) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `nodetype`
+--
+
+INSERT INTO `nodetype` (`id`, `name`, `description`) VALUES
+(1, 'container', ''),
+(2, 'menu', ''),
+(3, 'link', ''),
+(4, 'file', ''),
+(11, 'page', ''),
+(12, 'article', ''),
+(13, 'news', ''),
+(14, 'event', ''),
+(15, 'comment', '');
 
 -- --------------------------------------------------------
 
@@ -222,14 +227,6 @@ ALTER TABLE `acl`
   ADD KEY `id_role` (`id_role`);
 
 --
--- Indexes for table `comment`
---
-ALTER TABLE `comment`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `comment_ibfk_1` (`id_user`),
-  ADD KEY `id_page` (`id_page`);
-
---
 -- Indexes for table `contact`
 --
 ALTER TABLE `contact`
@@ -242,11 +239,19 @@ ALTER TABLE `module`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `page`
+-- Indexes for table `node`
 --
-ALTER TABLE `page`
+ALTER TABLE `node`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `id_user` (`id_user`);
+  ADD KEY `id_user` (`id_user`),
+  ADD KEY `id_nodetype` (`id_nodetype`),
+  ADD KEY `id_parent_node` (`id_parent_node`);
+
+--
+-- Indexes for table `nodetype`
+--
+ALTER TABLE `nodetype`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `role`
@@ -280,12 +285,6 @@ ALTER TABLE `acl`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
--- AUTO_INCREMENT for table `comment`
---
-ALTER TABLE `comment`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1003;
-
---
 -- AUTO_INCREMENT for table `contact`
 --
 ALTER TABLE `contact`
@@ -295,13 +294,19 @@ ALTER TABLE `contact`
 -- AUTO_INCREMENT for table `module`
 --
 ALTER TABLE `module`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `node`
+--
+ALTER TABLE `node`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `page`
+-- AUTO_INCREMENT for table `nodetype`
 --
-ALTER TABLE `page`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+ALTER TABLE `nodetype`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `role`
@@ -333,17 +338,11 @@ ALTER TABLE `acl`
   ADD CONSTRAINT `acl_ibfk_2` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
--- Constraints for table `comment`
+-- Constraints for table `node`
 --
-ALTER TABLE `comment`
-  ADD CONSTRAINT `comment_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `comment_ibfk_2` FOREIGN KEY (`id_page`) REFERENCES `page` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Constraints for table `page`
---
-ALTER TABLE `page`
-  ADD CONSTRAINT `page_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `node`
+  ADD CONSTRAINT `node_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `node_ibfk_2` FOREIGN KEY (`id_parent_node`) REFERENCES `node` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `user`
