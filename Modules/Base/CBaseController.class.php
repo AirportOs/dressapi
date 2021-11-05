@@ -58,7 +58,10 @@ class CBaseController extends CDB
     /**
      * Constructor
      *
-     * @param string $table the real table of DB (normally is used by derived classes of BaseController)
+     * @param CRequest  $request object that contains the current request, that is, all the input data
+     * @param CResponse $response object that will contain the response processed by the current object
+     * @param CUser     $user object containing user information such as id, permissions, name and modules that can manage
+     * @param CCache    $cache object that manages cached data
      *
      * @return void
      */
@@ -125,16 +128,27 @@ class CBaseController extends CDB
     }
 
 
+    /**
+     * Set the auto user: if true when a table contains id_user set to id of the current user
+     * 
+     * @return bool $value if true (default), the auto user is run
+     */
     public function setAutoUser(bool $value = true)
     {
         $this->auto_user = (($this->user->isAdmin())?(false):($value));
     }
 
 
+    /**
+     * get the auto user: if true when a table contains id_user set to id of the current user
+     * 
+     * @return bool the value of current auto user
+     */
     public function getAutoUser() : bool
     {
         return $this->auto_user;
     }
+
 
     /**
      * Return the name of required module (default: 'Base')
