@@ -31,6 +31,7 @@ use DressApi\Core\DBMS\CSqlComposerBase;
 class CBaseController extends CDB
 {
     protected string $table;         // name of current table (derived from current module) 
+    protected string $module;        // name of current module (derived from current module) 
 
     protected string $items_view = '*'; // fields of the table to display 
 
@@ -94,7 +95,7 @@ class CBaseController extends CDB
             // Reads and stores all the tables in the DB
             $db_tables = $this->_getAllTables(); // it also excludes tables that are not to be managed
 
-            $module = $this->table;
+            $this->module = CRequest::getModule();
 
             // Check if the instantiated controller is a superclass of DressApi\Modules\Base\CBaseController
             $have_a_specific_module = is_subclass_of($this,'DressApi\Modules\Base\CBaseController');
@@ -107,7 +108,7 @@ class CBaseController extends CDB
                         throw new Exception("Module ".ucfirst($this->table)." not exist");
                 
                     // set a table of DB with "Base" Module
-                    $this->setTable($db_tables, $module); // Tables of the DB
+                    $this->setTable($db_tables, $this->table); // Tables of the DB
                 }
             }
 
@@ -961,7 +962,7 @@ die;
                 $data = $this->_getContentFromDB($sql, (string)$cache_key);
 
             if ( $this->user!==null)
-                $data['permissions'] = $this->user->getPermissions(CRequest::getModule());
+                $data['permissions'] = $this->user->getPermissions($this->module);
         }
         catch (Exception $ex)
         {

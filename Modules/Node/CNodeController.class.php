@@ -26,14 +26,17 @@ class CNodeController extends CBaseController
 {
     
     /**
-     * Method __construct
+     * Constructor
+     *
+     * @param CRequest  $request object that contains the current request, that is, all the input data
+     * @param CResponse $response object that will contain the response processed by the current object
+     * @param CUser     $user object containing user information such as id, permissions, name and modules that can manage
+     * @param CCache    $cache object that manages cached data
      *
      * @return void
      */
-    public function __construct(CRequest $request, CResponse $response, ?CUser $user = null, ?CCache $cache = null,
-                                 $real_table = 'node')
+    public function __construct(CRequest $request, CResponse $response, ?CUser $user = null, ?CCache $cache = null)
     {
-        $this->table = $real_table; // from 'example' module to real table 'node'
         parent::__construct($request, $response, $user, $cache);
     }
        
