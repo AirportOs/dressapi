@@ -49,6 +49,7 @@ class CBaseModel
      *
      * @param $table $table current table name
      * @param array $all_tables list of all tables of current DB with column_list list
+     * @param CCache    $cache object that manages cached data
      *
      * @return void
      */
@@ -198,7 +199,6 @@ class CBaseModel
     /**
      * Delete all controllers derived from DB tables
      * 
-     * @param array $db_tables list of all table of current DB
      * @param array $excluded_controllers list of controllers derived from the DB to be excluded
      * 
      */
