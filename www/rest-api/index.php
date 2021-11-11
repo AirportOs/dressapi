@@ -13,9 +13,7 @@ use DressApi\Core\User\CUser;
 use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
 use DressApi\Core\Logger\CLogger;
-
 use DressApi\Modules\Base\CBaseController;
-use DressApi\Modules\User\CUserController;
 
 try
 {       
