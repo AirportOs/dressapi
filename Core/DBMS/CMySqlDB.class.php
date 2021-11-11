@@ -945,6 +945,8 @@ class CMySqlDB extends CDBMS
                 elseif (strlen($opt) > 0)
                     $v['max'] = (int)$opt;
 
+                if (isset($a['Default']))
+                    $v['default'] = $a['Default'];
                 $db_cols[$name] = $v;
             }
     }
@@ -959,28 +961,6 @@ class CMySqlDB extends CDBMS
     public function ExistsTable(string $table): bool
     {
         return ($this->query("SHOW TABLES LIKE `$table`") > 0);
-    }
-
-
-    /**
-     * Return the current date time for this DB
-     *
-     * @return the current date time for this DB
-     */
-    public function getCurrentDateTime(): string
-    {
-        return date('Y-m-d H:i:s');
-    }
-
-
-    /**
-     * Return the current date for this DB
-     *
-     * @return the current date for this DB
-     */
-    public function getCurrentDate(): string
-    {
-        return date('Y-m-d');
     }
 
 
