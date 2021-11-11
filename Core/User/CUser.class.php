@@ -438,26 +438,18 @@ class CUser extends CDB
     public function getPermissions(string $module)
     {
         $permissions = [];
-        foreach($this->user_roles as $role)
+        $user_roles = array_merge(['*'], $this->user_roles ?? []);
+        foreach($user_roles as $role)
         {
-            $quit = false;
-            do // specific module and * if exists
+            if (isset($this->role_permissions[$role]) && isset($this->role_permissions[$role][$module]))
             {
-                if (isset($this->role_permissions[$role]) && isset($this->role_permissions[$role][$module]))
-                {
-                    $rp = &$this->role_permissions[$role][$module];
-                    
-                    if (in_array('GET',$rp))    $permissions['can_read']   = 'can_read';
-                    if (in_array('POST',$rp))   $permissions['can_insert'] = 'can_insert';
-                    if (in_array('PATCH',$rp))  $permissions['can_update'] = 'can_update';
-                    if (in_array('DELETE',$rp)) $permissions['can_delete'] = 'can_delete';
-                }
-    
-                if ($module=='*')
-                    $quit = true;
-                else
-                    $module = '*';
-            }while($quit);
+                $rp = &$this->role_permissions[$role][$module];
+                
+                if (in_array('GET',$rp))    $permissions['can_read']   = 'can_read';
+                if (in_array('POST',$rp))   $permissions['can_insert'] = 'can_insert';
+                if (in_array('PATCH',$rp))  $permissions['can_update'] = 'can_update';
+                if (in_array('DELETE',$rp)) $permissions['can_delete'] = 'can_delete';
+            }    
         }
 
         return $permissions;
@@ -652,7 +644,7 @@ class CUser extends CDB
         $role_conditions = $this->_setRoleConditions();
         if ($role_conditions!=='')
             $role_conditions .= ' AND'; 
-        $sql = $sc->select('name')->from('acl')->
+        $sql = $sc->select('DISTINCT name')->from('acl')->
                     leftJoin('module', 'mt.id=acl.id_module OR id_module IS NULL', 'mt')->
                     where("$role_conditions acl.can_read='YES'");
 
