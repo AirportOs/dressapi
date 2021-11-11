@@ -20,8 +20,6 @@ use Exception;
 
 class CRequest
 {   
-    protected CConfig $config;            // config values from db table "config"
-    
     protected string $sets;              // input parameters
     protected array  $params;            // values ​​to register input / update
     protected array $filters;            // filters or input/update parameters
@@ -41,10 +39,8 @@ class CRequest
     protected static string $format = DEFAULT_FORMAT_OUTPUT;
     protected static string $charset = DEFAULT_CHARSET;
 
-    public function __construct(CConfig $config)
+    public function __construct()
     {
-        $this->config = $config;
-        
         $this->with_relations = false;
         self::$module = '';
         self::$htmlframe = 'Read';

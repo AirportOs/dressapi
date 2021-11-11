@@ -36,6 +36,25 @@ class CExampleController extends CBaseController
     {
         $this->setDBTable('page'); // Default dbtable
         parent::__construct($request, $response, $user, $cache);
+
+/*
+        $cache_attr_name = 'nodetype';
+        if ($this->cache && $this->cache->exists($cache_attr_name,'structures'))
+            $this->nodetypes = $this->cache->get($cache_attr_name);
+        else
+        {
+            $sql = new CSqlComposer();
+            $sql->select('id,name')->from('nodetype');
+
+            $db = new CDB(); 
+            $db->query($sql);
+            $this->nodetypes = $db->getIdsArray(0, 'name');
+    
+            if ($this->cache)
+                $this->cache->set($cache_attr_name, $this->nodetypes);    
+        }
+*/
+
     }
 
 
@@ -62,10 +81,11 @@ class CExampleController extends CBaseController
             if (count($order_by) > 0)
                 $sql = $sql->orderBy($order_by);
 
-            // Alternative you can use a normal SQL CODE
+            // Alternative you can use a normal SQL CODE 
+            // NOTE: if not standard you could be a problems with other DBMS
             // $sql = "SELECT * FROM `metadata` m ".
             //        "LEFT JOIN `metadatadetail_article` a ON a.id_metadata=m.id ".
-            //        "WHERE (m.id=1) LIMIT 0,20";
+            //        "WHERE (m.id=1)";
 
             $this->response->setStatusCode(CResponse::HTTP_STATUS_OK);
 

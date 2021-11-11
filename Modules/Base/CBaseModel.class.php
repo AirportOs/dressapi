@@ -320,7 +320,6 @@ class CBaseModel
      * Set the auto user: if true when a table contains id_user set to id of the current user
      * 
      * @param bool $value the value to be set;
-     * @return bool $value if true (default), the auto user is run
      */
     public function setAutoUser(bool $value = true)
     {
@@ -337,7 +336,7 @@ class CBaseModel
      * 
      * @return bool the value of current auto user
      */
-    public function getAutoUser() : bool
+    protected function getAutoUser() : bool
     {
         return $this->auto_user;
     }
@@ -361,7 +360,7 @@ class CBaseModel
      * for the name of item creation_date see CREATION_DATE definition on main config.php file
      * @return bool the value of current auto user
      */
-    public function getAutoCreationDate() : bool
+    protected function getAutoCreationDate() : bool
     {
         return $this->auto_creation_date;
     }
@@ -441,7 +440,7 @@ class CBaseModel
      *
      * @return void
      */
-    public function setRequiredInt(string $field_name, int $min = null, int $max = null)
+    final public function setRequiredInt(string $field_name, int $min = null, int $max = null)
     {
         if (isset($this->column_list[$field_name]))
         {
@@ -461,7 +460,7 @@ class CBaseModel
      *
      * @return void
      */
-    public function setRequiredFloat(string $field_name, float $min = null, float $max = null)
+    final public function setRequiredFloat(string $field_name, float $min = null, float $max = null)
     {
         if (isset($this->column_list[$field_name]))
         {
@@ -481,7 +480,7 @@ class CBaseModel
      *
      * @return void
      */
-    public function setRule(string $field_name, string $pattern)
+    final public function setRule(string $field_name, string $pattern)
     {
         if (isset($this->column_list[$field_name]))
             $this->column_list[$field_name]['rule'] = $pattern;
@@ -503,7 +502,7 @@ class CBaseModel
      * 
      * @return void
      */
-    public function setRequired($field_name, bool $required, $min_length = null, $max_length = null)
+    final public function setRequired($field_name, bool $required, $min_length = null, $max_length = null)
     {                
         if (isset($this->column_list[$field_name]))
         {
@@ -528,7 +527,7 @@ class CBaseModel
      * 
      * @return void
      */
-    public function setRequiredPattern(string $field_name, string $pattern, string $options = null)
+    final public function setRequiredPattern(string $field_name, string $pattern, string $options = null)
     {        
         if (isset($this->column_list[$field_name]))
         {
@@ -682,7 +681,7 @@ class CBaseModel
      * @return void
      * 
      */
-    public function checkValid($all_required = true) // POST/PUT(all_required=true), PATCH(all_required=false)
+    final public function checkValid(bool $all_required = true) // POST/PUT(all_required=true), PATCH(all_required=false)
     {
         $valid = 'OK';
         if (isset($this->column_list))

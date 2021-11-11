@@ -22,8 +22,6 @@ use Exception;
 
 class CPagesModel extends CBaseModel
 {   
-    public $nodetypes = [];
-
     /**
      * @param $table $table current table name
      * @param array $all_tables list of all tables of current DB with column_list list
@@ -34,23 +32,6 @@ class CPagesModel extends CBaseModel
     public function __construct( string $table, array $all_tables, ?CUser $user = null, ?CCache $cache )
     {
         parent::__construct( $table, $all_tables, $user, $cache );
-/*
-        $cache_attr_name = 'nodetype';
-        if ($this->cache && $this->cache->exists($cache_attr_name,'structures'))
-            $this->nodetypes = $this->cache->get($cache_attr_name);
-        else
-        {
-            $sql = new CSqlComposer();
-            $sql->select('id,name')->from('nodetype');
-
-            $db = new CDB(); 
-            $db->query($sql);
-            $this->nodetypes = $db->getIdsArray(0, 'name');
-    
-            if ($this->cache)
-                $this->cache->set($cache_attr_name, $this->nodetypes);    
-        }
-*/
     }            
 
     /**

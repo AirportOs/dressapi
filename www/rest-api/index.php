@@ -10,7 +10,6 @@ require_once __DIR__ . '/../../Core/autoload.php'; // Autoloader dell'applicazio
 use DressApi\Core\DBMS\CMySqlDB as CDB;       // In the future other DBMS as Oracle, PostgreSQL, MS SQL
 use DressApi\Core\Cache\CFileCache as CCache; // An alternative is CRedisCache
 use DressApi\Core\User\CUser;
-use DressApi\Core\Config\CConfig;
 use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
 use DressApi\Core\Logger\CLogger;
@@ -23,9 +22,8 @@ try
     CDB::connect(DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT);
     
     $cache = new CCache(DOMAIN_NAME,DB_NAME); // Cache manager
-    $config = new CConfig($cache); // Cache manager
 
-    $request = new CRequest($config);        // Input manager (but the validations is the CBaseModel class)
+    $request = new CRequest();        // Input manager (but the validations is the CBaseModel class)
     $response = new CResponse();      // Output manager
 
     $user = new CUser($request, $cache);
