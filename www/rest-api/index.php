@@ -10,19 +10,23 @@ require_once __DIR__ . '/../../Core/autoload.php'; // Autoloader dell'applicazio
 use DressApi\Core\DBMS\CMySqlDB as CDB;       // In the future other DBMS as Oracle, PostgreSQL, MS SQL
 use DressApi\Core\Cache\CFileCache as CCache; // An alternative is CRedisCache
 use DressApi\Core\User\CUser;
+use DressApi\Core\Config\CConfig;
 use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
 use DressApi\Core\Logger\CLogger;
 
 use DressApi\Modules\Base\CBaseController;
+use DressApi\Modules\User\CUserController;
 
 try
-{
-    $request = new CRequest();        // Input manager (but the validations is the CBaseModel class)
-    $response = new CResponse();      // Output manager
-    $cache = new CCache(DOMAIN_NAME,DB_NAME); // Cache manager
-
+{       
     CDB::connect(DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT);
+    
+    $cache = new CCache(DOMAIN_NAME,DB_NAME); // Cache manager
+    $config = new CConfig($cache); // Cache manager
+
+    $request = new CRequest($config);        // Input manager (but the validations is the CBaseModel class)
+    $response = new CResponse();      // Output manager
 
     $user = new CUser($request, $cache);
     $valid_token = $user->run();
@@ -42,12 +46,12 @@ try
         // Create a role ('all') and accept all permissions
         // This operation is for general purposes, if you have indicated the permissions 
         // in the "acl" table then delete these instructions
-        if (!$imported_permission)
-        {
-            $user->setUserRole(['all']); // // Add role "all" to current user
-            $powers = ['can_read'=>'YES','can_insert'=>'YES','can_update'=>'YES','can_delete'=>'YES'];
-            $user->addRolePermission('all', '*', $powers); // Role=all, All modules, all permission
-        }
+        // if (!$imported_permission)
+        // {
+        //     $user->setUserRole(['all']); // // Add role "all" to current user
+        //     $powers = ['can_read'=>'YES','can_insert'=>'YES','can_update'=>'YES','can_delete'=>'YES'];
+        //     $user->addRolePermission('all', '*', $powers); // Role=all, All modules, all permission
+        // }
 
         // Create an appropriate Controller for the request 
         // (if you use additional modules besides CBaseController, i.e.: CExampleController)

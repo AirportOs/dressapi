@@ -14,24 +14,55 @@ function setToast( message, background )
     toastList.forEach(toast => toast.show()); // This show them
 }
 
+
 function createHTMLMenu(data) 
 {
-    let menu = document.getElementById('sidebarMenuList');
-    for (let i in data) {
-        let table = data[i];
-        let a = document.createElement('a');
-        a.className = "nav-link"+((i==0)?(' active'):(''));
-        a.href = '#';
-        a.areaCurrent = table;
-        a.addEventListener('click', () => { GetList(table, list_options); document.getElementById('search_on_table').value=''; });
-        a.innerHTML = '<span data-feather="get_list"></span>' + table;
+    let main_menu = document.getElementById('sidebarMenuList');
+    
+    if (main_menu && data.modules)
+    {
+            for (let i in data.modules) {
+            let module = data.modules[i];
+            let a = document.createElement('a');
+            a.className = "nav-link"+((i==0)?(' active'):(''));
+            a.href = '#';
+            a.areaCurrent = module;
+            a.addEventListener('click', () => { GetList(module, list_options); document.getElementById('search_on_module').value=''; });
+            a.innerHTML = '' + module;
 
-        let li = document.createElement('li');
-        li.className = 'nav-item';
-        li.appendChild(a);
-        menu.appendChild(li);
-    }
+            let li = document.createElement('li');
+            li.className = 'nav-item';
+            li.appendChild(a);
+            main_menu.insertBefore(li, main_menu.children[i]); // before predefined voices
+            // main_menu.appendChild(li);
+        }
+        
+        if (data.tables)
+        {
+            let li_label = document.createElement('li');
+            let label = document.createElement('hr');
+            li_label.appendChild(label);
+            main_menu.appendChild(li_label);
+
+            for (let i in data.tables) {
+                let table = data.tables[i];
+                let a = document.createElement('a');
+                a.className = "nav-link"+((i==0)?(''):(''));
+                a.href = '#';
+                a.areaCurrent = table;
+                a.addEventListener('click', () => { GetList(table, list_options); document.getElementById('search_on_module').value=''; });
+                a.innerHTML = table;
+    
+                let li = document.createElement('li');
+                li.className = 'nav-item';
+                li.appendChild(a);
+                main_menu.appendChild(li);
+            }
+        }
+
+    }    
 }
+
 
 async function createMenuTables() 
 {
@@ -97,10 +128,10 @@ function createTable(full_data, options)
             html += '<tr>';
             if (typeof (full_data.metadata) != 'undefined')
             {
-                localStorage.current_table = full_data.metadata.table;
-                html += '<td><input type="button" class="btn btn-secondary m-1" value="Details" onclick="ViewRow(\'' + full_data.metadata.table + '\', \'' + full_data.metadata.key + '\', ' + data[i]['id'] + ')"></td>';
-                // html += '<input type="button" class="btn btn-warning m-1" value="Upd" onclick="UpdateRowForm(\'' + full_data.metadata.table + '\', ' + data[i]['id'] + ')">';
-                // html += '<input type="button" class="btn btn-danger m-1" value="Del" onclick="DeleteRow(\'' + full_data.metadata.table + '\', ' + data[i]['id'] + ')"></td>';
+                localStorage.current_module = full_data.metadata.module;
+                html += '<td><input type="button" class="btn btn-secondary m-1" value="Details" onclick="ViewRow(\'' + full_data.metadata.module + '\', \'' + full_data.metadata.key + '\', ' + data[i]['id'] + ')"></td>';
+                // html += '<input type="button" class="btn btn-warning m-1" value="Upd" onclick="UpdateRowForm(\'' + full_data.metadata.module + '\', ' + data[i]['id'] + ')">';
+                // html += '<input type="button" class="btn btn-danger m-1" value="Del" onclick="DeleteRow(\'' + full_data.metadata.module + '\', ' + data[i]['id'] + ')"></td>';
             }
             for (let col_name in data[i])
                 html += '<td>' + ((data[i][col_name]==null)?('ALL'):(data[i][col_name])) + '</td>';
@@ -116,9 +147,9 @@ function createTable(full_data, options)
     if (typeof (full_data.metadata) != 'undefined') 
     {
         if (typeof(full_data.permissions)!='undefined' && typeof(full_data.permissions.can_insert)!='undefined')
-            document.getElementById('insertButton').innerHTML = '<input type="button" class="btn btn-success float-end" value="Add New" onclick="InsertRowForm(\''+full_data.metadata.table+'\')">';
+            document.getElementById('insertButton').innerHTML = '<input type="button" class="btn btn-success float-end" value="Add New" onclick="InsertRowForm(\''+full_data.metadata.module+'\')">';
         
-        document.getElementById('tableName').innerHTML = full_data.metadata.table;
+        document.getElementById('moduleName').innerHTML = full_data.metadata.module;
         html = 'Page ' + full_data.metadata.page + '/' + full_data.metadata.total_pages + ' - ' + full_data.metadata.total_items + ' totale elements<br>' + html;
         
 
@@ -131,7 +162,7 @@ function createTable(full_data, options)
             if (p==full_data.metadata.page)
                 html += '    <button type="button" class="btn btn-primary"><strong>'+p+'</strong></button>';
             else
-                html += '    <button type="button" class="btn btn-secondary" onclick="GetList(\''+full_data.metadata.table+'\', \''+options+'/p/'+p+'\')">'+p+'</button>';
+                html += '    <button type="button" class="btn btn-secondary" onclick="GetList(\''+full_data.metadata.module+'\', \''+options+'/p/'+p+'\')">'+p+'</button>';
         
                 html += '  </div>' +
                 '</div>';
@@ -210,9 +241,9 @@ function createForm(full_data, item)
                         // '<div class="invalid-feedback">Example invalid feedback text</div>' +
                         '</div>'+"\r\n";
                         
-                        [rel_table,rel_sitems] = full_data.structure[i]['ref'].split(':');
+                        [rel_module,rel_sitems] = full_data.structure[i]['ref'].split(':');
                         [rel_id_name,rel_items] = rel_sitems.split('-');
-                        popolateLists.push(['select','input_'+field, rel_table, '/page/1,500', rel_id_name, rel_items, value, (full_data.structure[i]['null']=='YES')]);
+                        popolateLists.push(['select','input_'+field, rel_module, '/page/1,500', rel_id_name, rel_items, value, (full_data.structure[i]['null']=='YES')]);
                         break;
 
             case 'datalist': 
@@ -222,9 +253,9 @@ function createForm(full_data, item)
                         // '<div class="invalid-feedback">Example invalid feedback text</div>' +
                         '</div>'+"\r\n";
                         
-                        [rel_table,rel_sitems] = full_data.structure[i]['ref'].split(':');
+                        [rel_module,rel_sitems] = full_data.structure[i]['ref'].split(':');
                         [rel_id_name,rel_items] = rel_sitems.split('-');
-                        popolateLists.push(['datalist','input_'+field, rel_table, '/page/1,500', rel_id_name, rel_items, value, full_data.structure[i]['null']=='YES']);
+                        popolateLists.push(['datalist','input_'+field, rel_module, '/page/1,500', rel_id_name, rel_items, value, full_data.structure[i]['null']=='YES']);
                         break;
 
             case 'checkbox-list-ex': 
@@ -261,12 +292,12 @@ function createForm(full_data, item)
 
     html += '<div class="row position-relative">';
     if (item)
-        html += '  <input value="Update" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="UpdateRow(\''+full_data.metadata.table+'\', document.getElementById(\'editForm\'), '+item.elements[0][full_data.metadata.key]+' )">';
+        html += '  <input value="Update" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="UpdateRow(\''+full_data.metadata.module+'\', document.getElementById(\'editForm\'), '+item.elements[0][full_data.metadata.key]+' )">';
     else
-        html += '  <input value="Insert" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="InsertRow(\''+full_data.metadata.table+'\', document.getElementById(\'editForm\') )">';
-    html += '  <input value="Go to List" type="button" class="btn btn-secondary col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="GetList(\''+full_data.metadata.table+'\', \'wr/ob/'+full_data.metadata.key+'-DESC\')">';
+        html += '  <input value="Insert" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="InsertRow(\''+full_data.metadata.module+'\', document.getElementById(\'editForm\') )">';
+    html += '  <input value="Go to List" type="button" class="btn btn-secondary col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="GetList(\''+full_data.metadata.module+'\', \'wr/ob/'+full_data.metadata.key+'-DESC\')">';
     if (item)
-        html += '  <input value="Delete" type="button" class="btn btn-danger col-sm-3 col-lg-2 m-3 top-50 end-0" onclick="DeleteRow(\''+full_data.metadata.table+'\','+item.elements[0][full_data.metadata.key]+')">';
+        html += '  <input value="Delete" type="button" class="btn btn-danger col-sm-3 col-lg-2 m-3 top-50 end-0" onclick="DeleteRow(\''+full_data.metadata.module+'\','+item.elements[0][full_data.metadata.key]+')">';
     html += '<br></div>';
 
     html += '</form>';
@@ -281,7 +312,7 @@ function createForm(full_data, item)
         {
             case 'datalist':
             case 'select':
-                           // id_obj, rel_table,  options, rel_id_name, items to display
+                           // id_obj, rel_module,  options, rel_id_name, items to display
                 popolateSelect(row[0],row[1], row[2], row[3], row[4], row[5], row[6], row[7]);
                 break;
 
@@ -299,10 +330,10 @@ function createForm(full_data, item)
 }
 
 //
-// Get a list of table (Method GET). 
+// Get a list of module (Method GET). 
 // The page 2 is options '/p/2' or 'p/2,10' (page 2 with 10 elements per page)
 //
-function popolateSelect(type, id_obj, rel_table, options, rel_id_name, rel_display_fields, value, with_null)
+function popolateSelect(type, id_obj, rel_module, options, rel_id_name, rel_display_fields, value, with_null)
 {
     let displayed_fields_separator = ' ';
     if (!options)
@@ -310,8 +341,8 @@ function popolateSelect(type, id_obj, rel_table, options, rel_id_name, rel_displ
     else
         options = '/' + options;
 
-    // document.querySelector('h3').innerHTML=table;
-    requestData('GET','/api/' + rel_table + '/' + options)
+    // document.querySelector('h3').innerHTML=module;
+    requestData('GET','/api/' + rel_module + '/' + options)
         .then(res => {
             if (res.status == 200)
                 res.json().then(data => 
@@ -343,10 +374,10 @@ function popolateSelect(type, id_obj, rel_table, options, rel_id_name, rel_displ
 
 
 //
-// Get a list of table (Method GET). 
+// Get a list of module (Method GET). 
 // The page 2 is options '/p/2' or 'p/2,10' (page 2 with 10 elements per page)
 //
-function popolateList(type, id_obj, rel_table, options, rel_id_name, rel_display_fields)
+function popolateList(type, id_obj, rel_module, options, rel_id_name, rel_display_fields)
 {
     let displayed_fields_separator = ' ';
     if (!options)
@@ -354,8 +385,8 @@ function popolateList(type, id_obj, rel_table, options, rel_id_name, rel_display
     else
         options = '/' + options;
 
-    // document.querySelector('h3').innerHTML=table;
-    requestData('GET','/api/' + rel_table + '/' + options)
+    // document.querySelector('h3').innerHTML=module;
+    requestData('GET','/api/' + rel_module + '/' + options)
         .then(res => {
             if (res.status == 200)
                 res.json().then(data => 
@@ -385,18 +416,18 @@ function popolateList(type, id_obj, rel_table, options, rel_id_name, rel_display
 
 
 //
-// Get a list of table (Method GET). 
+// Get a list of module (Method GET). 
 // The page 2 is options '/p/2' or 'p/2,10' (page 2 with 10 elements per page)
 //
-function GetList(table, options)
+function GetList(module, options)
 {
     if (!options)
         options = '';
     else
         options = '/' + options;
 
-    // document.querySelector('h3').innerHTML=table;
-    requestData('GET','/api/' + table + options)
+    // document.querySelector('h3').innerHTML=module;
+    requestData('GET','/api/' + module + options)
         .then(res => {
             if (res.status == 200)
                 res.json().then(data => { createTable(data); });
@@ -407,12 +438,12 @@ function GetList(table, options)
 //
 // Update Form
 //
-function InsertRowForm(table)
+function InsertRowForm(module)
 {
     //
-    // Get Structure of table (Method OPTIONS)
+    // Get Structure of module (Method OPTIONS)
     //
-    requestData('OPTIONS','/api/'+table)
+    requestData('OPTIONS','/api/'+module)
     .then(res2 => {
         if (res2.status==200)
             res2.json().then(data => { createForm(data);} );
@@ -427,18 +458,18 @@ function InsertRowForm(table)
 //
 // Insert (Method POST)
 //<
-function InsertRow(table, formData)
+function InsertRow(module, formData)
 {
     // let formData = new FormData();
     // formData.append('id', 1000);
-    // formData.append(table, 'Lumen is better than DressApi!');
+    // formData.append(module, 'Lumen is better than DressApi!');
     // formData.append('id_page', 1);
-    requestData('POST', '/api/'+table+'/',formData)
+    requestData('POST', '/api/'+module+'/',formData)
             .then(data => {
                 if (data.status==201)
                     data.json().then(res => { 
                                                 setToast('Item entered successfully','bg-success');
-                                                GetList(table,list_options);
+                                                GetList(module);
                                              } );
                 else
                     setToast('Operation failed with status '+data.status,'bg-danger'); 
@@ -449,9 +480,9 @@ function InsertRow(table, formData)
 //
 // View Single Row
 //
-function ViewRow(table, key, id)
+function ViewRow(module, key, id)
 {
-    requestData('GET','/api/'+table+'/'+id+'/wr')
+    requestData('GET','/api/'+module+'/'+id+'/wr')
             .then(res => {
                 if (res.status==200)
                 {
@@ -474,10 +505,10 @@ function ViewDetails(data, key, id)
 
     html += '<div class="row">';
     if (data.permissions.can_update)
-        html += '  <input value="Modify" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="UpdateRowForm(\''+data.metadata.table+'\','+id+' )">';
-    html += '  <input value="Go to List" type="button" class="btn btn-secondary col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="GetList(\''+data.metadata.table+'\', \'wr/ob/'+key+'-DESC\')">';
+        html += '  <input value="Modify" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="UpdateRowForm(\''+data.metadata.module+'\','+id+' )">';
+    html += '  <input value="Go to List" type="button" class="btn btn-secondary col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="GetList(\''+data.metadata.module+'\', \'wr/ob/'+key+'-DESC\')">';
     if (data.permissions.can_update)
-        html += '  <input value="Delete" type="button" class="btn btn-danger col-sm-3 col-lg-2 m-3 top-50 end-0" onclick="DeleteRow(\''+data.metadata.table+'\','+id+')">';
+        html += '  <input value="Delete" type="button" class="btn btn-danger col-sm-3 col-lg-2 m-3 top-50 end-0" onclick="DeleteRow(\''+data.metadata.module+'\','+id+')">';
     html += '<br></div>';
     
     document.querySelector('.results').innerHTML = html;
@@ -489,19 +520,19 @@ function ViewDetails(data, key, id)
 //
 // Update Form
 //
-function UpdateRowForm(table, id)
+function UpdateRowForm(module, id)
 {
     var record = null;
     // console.log(id);
-    requestData('GET','/api/'+table+'/'+id)
+    requestData('GET','/api/'+module+'/'+id)
             .then(res => {
                 if (res.status==200)
                 {
                     res.json().then(data => { record = data; } );
                     //
-                    // Get Structure of table (Method OPTIONS)
+                    // Get Structure of module (Method OPTIONS)
                     //
-                    requestData('OPTIONS','/api/'+table)
+                    requestData('OPTIONS','/api/'+module)
                     .then(res2 => {
                         if (res2.status==200)
                             res2.json().then(data => { createForm(data, record);} );
@@ -517,14 +548,14 @@ function UpdateRowForm(table, id)
 //
 // Update (Method PUT/PATCH)
 //
-function UpdateRow(table, formData, id)
+function UpdateRow(module, formData, id)
 {
     // let formData = new FormData();
     // formData.append('id', 1000);
-    // formData.append(table, 'Yii is better than DressApi!');
+    // formData.append(module, 'Yii is better than DressApi!');
     // formData.append('id_page', 1);
     
-    requestData('PATCH','/api/'+table+'/'+id, formData)
+    requestData('PATCH','/api/'+module+'/'+id, formData)
         .then(data => {
                         let msg = 'Operation '+((data.status==200)?'successful':'failed'); // +' with status '+data.status;
                         let jsonprom = data.json();
@@ -544,18 +575,18 @@ function UpdateRow(table, formData, id)
 //
 // Delete (Method DELETE)
 //
-function DeleteRow(table, id)
+function DeleteRow(module, id)
 {
     // let formData = new FormData();
     // formData.append('id', 1000);
     
     if (confirm('Are you sure to delete this element?'))
     {
-        requestData('DELETE','/api/'+table+'/'+id)
+        requestData('DELETE','/api/'+module+'/'+id)
             .then(data => {
                 if (data.status==200)
                 {
-                    data.json().then(res => {  GetList(table,list_options); setToast(res.message,'bg-success'); } );
+                    data.json().then(res => {  GetList(module,list_options); setToast(res.message,'bg-success'); } );
                 }
                 else
                     setToast('Operation failed with status '+data.status,'bg-danger'); 

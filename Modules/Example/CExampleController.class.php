@@ -71,10 +71,7 @@ class CExampleController extends CBaseController
 
             // print "$sql\n";
 
-            $cache_key = $this->_getCacheKey($sql);
-            $data = $this->_getCachedData($sql, $cache_key);
-            if ($data===null)
-                $data = $this->_getContentFromDB($sql, (string)$cache_key);     
+            $data = $this->_getContentFromDB($sql);     
         }
         catch (Exception $ex)
         {

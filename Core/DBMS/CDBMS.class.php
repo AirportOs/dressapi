@@ -107,6 +107,28 @@ abstract class CDBMS
 
 
     /**
+     * Return the current date time for this DB
+     *
+     * @return the current date time for this DB
+     */
+    public static function getCurrentDateTime(): string
+    {
+        return date('Y-m-d H:i:s');
+    }
+
+
+    /**
+     * Return the current date for this DB
+     *
+     * @return the current date for this DB
+     */
+    public static function getCurrentDate(): string
+    {
+        return date('Y-m-d');
+    }
+
+
+    /**
      * Releases the resource to connect to the DB
      * 
      * @param ?string $dbkey key of db to disconnect (optional), 

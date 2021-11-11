@@ -17,6 +17,10 @@
  */
 namespace DressApi\Modules\Base;
 
+use DressApi\Core\Cache\CFileCache as CCache;
+use DressApi\Core\User\CUser;
+use DressApi\Core\Request\CRequest;
+use DressApi\Core\DBMS\CDBMS;
 use Exception;
 
 class CBaseModel
@@ -25,8 +29,13 @@ class CBaseModel
     protected array  $all_tables = [];
     protected ?array $column_list = [];
     protected string $table = '';
+    protected string $module = '';
 
-    private mixed $cache; // CCache, CFileCache or CRedisCache
+    protected bool $auto_user = true; // true set automatically the id value of user to current user
+    protected bool $auto_creation_date = true; // true set automatically the id value of creation_date to current date/datetime
+
+    protected ?CCache $cache; // CCache, CFileCache or CRedisCache
+    protected ?CUser  $user;  // CUser  or sons
 
     public const REGEX_INT = '/^[-]?[\d]+$/';
     public const REGEX_UINT = '/^[\d]+$/';
@@ -45,18 +54,25 @@ class CBaseModel
     public const REGEX_INDEXES = '/[\d,]+/';  // indici numerici separati da virgole
     
     /**
-     * Method __construct
-     *
      * @param $table $table current table name
      * @param array $all_tables list of all tables of current DB with column_list list
-     * @param CCache    $cache object that manages cached data
+     * @param ?CUser $user object that manages user data
+     * @param ?CCache $cache object that manages cached data
      *
-     * @return void
      */
-    public function __construct( string $table, array $all_tables, mixed $cache )
+    public function __construct( string $table, array $all_tables, ?CUser $user = null, ?CCache $cache )
     {
         $this->table = $table;
+        // if ($this->module==='')
+        //    $this->module = substr(basename(get_class($this)),1,-5); // form 'CBaseModel' => 'Base'
+
+        $this->module = CRequest::getModule();
+
+        $this->setAutoUser( );
+        $this->setAutoCreationDate( );
+
         $this->cache = $cache;
+        $this->user = $user;
 
         if ($all_tables && isset($all_tables[$this->table]))
         {
@@ -238,13 +254,22 @@ class CBaseModel
 
 
     /**
-     * Method getListItems
-     *
      * Return a list of column of current table
      *
      * @return array list of column names of current table
      */
     public function getListItems() : array
+    {
+        return array_keys($this->column_list);
+    }        
+
+
+    /**
+     * Return a list of column of current table for Admin users
+     *
+     * @return array list of column names of current table
+     */
+    public function getListItemsByAdmin() : array
     {
         return array_keys($this->column_list);
     }        
@@ -268,42 +293,142 @@ class CBaseModel
      * This method can change the default attributes of the table fields, 
      * for example a "select" type field can become a "hidden" type field 
      *
-     * @param $columns array list of field properties
+     * @param &$columns array list of field properties
+     * 
+     * 
      */
     public function changeStructureTable(array &$columns) : void
     {
         // Usable from derived class
+
+        // All attributes:
+        // - html_type (type to view in HTML)
+        // - default (default value)
+        // - field (name of field)
+        // - type (db type)
+        // - null (is nullable)
+        // - max (max length)
+        // - options (for ENUM o SET)
+
+        // FOR EXAMPLE:
+        // $columns['img']['html_type'] = 'file';
+        // $columns['title']['default'] = 'New Title';
+
+    }
+
+    /**
+     * Set the auto user: if true when a table contains id_user set to id of the current user
+     * 
+     * @param bool $value the value to be set;
+     * @return bool $value if true (default), the auto user is run
+     */
+    public function setAutoUser(bool $value = true)
+    {
+        // keep the real value from input only if is an Administrator
+        if ($this->user->isAdmin())
+           return false;
+
+        $this->auto_user = $value;
     }
 
 
     /**
-     * Change items values
-     *
-     * @param array $values all $values of table
-     *
-     * @return void
+     * get the auto user: if true when a table contains id_user set to id of the current user
+     * 
+     * @return bool the value of current auto user
      */
-    protected function changeItemValues(array &$values)
-    {        
+    public function getAutoUser() : bool
+    {
+        return $this->auto_user;
+    }
+
+
+     /**
+     * Set the auto creation date: if true when a table contains creation_date (or equivalent) set to the current date/datetime
+     * for the name of item creation_date see CREATION_DATE definition on main config.php file
+     * 
+     * @param bool $value the value to be set;
+     * @return bool $value if true (default), the auto user is run
+     */
+    public function setAutoCreationDate(bool $value = true)
+    {
+        $this->auto_creation_date = $value;
     }
 
 
     /**
-     * Set all input's parameters
+     * get the auto creation date: if true when a table contains id_creation_date (or equivalent) set to the current date/datetime
+     * for the name of item creation_date see CREATION_DATE definition on main config.php file
+     * @return bool the value of current auto user
+     */
+    public function getAutoCreationDate() : bool
+    {
+        return $this->auto_creation_date;
+    }
+
+
+
+    /**
+     * Change items values befor insert/update into db
      *
-     * @param array $filters all input's parameters
+     * @param array &$values all $values of table
+     * @param string $operation type of operation ('insert' or 'modify')
      *
      * @return void
      */
-    public function setFilters(array $filters)
+    public function changeItemValues(array &$values, string $operation)
+    {   
+        // Force the id_user to current id user value
+        $field_id_user = str_replace('[related_table]',USER_TABLE,RELATED_TABLE_ID);
+        if ($this->getAutoUser() && $this->model->existsField($field_id_user))
+            $values[$field_id_user] = (($this->user!==null)?($this->user->getId()):(NULL));
+ 
+ 
+        // Force eventual creation_date to current_date
+        if ($operation=='modify' && $this->getAutoCreationDate() && $this->model->existsField(CREATION_DATE))
+        {
+            if ($this->model->getFieldAttribute(CREATION_DATE,'type')=='DATETIME')
+                $values[CREATION_DATE] = CDBMS::getCurrentDateTime();
+            else
+                $values[CREATION_DATE] = CDBMS::getCurrentDate();
+        }
+
+    
+    }
+
+
+    /**
+     * Set all input's parameters before insert/update into db
+     *
+     * @param array $data all input's parameters
+     *
+     * @return void
+     */
+    public function setData(array $data)
     {        
-        $this->changeItemValues($filters);
         foreach($this->column_list as $value)
         {
             $field_name = $value['field']; 
-            if (isset($filters[$field_name]))
-                $this->column_list[$field_name]['value'] = $filters[$field_name];
+            if (isset($data[$field_name]))
+                $this->column_list[$field_name]['value'] = $data[$field_name];
         }
+    }
+
+    /**
+     * Set all conditions before read from db or delete into db
+     *
+     * @param ?array &$filters all input's parameters
+     *
+     * @return void
+     */
+    public function changeFilters(?array &$filters)
+    {        
+//        foreach($this->column_list as $value)
+//        {
+//            $field_name = $value['field']; 
+//            if (isset($filters[$field_name]))
+//                $this->column_list[$field_name]['value'] = $filters[$field_name];
+//        }
     }
 
 
@@ -423,14 +548,21 @@ class CBaseModel
      */
     final public function getFields() : array 
     {
-        if ($this->cache && $this->cache->exists('fields','structures'))
-            $fields = $this->cache->get('fields');
+        $cache_attr_name = 'fields_'.$this->module.($this->user->isAdmin()??'');
+        if ($this->cache && $this->cache->exists($cache_attr_name,'structures'))
+            $fields = $this->cache->get($cache_attr_name);
         else
         {
             $related_table_from_id = '/^'.str_replace('[related_table]','([\S]*)',RELATED_TABLE_ID).'/';
-        
-            foreach($this->column_list as $name=>&$struct)
+
+            $column_list = [];
+            if ($this->user->isAdmin())
+                $list_items = $this->getListItemsByAdmin();
+            else
+                $list_items = $this->getListItems();
+            foreach($list_items as $name)
             {
+                $struct = $this->column_list[$name];
                 $struct['ref'] = '';
                 $struct['display_name'] = ucfirst(str_replace('_',' ',$name));
     
@@ -455,8 +587,10 @@ class CBaseModel
                             $struct['ref'] = $rel_table.':'.str_replace('[table]',$rel_table,ITEM_ID).'-'.RELATED_FIELD_NAMES[$table_check];
                     }
                 }
+
+                $column_list[$name] = $struct;
             }
-            $this->changeStructureTable($this->column_list);
+            $this->changeStructureTable($column_list);
     
             // searches for tables that contain the related field
             $related_item = str_replace('[related_table]',$this->table,RELATED_TABLE_ID);
@@ -465,13 +599,13 @@ class CBaseModel
                 if (isset($items[$related_item]) )
                     $related_tables[] = $tab;            
 
-            $fields = ['structure'=>$this->column_list,
+            $fields = ['structure'=>$column_list,
                        'metadata'=>['table'=>$this->table,
                        'key'=>str_replace('[table]',$related_table_from_id,ITEM_ID)],
                        'related_tables'=>$related_tables ]; 
             
             if ($fields && $this->cache)
-                $this->cache->set('fields', $fields);
+                $this->cache->set($cache_attr_name, $fields);
         }
 
         return $fields; 
@@ -584,7 +718,7 @@ class CBaseModel
                         }
                     }
                     else
-                        throw new Exception($field['field'].' column value is required in the table '.$this->table);
+                        throw new Exception($field['field'].' value is required in the table '.$this->table);
     }
 
 } // end class

@@ -14,7 +14,7 @@
  * 
  */
 
-namespace DressApi\Modules\Node;
+namespace DressApi\Modules\Pages;
 
 use DressApi\Core\User\CUser;
 use DressApi\Core\Cache\CFileCache as CCache;
@@ -22,9 +22,8 @@ use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
 use DressApi\Modules\Base\CBaseController;
 
-class CNodeController extends CBaseController
-{
-    
+class CPagesController extends CBaseController
+{   
     /**
      * Constructor
      *

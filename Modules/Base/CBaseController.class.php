@@ -29,7 +29,10 @@ use DressApi\Core\Response\CResponse;
 use DressApi\Core\DBMS\CSqlComposerBase;
 
 class CBaseController extends CDB
-{
+{   
+    protected ?array $all_db_modules = [];
+    protected ?array $all_db_tables = [];
+
     protected string $table;         // name of current table (derived from current module) 
     protected string $module;        // name of current module (derived from current module) 
 
@@ -46,8 +49,6 @@ class CBaseController extends CDB
 
     
     protected bool $cache_per_user = true; // flag: if true, one cache foreach user, false: same cache for all
-
-    protected bool $auto_user = true; // true set automatically the id value of user to current user
 
     // optional objects
     protected ?CCache $cache; // CCache or sons
@@ -76,10 +77,6 @@ class CBaseController extends CDB
 
         $this->response->setStatusCode(CResponse::HTTP_STATUS_BAD_REQUEST);
 
-        $this->setAutoUser();
-
-        $this->table = CRequest::getTable();
-
         // Verify if the method (GET,POST,DELETE,...) is implemented
         $this->method = $this->request->getMethod();
         if (!method_exists($this, 'exec' . ucfirst(strtolower($this->method))))
@@ -92,10 +89,18 @@ class CBaseController extends CDB
 
         try
         {
-            // Reads and stores all the tables in the DB
-            $db_tables = $this->_getAllTables(); // it also excludes tables that are not to be managed
+            // Reads and stores all the tables from the DB
+            $this->_importAllDbTables();
+
+            // Reads and stores all the modules from the DB
+            $this->_importAllDbModules();
 
             $this->module = CRequest::getModule();
+
+            if (isset($this->all_db_modules[$this->module]) && isset($this->all_db_modules[$this->module]['tablename']))
+                $this->table = $this->all_db_modules[$this->module]['tablename'];
+            else
+                $this->table = strtolower($this->module);
 
             // Check if the instantiated controller is a superclass of DressApi\Modules\Base\CBaseController
             $have_a_specific_module = is_subclass_of($this,'DressApi\Modules\Base\CBaseController');
@@ -104,16 +109,16 @@ class CBaseController extends CDB
             {
                 if ($this->table!='all')
                 {
-                    if (!isset($db_tables[$this->table])) // NOT exists
+                    if (!isset($this->all_db_tables[$this->table])) // NOT exists
                         throw new Exception("Module ".ucfirst($this->table)." not exist");
                 
                     // set a table of DB with "Base" Module
-                    $this->setTable($db_tables, $this->table); // Tables of the DB
+                    $this->setTable($this->all_db_tables, $this->table); // Tables of the DB
                 }
             }
 
             $model = self::GetModuleModel();
-            $this->model = new $model($this->table, $db_tables, $this->cache);
+            $this->model = new $model($this->table, $this->all_db_tables, $this->user, $this->cache);
 
             $this->setItemsView(); // Fields to display, default '*' that is all
 
@@ -126,28 +131,6 @@ class CBaseController extends CDB
             $this->response->setMessageError($ex->getMessage());
             throw new Exception($ex->getMessage());
         }
-    }
-
-
-    /**
-     * Set the auto user: if true when a table contains id_user set to id of the current user
-     * 
-     * @return bool $value if true (default), the auto user is run
-     */
-    public function setAutoUser(bool $value = true)
-    {
-        $this->auto_user = (($this->user->isAdmin())?(false):($value));
-    }
-
-
-    /**
-     * get the auto user: if true when a table contains id_user set to id of the current user
-     * 
-     * @return bool the value of current auto user
-     */
-    public function getAutoUser() : bool
-    {
-        return $this->auto_user;
     }
 
 
@@ -223,33 +206,50 @@ class CBaseController extends CDB
 
 
     /**
-     * Import from DB all table names and update excluded/included table/controllers
-     * 
+     * Import from DB all record of module table
      */
-    private function _getAllTables(): array
+    private function _importAllDbModules(): void
     {
-        $db_tables = [];
-
         if ($this->cache)
         {
             $this->cache->setArea('structures');
-            $db_tables = $this->cache->get('db_tables');
+            $this->all_db_modules = $this->cache->get('all_db_modules') ?? [];
         }
 
-        if (!$db_tables)
+        if (!$this->all_db_modules)
         {
-            $db_tables = [];
-            $this->getAllTables($db_tables);
-            if ($db_tables)
+            $this->query('SELECT id,name,tablename FROM module');
+            $this-> getDataTable($this->all_db_modules, self::DB_ASSOC, 'name');
+            if ($this->cache)
+                $this->cache->set('all_db_modules', $this->all_db_modules);
+        }
+
+    }
+
+    /**
+     * Import from DB all table names and update excluded/included table/controllers
+     * 
+     */
+    private function _importAllDbTables(): void
+    {
+        if ($this->cache)
+        {
+            $this->cache->setArea('structures');
+            $this->all_db_tables = $this->cache->get('all_db_tables');
+        }
+
+        if (!$this->all_db_tables)
+        {
+            $this->all_db_tables = [];
+            $this->getAllTables($this->all_db_tables);
+            if ($this->all_db_tables)
             {
                 if ($this->cache)
-                    $this->cache->set('db_tables', $db_tables);
+                    $this->cache->set('all_db_tables', $this->all_db_tables);
             }
             else
                 throw new Exception("No table available");
         }
-
-        return $db_tables;
     }
 
 
@@ -412,7 +412,12 @@ class CBaseController extends CDB
     protected function setItemsView(?array $vitems = null): void
     {
         if ($vitems === null && $this->model->existsTable($this->table))
-            $this->items_view = implode(',', $this->model->getListItems()); // , *, "name,surname,private_email"';   
+        {
+            if ($this->user->isAdmin())
+                $this->items_view = implode(',', $this->model->getListItemsByAdmin()); // , *, "name,surname,private_email"';
+            else   
+                $this->items_view = implode(',', $this->model->getListItems()); // , *, "name,surname,private_email"';   
+        }
     }
 
 
@@ -447,7 +452,8 @@ class CBaseController extends CDB
         $this->bind_params_types = [];
 
         $filters = $this->request->getFilters();
-
+        $this->model->changeFilters($filters);
+        
         if (isset($filters) && is_array($filters) && count($filters))
         {
             $start = true;
@@ -545,25 +551,12 @@ class CBaseController extends CDB
     {
         $ret = false;
 
-        $params = $this->request->getParameters();
-        $field_id_user = str_replace('[related_table]',USER_TABLE,RELATED_TABLE_ID);
+        $params = $this->request->getParameters() ?? [];
         
-        // Force the id_user to current id user value
-        if ($this->getAutoUser() && $this->model->existsField($field_id_user))
-            $params[$field_id_user] = (($this->user!==null)?($this->user->getId()):(NULL));
-
-        // Force eventual creation_date to current_date
-        if ($this->model->existsField(CREATION_DATE))
+        if ($params)
         {
-            if ($this->model->getFieldAttribute(CREATION_DATE,'type')=='DATETIME')
-                $params[CREATION_DATE] = $this->getCurrentDateTime();
-            else
-                $params[CREATION_DATE] = $this->getCurrentDate();
-        }
-
-        if (isset($params))
-        {
-            $this->model->setFilters($params);
+            $this->model->changeItemValues($params,'insert');
+            $this->model->setData($params);
             $this->model->checkValid(true);
 
             $item_types = [];
@@ -571,7 +564,9 @@ class CBaseController extends CDB
                 if ($this->model->existsField($key)) 
                     $item_types[] = $this->model->getFieldAttribute($key,'type');
                 else
-                    throw new Exception('Item ' . $key . ' not valid');
+                    unset($params[$key]);
+                // else
+                //    throw new Exception('Item ' . $key . ' not valid'); ignored parameter
 
             $ret = $this->insertRecord($this->table, $params, $item_types);
         }
@@ -592,18 +587,13 @@ class CBaseController extends CDB
         $ret = false;
         try
         {
-            $this->model->setFilters($this->request->getParameters());
+            $params = $this->request->getParameters();
+            $this->model->changeItemValues($params,'modify');
+            $this->model->setData($params);
             $this->model->checkValid($all_params_required);
 
             $conditions = $this->getConditions();
 
-            $params = $this->request->getParameters();
-
-            // Force the id_user to current id user value
-            $field_id_user = str_replace('[related_table]',USER_TABLE,RELATED_TABLE_ID);
-            if ($this->getAutoUser() && $this->model->existsField($field_id_user))
-                $params[$field_id_user] = (($this->user!==null)?($this->user->getId()):(NULL));
-            
             $item_types = [];
             foreach ($params as $key => $val)
                 if ($this->model->existsField($key))
@@ -645,12 +635,10 @@ class CBaseController extends CDB
     {
         $ret = false;
 
-        $filters = $this->request->getFilters();
+        $conditions = $this->getConditions();
 
-        if (count($filters))
+        if ($conditions!='')
         {
-            $conditions = $this->getConditions();
-
             $res = $this->deleteRecord(null, $conditions, $this->bind_params_values, $this->bind_params_types);
             if ($res)
             {
@@ -670,95 +658,6 @@ class CBaseController extends CDB
         }
 
         return $ret;
-    }
-
-
-    /**
-     * Import one or more files to upload
-     *
-     * @return string list of all uploaded files separated by semicolons 
-     * @throw in case of an error
-     */
-    protected function _inputFile(): string
-    {
-        $filenames = '';
-        $ret = '';
-
-        try
-        {
-            if (isset($_FILES) && count($_FILES) > 0)
-            {
-                foreach ($_FILES as $name => $file)
-                {
-                    $path =  UPLOAD_FILE_PATH . '/' . $name . "/";
-                    // print "\n$path\n";
-                    $filename = strtolower($file['name']);
-
-                    if ($file['error'] != 0)
-                    {
-                        $this->response->setStatusCode(CResponse::HTTP_STATUS_BAD_REQUEST);
-                        throw new Exception('File error on file ' . $filename);
-                    }
-                    if (!is_dir($path))
-                        mkdir($path, 0774, true);
-
-                    $path_parts = pathinfo($filename);
-
-                    if (!in_array(strtolower($path_parts['extension']), UPLOAD_EXT_ACCEPTED))
-                    {
-                        $this->response->setStatusCode(CResponse::HTTP_STATUS_NOT_MODIFIED);
-                        throw new Exception('The filetype is not valid (only ' . implode(', ', UPLOAD_EXT_ACCEPTED) . ')');
-                    }
-
-                    $internal_filename = time() . '_' . $filename;
-                    if (move_uploaded_file($file['tmp_name'], $path . $internal_filename))
-                    {
-                        $this->response->setStatusCode(CResponse::HTTP_STATUS_OK);
-
-                        $filenames .= $filename . ';';
-                        $this->parameters[$name] = $internal_filename;
-                    }
-                    else
-                    {
-                        $this->response->setStatusCode(CResponse::HTTP_STATUS_INTERNAL_SERVER_ERROR); // non puo' spostare il file
-                        throw new Exception('the server cannot store the file ' . $filename);
-                    }
-                }
-            }
-        }
-        catch (Exception $ex)
-        {
-            $ret = 'ERROR';
-            $this->response->setMessageError($ex->getMessage());
-        }
-        finally
-        {
-            if (isset($_FILES))
-                foreach ($_FILES as $name => $file)
-                    if (file_exists($file['tmp_name']))
-                        unlink($file['tmp_name']);
-        }
-        if ($ret == 'ERROR')
-            throw new Exception($this->response->getMessageError());
-
-        return $filenames;
-    }
-
-
-    /**
-     * Remove newly uploaded files in case of any other errors
-     *
-     * @return void
-     */
-    protected function _removeUploadedFile()
-    {
-        if (isset($_FILES))
-            foreach ($_FILES as $name => $file)
-            {
-                $path =  UPLOAD_FILE_PATH . '/' . $name . "/";
-                if (file_exists($path . $this->parameters[$name]))
-                    unlink($path . $this->parameters[$name]);
-            }
     }
 
 
@@ -807,18 +706,18 @@ class CBaseController extends CDB
      * Get a content in cache if exists
      *
      * @param $cache_key name of cache
+     * @param string $area_name name of area (null or not declared is the implicit "current area") 
      * 
      * @return ?array results of query or null if there is no data in the cache
      */
-    protected function _getCachedData(string $cache_key): ?array
+    protected function _getCachedData(string $cache_key, $area_name = null): ?array
     {
         $data = null; // request new data
         if ($this->cache)
         {
             try
             {
-                $this->cache->setArea($this->table);
-                $data = $this->cache->get($cache_key);
+                $data = $this->cache->get($cache_key, $area_name);
             }
             catch (\Exception)
             {
@@ -830,33 +729,45 @@ class CBaseController extends CDB
     }
 
 
-    protected function _getContentFromDB(mixed $sql, string $cache_key = '') : array
+    /**
+     * Get a content in cache if exists
+     *
+     * @param $sql SQL Composer Object contains the query to execute
+     * 
+     * @return array results of query or [] (emtpy array) if there is no data
+     */
+    protected function _getContentFromDB(mixed $sql) : array
     {
         // $s = (string)$sql;
         
-        $data = [];
-        $data['elements'] = [];
-
-
-        $this->getQueryDataTable($data['elements'], $sql, $this->bind_params_values, $this->bind_params_types);
-
-        $sql->select('COUNT(*)')->paging(0, 0);
-
-        $total_items = (int)$this->getQueryDataValue($sql);
-        $items_per_page = $this->request->getItemsPerPage();
-        $total_pages = (($items_per_page > 0 && $total_items > 0) ? (ceil($total_items / $items_per_page)) : (1));
-
-        $data['metadata'] = [
-            'total_items' => $total_items,
-            'page' => $this->request->getCurrentPage(),
-            'total_pages' => $total_pages,
-            'items_per_page' => $items_per_page,
-            'table' => $this->table,
-            'key' => str_replace('[table]', $this->table, ITEM_ID)
-        ];
-
-        if ($this->cache && $cache_key && $data['elements'] !== null && count($data['elements']) > 0)
-            $this->cache->set($cache_key, $data);
+        $cache_key = $this->_getCacheKey($sql);
+        $data = $this->_getCachedData($cache_key,$this->table);
+        if (!$data)
+        {
+            $data = [];
+            $data['elements'] = [];
+    
+    
+            $this->getQueryDataTable($data['elements'], $sql, $this->bind_params_values, $this->bind_params_types);
+    
+            $sql->select('COUNT(*)')->paging(0, 0);
+    
+            $total_items = (int)$this->getQueryDataValue($sql);
+            $items_per_page = $this->request->getItemsPerPage();
+            $total_pages = (($items_per_page > 0 && $total_items > 0) ? (ceil($total_items / $items_per_page)) : (1));
+    
+            $data['metadata'] = [
+                'total_items' => $total_items,
+                'page' => $this->request->getCurrentPage(),
+                'total_pages' => $total_pages,
+                'items_per_page' => $items_per_page,
+                'module' => $this->module,
+                'key' => str_replace('[table]', $this->table, ITEM_ID)
+            ];
+    
+            if ($this->cache && $cache_key /* && $data['elements'] !== null && count($data['elements']) > 0 */)
+                $this->cache->set($cache_key, $data, $this->table);    
+        }
 
         return $data;
     }
@@ -950,16 +861,7 @@ class CBaseController extends CDB
                     $sql = $sql->orderBy($order_by);    
             }
 
-/*
-            // print "$sql\n";
-$full_sql = (string)$sql;
-print "\n$full_sql\n";
-die;
-*/
-            $cache_key = $this->_getCacheKey($sql);
-            $data = $this->_getCachedData($cache_key);
-            if ($data===null)
-                $data = $this->_getContentFromDB($sql, (string)$cache_key);
+            $data = $this->_getContentFromDB($sql);
 
             if ( $this->user!==null)
                 $data['permissions'] = $this->user->getPermissions($this->module);
@@ -987,7 +889,7 @@ die;
      */
     public function execHEAD(): array
     {
-        $this->execGet();
+        $this->execGET();
         return ['message' => 'OK'];
     }
 
@@ -1049,9 +951,10 @@ die;
     {
         try
         {
-            $filename = $this->_inputFile();
-
             $this->response->setStatusCode(CResponse::HTTP_STATUS_BAD_REQUEST);
+            
+            // Attachments
+            $filenames = $this->request->inputFile();
 
             $affected_rows = $this->_insertDB();
             if ($affected_rows)
@@ -1069,9 +972,10 @@ die;
         }
         catch (Exception $ex)
         {
+            $this->request->removeUploadedFile();
+            $this->response->setStatusCode($ex->getCode());
             $this->response->setMessageError($ex->getMessage());
             $ret = ['message' => $ex->getMessage()];
-            $this->_removeUploadedFile();
         }
 
         return $ret;
@@ -1087,24 +991,25 @@ die;
     {
         $data = [];
 
-        $cache_key = $this->_getCacheKey('structures/'.$this->table.'.options');
-        $data = $this->_getCachedData($cache_key);
+        $cache_key = $this->_getCacheKey($this->module.'.options');
+        $data = $this->_getCachedData($cache_key, 'structures') ?? [];
         if (!$data)
         {
-            if ($this->table == 'all')
+            if ($this->module == 'All')
             {
-                if ($this->user->canViewAllModules())
-                    $data = array_keys($this->model->getAllAvailableTables());
-                else
-                    $data = $this->user->getAllAvaiableModules();
+                // if ($this->user->canViewAllModules())
+                if ($this->user->isAdmin()) 
+                    $data['tables'] = array_keys($this->model->getAllAvailableTables());                
+                $data['modules'] = $this->user->getAllAvaiableModules();
             }
             else
             {
                 $data = $this->model->getFields();
+                $data['metadata']['module'] =$this->module;
             }
 
             if ($this->cache && $cache_key && $data && count($data) > 0)
-                $this->cache->set($cache_key, $data);
+                $this->cache->set($cache_key, $data, 'structures');
         }
 
         return $data;
@@ -1123,8 +1028,8 @@ die;
         {
             $this->response->setStatusCode(CResponse::HTTP_STATUS_NOT_FOUND);
 
-            $this->model->setFilters($this->request->getFilters());
-            $this->model->checkValid(false); // Solo i parametri esplcitati, non sono necessari tutti
+//            $this->model->setFilters($this->request->getFilters());
+            $this->model->checkValid(false); // Only the specified parameters, not all are needed
 
             $this->_invalidateRelatedCache();
 

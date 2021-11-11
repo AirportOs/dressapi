@@ -14,10 +14,14 @@
 
 namespace DressApi\Core\Request;
 
+use DressApi\Core\Config\CConfig;
+use DressApi\Core\Response\CResponse;
 use Exception;
 
 class CRequest
 {   
+    protected CConfig $config;            // config values from db table "config"
+    
     protected string $sets;              // input parameters
     protected array  $params;            // values ​​to register input / update
     protected array $filters;            // filters or input/update parameters
@@ -27,22 +31,22 @@ class CRequest
     protected array $order_by = [];      // Order table by Item and type order (ASC or DESC) - i.e.: order-by/id-DESC
 
     protected int $page = 1;
-    protected int $items_per_page = DEFAULT_ITEMS_PER_PAGE;
+    protected int $items_per_page = MAX_ITEMS_PER_PAGE;
 
     protected string $http_autorization = '';
 
     protected static string $module;           // name of the module to display
-    protected static string $table;            // name of the db table
     protected static string $method;           // method get, head, post, puth, patch, delete OR options 
     protected static string $htmlframe;        // type of form (new or modify) only for HTML response
     protected static string $format = DEFAULT_FORMAT_OUTPUT;
     protected static string $charset = DEFAULT_CHARSET;
 
-    public function __construct()
+    public function __construct(CConfig $config)
     {
+        $this->config = $config;
+        
         $this->with_relations = false;
         self::$module = '';
-        self::$table = '';
         self::$htmlframe = 'Read';
 
         $this->setHttpAuthorization();
@@ -96,16 +100,12 @@ class CRequest
         if ($this->request)
         {
             if (strpos($this->request, '/') === false) // if only one filter is the module/table
-            {
-                self::$table = strtolower($this->request);
-                self::$module = ucfirst(self::$table);
-            }
+                self::$module = ucfirst(strtolower($this->request));
             else
             {
                 $filt = explode('/', $this->request);
                 
-                self::$table = strtolower(array_shift($filt));
-                self::$module = ucfirst(self::$table);
+                self::$module = ucfirst(strtolower(array_shift($filt)));
 
                 if (count($filt) > 0) // second is an id ("*" for all id)
                 {
@@ -149,7 +149,6 @@ class CRequest
                                 // $this->response->output(null, CResponse::HTTP_STATUS_BAD_REQUEST);
                                 break;
                             }
-
 
                             if ($this->items_per_page > MAX_ITEMS_PER_PAGE)
                                 $this->items_per_page = MAX_ITEMS_PER_PAGE;
@@ -273,10 +272,92 @@ class CRequest
         self::$format = ( ($format == '*') ? (DEFAULT_FORMAT_OUTPUT) : (strtolower($format)) );
     }
 
+        /**
+     * Import one or more files to upload
+     *
+     * @return string list of all uploaded files separated by semicolons 
+     * @throw in case of an error
+     */
+    public function inputFile(): string
+    {
+        $filenames = '';
+        $ret = '';
+
+        try
+        {
+            if (isset($_FILES) && count($_FILES) > 0)
+            {
+                foreach ($_FILES as $name => $file)
+                {
+                    $path =  UPLOAD_FILE_PATH . $name . "/";
+                    // print "\n$path\n";
+                    $filename = strtolower($file['name']);
+
+                    if ($file['error'] != 0)
+                        throw new Exception('File error on file ' . $filename,CResponse::HTTP_STATUS_BAD_REQUEST);
+                    if (!is_dir($path))
+                        mkdir($path, 0774, true);
+
+                    $path_parts = pathinfo($filename);
+
+                    if (!in_array(strtolower($path_parts['extension']), UPLOAD_EXT_ACCEPTED))
+                    {
+                        throw new Exception('The filetype is not valid (only ' . implode(', ', UPLOAD_EXT_ACCEPTED) . ')',CResponse::HTTP_STATUS_NOT_MODIFIED);
+                    }
+
+                    $internal_filename = time() . '_' . $filename;
+                    if (move_uploaded_file($file['tmp_name'], $path . $internal_filename))
+                    {
+                        if ($filenames!='') 
+                            $filenames.=';';
+                        $filenames .= $filename;
+                        $this->params[$name] = $internal_filename;
+                    }
+                    else // we can't move the file
+                        throw new Exception('the server cannot store the file ' . $filename, CResponse::HTTP_STATUS_INTERNAL_SERVER_ERROR);
+                }
+            }
+        }
+        catch (Exception $ex)
+        {
+            $ret = 'ERROR';
+            $this->response->setMessageError($ex->getMessage());
+        }
+        finally
+        {
+            if (isset($_FILES))
+                foreach ($_FILES as $name => $file)
+                    if (file_exists($file['tmp_name']))
+                        unlink($file['tmp_name']);
+        }
+        if ($ret == 'ERROR')
+            throw new Exception($this->response->getMessageError());
+
+        return $filenames;
+    }
+
+
+    /**
+     * Remove newly uploaded files in case of any other errors
+     *
+     * @return void
+     */
+    public function removeUploadedFile()
+    {
+        if (isset($_FILES))
+            foreach ($_FILES as $name => $file)
+            {
+                $path =  UPLOAD_FILE_PATH . '/' . $name . "/";
+                if (file_exists($path . $this->parameters[$name]))
+                    unlink($path . $this->parameters[$name]);
+            }
+    }
+
+
+
     public static function getFormat() : string  { return self::$format; }
     public static function getCharset() : string { return self::$charset; }
     public static function getModule() : string  { return self::$module; }
-    public static function getTable() : string   { return self::$table; }
     public static function getMethod() : string  { return self::$method; }
     public static function getHtmlFrame() : string    { return self::$htmlframe; }
 

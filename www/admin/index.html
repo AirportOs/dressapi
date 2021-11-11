@@ -47,8 +47,8 @@
             aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="w-75" id="search_on_table"><input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search" 
-                                                onkeyup="GetList(localStorage.current_table,  localStorage.list_options + '/all~'+this.value);"></div>
+        <div class="w-75" id="search_on_module"><input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search" 
+                                                onkeyup="GetList(localStorage.current_module,  localStorage.list_options + '/all~'+this.value);"></div>
         <div class="nav-link px-3 text-white" id="username_viewer"></div>
         <div class="navbar-nav">
             <div class="nav-item text-nowrap">
@@ -93,7 +93,7 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-3"><h2 id="tableName"></h2></div>
+                        <div class="col-3"><h2 id="moduleName"></h2></div>
                         <div class="col-9" id="insertButton"> </div>
                     </div>
 
