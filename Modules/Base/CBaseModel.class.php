@@ -34,8 +34,8 @@ class CBaseModel
     protected bool $auto_user = true; // true set automatically the id value of user to current user
     protected bool $auto_creation_date = true; // true set automatically the id value of creation_date to current date/datetime
 
-    protected ?CCache $cache; // CCache, CFileCache or CRedisCache
-    protected ?CUser  $user;  // CUser  or sons
+    protected ?CCache $cache= null; // CCache, CFileCache or CRedisCache
+    protected ?CUser  $user = null;  // CUser  or sons
 
     public const REGEX_INT = '/^[-]?[\d]+$/';
     public const REGEX_UINT = '/^[\d]+$/';
@@ -60,7 +60,7 @@ class CBaseModel
      * @param ?CCache $cache object that manages cached data
      *
      */
-    public function __construct( string $table, array $all_tables, ?CUser $user = null, ?CCache $cache )
+    public function __construct( string $table, array $all_tables, ?CUser $user = null, ?CCache $cache = null )
     {
         $this->table = $table;
         // if ($this->module==='')
@@ -68,11 +68,11 @@ class CBaseModel
 
         $this->module = CRequest::getModule();
 
-        $this->setAutoUser( );
-        $this->setAutoCreationDate( );
-
         $this->cache = $cache;
         $this->user = $user;
+
+        $this->setAutoUser( );
+        $this->setAutoCreationDate( );
 
         if ($all_tables && isset($all_tables[$this->table]))
         {
@@ -324,7 +324,7 @@ class CBaseModel
     public function setAutoUser(bool $value = true)
     {
         // keep the real value from input only if is an Administrator
-        if ($this->user->isAdmin())
+        if (isset($this->user) && $this->user->isAdmin())
            return false;
 
         $this->auto_user = $value;
