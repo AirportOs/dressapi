@@ -2,7 +2,7 @@
 /**
  * 
  * DressAPI
- * @version 1.0
+ * @version 1.1
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale
@@ -25,8 +25,9 @@ use DressApi\Core\Cache\CFileCache as CCache;
 use DressApi\Core\User\CUser;
 use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
+use DressApi\Core\Response\CHtmlView;
 
-use DressApi\Core\DBMS\CSqlComposerBase;
+// use DressApi\Core\DBMS\CSqlComposerBase;
 
 class CBaseController extends CDB
 {   
@@ -34,7 +35,7 @@ class CBaseController extends CDB
     protected ?array $all_db_tables = [];
 
     protected string $table;         // name of current table (derived from current module) 
-    protected string $module;        // name of current module (derived from current module) 
+    protected string $module_name;   // name of current module (derived from current module) 
 
     protected string $items_view = '*'; // fields of the table to display 
 
@@ -43,7 +44,7 @@ class CBaseController extends CDB
     protected array $bind_params_values = [];
     protected array $bind_params_types = [];
 
-    protected $model; // CBaseModel or sons
+    protected mixed $model; // CBaseModel or sons
 
     protected array $related_field_names = [];
 
@@ -95,12 +96,12 @@ class CBaseController extends CDB
             // Reads and stores all the modules from the DB
             $this->_importAllDbModules();
 
-            $this->module = CRequest::getModule();
+            $this->module_name = CRequest::getModuleName();
 
-            if (isset($this->all_db_modules[$this->module]) && isset($this->all_db_modules[$this->module]['tablename']))
-                $this->table = $this->all_db_modules[$this->module]['tablename'];
+            if (isset($this->all_db_modules[$this->module_name]) && isset($this->all_db_modules[$this->module_name]['tablename']))
+                $this->table = $this->all_db_modules[$this->module_name]['tablename'];
             else
-                $this->table = strtolower($this->module);
+                $this->table = strtolower($this->module_name);
 
             // Check if the instantiated controller is a superclass of DressApi\Modules\Base\CBaseController
             $have_a_specific_module = is_subclass_of($this,'DressApi\Modules\Base\CBaseController');
@@ -109,7 +110,7 @@ class CBaseController extends CDB
             {
                 if ($this->table!='all')
                 {
-                    if (!isset($this->all_db_tables[$this->table])) // NOT exists
+                    if (!isset($this->all_db_tables[$this->table])) // NOT exist
                         throw new Exception("Module ".ucfirst($this->table)." not exist");
                 
                     // set a table of DB with "Base" Module
@@ -117,7 +118,7 @@ class CBaseController extends CDB
                 }
             }
 
-            $model = self::GetModuleModel();
+            $model = self::getModelName();
             $this->model = new $model($this->table, $this->all_db_tables, $this->user, $this->cache);
 
             $this->setItemsView(); // Fields to display, default '*' that is all
@@ -135,43 +136,16 @@ class CBaseController extends CDB
 
 
     /**
-     * Return the name of required module (default: 'Base')
-     * 
-     * @return string the name of the required module
-     */
-    public static function GetModule(): string
-    {
-        $module_name = 'Base';
-        $filters =  ((isset($_SERVER['QUERY_STRING'])) ? ($_SERVER['QUERY_STRING']) : (''));
-
-        if ($filters)
-        {
-            if (str_contains($filters, '/') === false)
-                $module_name = ucfirst($filters);  // the unique element of filter is the module/table
-            else
-            {
-                $filt = explode('/', $filters);
-                $module_name = ucfirst(array_shift($filt)); // the first element of filter is the module/table
-            }
-        }
-
-        if (strstr($module_name, '-'))
-            list($module_name,) = explode('-', $module_name);
-
-        return $module_name;
-    }
-
-
-    /**
      * Return the fullname of the class more appropriated
      * 
      * @param string $class_type class type (normally 'Controller' or 'Model')
      *
      * @return string the fullname of class required
      */
-    public static function GetModuleElement(string $class_type): string
+    public static function getModuleElement(string $class_type): string
     {
-        $module = self::GetModule();
+        $module = CRequest::getModuleName();
+
         $file = realpath(__DIR__ . '/../' . $module . '/C' . $module . $class_type . '.class.php');
 
         if (file_exists($file))
@@ -188,9 +162,9 @@ class CBaseController extends CDB
      * 
      * @return string the fullname of class Controller required
      */
-    public static function GetModuleController(): string
+    public static function getControllerName(): string
     {
-        return self::GetModuleElement('Controller');
+        return self::getModuleElement('Controller');
     }
 
 
@@ -199,9 +173,9 @@ class CBaseController extends CDB
      * 
      * @return string the fullname of class Model required
      */
-    public static function GetModuleModel(): string
+    public static function getModelName(): string
     {
-        return self::GetModuleElement('Model');
+        return self::getModuleElement('Model');
     }
 
 
@@ -297,7 +271,7 @@ class CBaseController extends CDB
      * @see setItemsRequired()
      * 
      * @example
-     *   $controller = CBaseController::GetModuleController();
+     *   $controller = CBaseController::getControllerName();
      *   $rest = new $controller( );
      *   $rest->addItemRequired( 'freq', ['rule'=>'/[daily|weekly|monthly]/'],'page' );
      *   $rest->addItemRequired( 'age', ['min'=>16, 'max'=35], 'student' );
@@ -327,7 +301,7 @@ class CBaseController extends CDB
      * @see addItemRequired() for a single table this is prefered method
      * 
      * @example
-     *   $controller = CBaseController::GetModuleController();
+     *   $controller = CBaseController::getControllerName();
      *   $rest = new $controller( );
      *   // resource is the table/controller, the internal_code and the name are items with a limitated quantity of characters  
      *   $rest->setItemRequired( ['student' => [ ['name'=>'age','min'=>16, 'max'=>35], ['name'=>'vote','min'=>18, 'max'=>30] ]] );
@@ -365,7 +339,7 @@ class CBaseController extends CDB
      * @see setRelatedFieldNames() to indicate all fields of all tables
      * 
      * @example
-     *   $controller = CBaseController::GetModuleController();
+     *   $controller = CBaseController::getControllerName();
      *   $rest = new $controller( );
      *   $rest->addRelatedFieldName( 'name', 'preference' ); // id_preference => [table:field] => preference:name
      */
@@ -389,7 +363,7 @@ class CBaseController extends CDB
      * @see addRelatedFieldName() for a single table this is prefered method
      * 
      * @example
-     *   $controller = CBaseController::GetModuleController();
+     *   $controller = CBaseController::getControllerName();
      *   $rest = new $controller( );
      *   $rest->setRelatedFieldNames( ['user'=>'email','*'=>'name'] );
      */
@@ -413,7 +387,7 @@ class CBaseController extends CDB
     {
         if ($vitems === null && $this->model->existsTable($this->table))
         {
-            if ($this->user->isAdmin())
+            if ($this->user!==null && $this->user->isAdmin()) 
                 $this->items_view = implode(',', $this->model->getListItemsByAdmin()); // , *, "name,surname,private_email"';
             else   
                 $this->items_view = implode(',', $this->model->getListItems()); // , *, "name,surname,private_email"';   
@@ -686,7 +660,7 @@ class CBaseController extends CDB
      * 
      * @param string $key the content that uniquely identifies the cache
      *
-     * @return ?array results of query or null if there is no data in the cache
+     * @return string results of query or null if there is no data in the cache
      */
     protected function _getCacheKey(string $key): string
     {
@@ -696,7 +670,7 @@ class CBaseController extends CDB
             $key .= '.'.implode('.',$this->bind_params_values);
 
         if ($this->cache)
-            $cache_key = (($this->cache_per_user && isset($this->user)) ? ($this->user->getId() . '.') : ('')) . hash('sha256', $key);
+            $cache_key = (($this->cache_per_user && $this->user!==null) ? ($this->user->getId() . '.') : ('')) . hash('sha256', $key);
 
         return $cache_key;
     }
@@ -761,7 +735,7 @@ class CBaseController extends CDB
                 'page' => $this->request->getCurrentPage(),
                 'total_pages' => $total_pages,
                 'items_per_page' => $items_per_page,
-                'module' => $this->module,
+                'module' => $this->module_name,
                 'key' => str_replace('[table]', $this->table, ITEM_ID)
             ];
     
@@ -863,8 +837,21 @@ class CBaseController extends CDB
 
             $data = $this->_getContentFromDB($sql);
 
-            if ( $this->user!==null)
-                $data['permissions'] = $this->user->getPermissions($this->module);
+            if ($this->user!==null)
+                $data['permissions'] = $this->user->getPermissions($this->module_name);
+
+            // bind_params_values
+            // template
+            // user/request/filters/id
+            $vid = $this->request->getFilter('id');
+            if ($vid!==null && $vid[0]=='=' && (int)$vid[1]>0)
+                $template_name = CRequest::getHtmlFrame().'_Details';
+            else
+                $template_name = CRequest::getHtmlFrame().'_List';
+            $view = new CHtmlView( $data, CRequest::getModuleName(), 'Default', 'default', 'dynamic' );
+            $view->add($template_name.'.tmpl.php');
+            $data['template'] = $view->get(); // debug ."<pre>".print_r($this,true).'</pre>'
+                
         }
         catch (Exception $ex)
         {
@@ -991,21 +978,24 @@ class CBaseController extends CDB
     {
         $data = [];
 
-        $cache_key = $this->_getCacheKey($this->module.'.options');
+        $cache_key = $this->_getCacheKey($this->module_name.'.options');
         $data = $this->_getCachedData($cache_key, 'structures') ?? [];
         if (!$data)
         {
-            if ($this->module == 'All')
+            if ($this->module_name == 'All')
             {
-                // if ($this->user->canViewAllModules())
-                if ($this->user->isAdmin()) 
-                    $data['tables'] = array_keys($this->model->getAllAvailableTables());                
-                $data['modules'] = $this->user->getAllAvaiableModules();
+                // if ($this->user->canViewAllModules())                
+                if ($this->user!==null)
+                {
+                    if ($this->user->isAdmin()) 
+                        $data['tables'] = array_keys($this->model->getAllAvailableTables());                
+                    $data['modules'] = $this->user->getAllAvaiableModules();
+                }
             }
-            else
+            else // single module
             {
                 $data = $this->model->getFields();
-                $data['metadata']['module'] =$this->module;
+                $data['metadata']['module'] =$this->module_name;
             }
 
             if ($this->cache && $cache_key && $data && count($data) > 0)
@@ -1071,7 +1061,7 @@ class CBaseController extends CDB
         {
             if (method_exists($this, $method))
             {
-                if ( $this->user===null || $this->table==='all' || $this->user->checkPermission(CRequest::getModule(), $this->method))
+                if ( $this->user===null || $this->table==='all' || $this->user->checkPermission(CRequest::getModuleName(), $this->method))
                     $result = $this->{$method}();
                 else
                 {
@@ -1082,7 +1072,7 @@ class CBaseController extends CDB
             else
             {
                 $this->response->setStatusCode(CResponse::HTTP_STATUS_NOT_FOUND);
-                throw new Exception("The method " . $this->method . " not exists");
+                throw new Exception("The method " . $this->method . " not exist");
             }
         }
         catch (Exception $ex)

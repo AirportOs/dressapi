@@ -2,7 +2,7 @@
 /**
  * 
  * DressAPI
- * @version 1.0
+ * @version 1.1
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale
@@ -51,10 +51,12 @@ class CLogger
                               );
 
             file_put_contents($filename, $datarow, LOCK_EX|FILE_APPEND);
+            if ($request->getFormat()=='html' && $response->getStatusCode()>=300)
+                              print $response->getMessageError();
         }
         catch(Exception)
         {
-            // if we use print or echo we could compromise the good result due to the log
+            // if we use print or echo on not HTML format we could compromise the good result due to the log
             // where we can write the exception? :)
         }
     }

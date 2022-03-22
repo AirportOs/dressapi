@@ -1,8 +1,28 @@
 <VirtualHost [your domain]:[port]>
 	[...]
 
-RewriteEngine on
-RewriteRule ^api\/(.*?)\/?$ /rest-api/?$1 [L,QSA]
+    AddDefaultCharset utf-8
+    ServerName dressapi
+    #ServerAdmin webmaster@dressapi.com
+    DocumentRoot "/var/www/html/dressapi/www"
+    
+    <Directory "/var/www/html/dressapi/www">
+       
+        Options Indexes FollowSymLinks
+        AllowOverride None
+        Require all granted
+
+        RewriteEngine On
+        RewriteBase /
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteRule ^(.*)$ /index.php?$1 [L,QSA]
+
+    </Directory>
+
+
+    ErrorLog "/var/www/html/dressapi/logs/dressapi-error.log"
+    CustomLog "/var/www/html/dressapi/logs/dressapi-access.log" common
 
 	[...]
 </VirtualHost>

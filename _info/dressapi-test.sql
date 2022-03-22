@@ -1,13 +1,8 @@
+-- Generation Time: Mar 22, 2022 at 01:46 AM
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Database: `dressapi-test`
@@ -26,16 +21,40 @@ CREATE TABLE `acl` (
   `can_read` enum('YES','NO') DEFAULT 'NO',
   `can_insert` enum('YES','NO') DEFAULT 'NO',
   `can_update` enum('YES','NO') DEFAULT 'NO',
-  `can_delete` enum('YES','NO') DEFAULT 'NO'
+  `can_delete` enum('YES','NO') DEFAULT 'NO',
+  `only_owner` enum('NO','YES') NOT NULL DEFAULT 'NO'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `acl`
 --
 
-INSERT INTO `acl` (`id`, `id_role`, `id_module`, `can_read`, `can_insert`, `can_update`, `can_delete`) VALUES
-(1, 1, NULL, 'YES', 'YES', 'YES', 'NO'),
-(2, NULL, 1, 'YES', 'NO', 'NO', 'NO');
+INSERT INTO `acl` (`id`, `id_role`, `id_module`, `can_read`, `can_insert`, `can_update`, `can_delete`, `only_owner`) VALUES
+(1, 1, NULL, 'YES', 'YES', 'YES', 'YES', 'NO'),
+(2, NULL, 1, 'YES', 'YES', 'YES', 'YES', 'YES'),
+(4, NULL, 2, 'YES', 'NO', 'NO', 'NO', 'NO'),
+(5, 101, 2, 'YES', 'YES', 'YES', 'YES', 'NO');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `config`
+--
+
+CREATE TABLE `config` (
+  `id` int(11) NOT NULL,
+  `name` varchar(60) NOT NULL,
+  `val` varchar(250) NOT NULL,
+  `description` varchar(80) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `config`
+--
+
+INSERT INTO `config` (`id`, `name`, `val`, `description`) VALUES
+(1, 'HOMEPAGE_RELATIVE_URL', '/page/1', 'The homepage relative url'),
+(2, 'WEBSITE_OWNER', 'DressApi', '');
 
 -- --------------------------------------------------------
 
@@ -67,12 +86,73 @@ INSERT INTO `contact` (`id`, `name`, `surname`, `address`, `zip_code`, `city`, `
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `document`
+--
+
+CREATE TABLE `document` (
+  `id` int(11) NOT NULL,
+  `name` varchar(80) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `extension` varchar(20) NOT NULL,
+  `filename` varchar(255) DEFAULT NULL,
+  `url` varchar(255) DEFAULT NULL,
+  `creation_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `id_user` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `document`
+--
+
+INSERT INTO `document` (`id`, `name`, `description`, `extension`, `filename`, `url`, `creation_date`, `id_user`) VALUES
+(3, 'Electro', '', 'jpg', '1636638666_img_20181130_180133.jpg', 'https://dressapi.com', '2021-11-11 14:52:55', 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `event`
+--
+
+CREATE TABLE `event` (
+  `id` int(11) NOT NULL,
+  `title` varchar(60) NOT NULL,
+  `abstract` varchar(250) NOT NULL,
+  `body` text NOT NULL,
+  `date` date NOT NULL,
+  `visible` enum('no','yes') NOT NULL DEFAULT 'no',
+  `status` enum('draft','reserved','public') NOT NULL DEFAULT 'draft',
+  `img` varchar(80) NOT NULL,
+  `site` varchar(120) NOT NULL,
+  `url` varchar(300) NOT NULL,
+  `creation_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `id_user` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `faq`
+--
+
+CREATE TABLE `faq` (
+  `id` int(11) NOT NULL,
+  `question` varchar(300) NOT NULL,
+  `answer` text NOT NULL,
+  `visible` enum('no','yes') NOT NULL DEFAULT 'no',
+  `status` enum('draft','reserved','public') NOT NULL DEFAULT 'draft',
+  `priority` int(11) NOT NULL DEFAULT 1000
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `module`
 --
 
 CREATE TABLE `module` (
   `id` int(11) NOT NULL,
   `name` varchar(80) NOT NULL,
+  `tablename` varchar(40) NOT NULL,
   `title` varchar(65) NOT NULL,
   `description` varchar(160) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -81,8 +161,38 @@ CREATE TABLE `module` (
 -- Dumping data for table `module`
 --
 
-INSERT INTO `module` (`id`, `name`, `title`, `description`) VALUES
-(1, 'Node', 'Node Module', 'Description of Node Module');
+INSERT INTO `module` (`id`, `name`, `tablename`, `title`, `description`) VALUES
+(1, 'Sign', 'user', 'Sign', 'Login, Logout, Subscription, Unsubscription'),
+(2, 'Pages', 'page', 'Page Module', ''),
+(3, 'News', 'news', 'News', ''),
+(4, 'Events', 'event', 'Events', ''),
+(5, 'Faq', 'faq', 'Faq', ''),
+(6, 'Documents', 'document', 'Documents', 'List of Documents');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `news`
+--
+
+CREATE TABLE `news` (
+  `id` int(11) NOT NULL,
+  `title` varchar(60) NOT NULL,
+  `abstract` varchar(250) NOT NULL,
+  `body` text NOT NULL,
+  `visible` enum('no','yes') NOT NULL DEFAULT 'no',
+  `status` enum('draft','reserved','public') NOT NULL DEFAULT 'draft',
+  `img` varchar(80) NOT NULL,
+  `creation_date` datetime NOT NULL DEFAULT current_timestamp(),
+  `id_user` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `news`
+--
+
+INSERT INTO `news` (`id`, `title`, `abstract`, `body`, `visible`, `status`, `img`, `creation_date`, `id_user`) VALUES
+(3, 'New Titlefh 56', 'sfhj', 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.', 'yes', 'public', '1636638573_img_20181130_180150.jpg', '2021-11-11 14:56:13', 0);
 
 -- --------------------------------------------------------
 
@@ -92,25 +202,25 @@ INSERT INTO `module` (`id`, `name`, `title`, `description`) VALUES
 
 CREATE TABLE `node` (
   `id` int(11) NOT NULL,
-  `id_nodetype` int(11) NOT NULL,
+  `id_nodetype` int(11) NOT NULL DEFAULT 11,
+  `label` varchar(40) NOT NULL,
   `title` varchar(180) NOT NULL,
   `body` text NOT NULL,
   `description` varchar(160) NOT NULL,
   `visible` enum('no','yes') NOT NULL DEFAULT 'no',
   `status` enum('draft','reserved','public') NOT NULL DEFAULT 'draft',
   `creation_date` date NOT NULL DEFAULT current_timestamp(),
-  `id_user` int(11) NOT NULL,
-  `id_parent_node` int(11) DEFAULT NULL
+  `id_user` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `node`
 --
 
-INSERT INTO `node` (`id`, `id_nodetype`, `title`, `body`, `description`, `visible`, `status`, `creation_date`, `id_user`, `id_parent_node`) VALUES
-(1, 3, 'Welcome to DressApi: the new ORM REST API', 'The name \"Dress\" means it \"dress\" up your database, substantially it provides a quick REST API, to your db schema. \nORM means Object-relational mapping and DressApi maps your database dynamically. Although it is structured as an MVC (Model, View, Controller) it does not need to define a model for each table in the DB but if it automatically reads it from the DB. \nThe most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code.', 'Example of use DressApi', 'no', 'draft', '2021-01-13', 1, NULL),
-(2, 3, 'DressApi is new but contains long experience inside', 'I have a very long experience in programming with various languages, for the web I have always preferred PHP.\r\nIn about twenty years of developing web applications, I have always developed and used a personal framework that adopts the dynamic ORM logic and has evolved over time. Now a large part of the code has been rewritten from scratch in the most modern view of the REST API but the idea has remained the same and the experience has certainly allowed to create a solid and functional platform.', '', 'no', 'draft', '2021-01-15', 103, NULL),
-(3, 3, 'title test', 'I have a very long experience in programming with various languages, for the web I have always preferred PHP.\nIn about twenty years of developing web applications, I have always developed and used a personal framework that adopts the dynamic ORM logic and has evolved over time. Now a large part of the code has been rewritten from scratch in the most modern view of the REST API but the idea has remained the same and the experience has certainly allowed to create a solid and functional platform.', 'Title Test OK!', 'no', 'draft', '2021-01-15', 115, NULL);
+INSERT INTO `node` (`id`, `id_nodetype`, `label`, `title`, `body`, `description`, `visible`, `status`, `creation_date`, `id_user`) VALUES
+(1, 11, 'HOME', 'Welcome to DressApi: the new ORM REST API', 'The name \"Dress\" means it \"dress\" up your database, substantially it provides a quick REST API, to your db schema. \nORM means Object-relational mapping and DressApi maps your database dynamically. Although it is structured as an MVC (Model, View, Controller) it does not need to define a model for each table in the DB but if it automatically reads it from the DB. \nThe most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code.', 'Example of use DressApi', 'yes', 'draft', '2021-01-13', 2),
+(2, 1, 'Experience', 'DressApi is new but contains long experience inside', 'I have a very long experience in programming with various languages, for the web I have always preferred PHP.\nIn about twenty years of developing web applications, I have always developed and used a personal framework that adopts the dynamic ORM logic and has evolved over time. Now a large part of the code has been rewritten from scratch in the most modern view of the REST API but the idea has remained the same and the experience has certainly allowed to create a solid and functional platform.', '', 'no', 'reserved', '2021-01-15', 101),
+(3, 1, 'Test', 'title test', 'I have a very long experience in programming with various languages, for the web I have always preferred PHP.\nIn about twenty years of developing web applications, I have always developed and used a personal framework that adopts the dynamic ORM logic and has evolved over time. Now a large part of the code has been rewritten from scratch in the most modern view of the REST API but the idea has remained the same and the experience has certainly allowed to create a solid and functional platform.', 'Title Test OK!', 'yes', 'reserved', '2021-01-15', 2);
 
 -- --------------------------------------------------------
 
@@ -161,6 +271,26 @@ INSERT INTO `role` (`id`, `name`, `description`) VALUES
 (101, 'Editor', 'Full power: can Delete or publish a post'),
 (102, 'Writer', 'Can write a post'),
 (103, 'Commentator', 'Can write a comment');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `route`
+--
+
+CREATE TABLE `route` (
+  `id` int(11) NOT NULL,
+  `origin_path` varchar(512) NOT NULL,
+  `destination_path` varchar(512) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `route`
+--
+
+INSERT INTO `route` (`id`, `origin_path`, `destination_path`) VALUES
+(1, 'login', 'sign/login-form'),
+(2, 'logout', 'sign/logout');
 
 -- --------------------------------------------------------
 
@@ -227,9 +357,35 @@ ALTER TABLE `acl`
   ADD KEY `id_role` (`id_role`);
 
 --
+-- Indexes for table `config`
+--
+ALTER TABLE `config`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `contact`
 --
 ALTER TABLE `contact`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `document`
+--
+ALTER TABLE `document`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_user` (`id_user`);
+
+--
+-- Indexes for table `event`
+--
+ALTER TABLE `event`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_user` (`id_user`);
+
+--
+-- Indexes for table `faq`
+--
+ALTER TABLE `faq`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -239,24 +395,37 @@ ALTER TABLE `module`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `news`
+--
+ALTER TABLE `news`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_user` (`id_user`);
+
+--
 -- Indexes for table `node`
 --
 ALTER TABLE `node`
   ADD PRIMARY KEY (`id`),
   ADD KEY `id_user` (`id_user`),
-  ADD KEY `id_nodetype` (`id_nodetype`),
-  ADD KEY `id_parent_node` (`id_parent_node`);
+  ADD KEY `id_nodetype` (`id_nodetype`);
 
 --
 -- Indexes for table `nodetype`
 --
 ALTER TABLE `nodetype`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
 
 --
 -- Indexes for table `role`
 --
 ALTER TABLE `role`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `route`
+--
+ALTER TABLE `route`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -282,7 +451,13 @@ ALTER TABLE `user_role`
 -- AUTO_INCREMENT for table `acl`
 --
 ALTER TABLE `acl`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `config`
+--
+ALTER TABLE `config`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `contact`
@@ -291,16 +466,40 @@ ALTER TABLE `contact`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
+-- AUTO_INCREMENT for table `document`
+--
+ALTER TABLE `document`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `event`
+--
+ALTER TABLE `event`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `faq`
+--
+ALTER TABLE `faq`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `module`
 --
 ALTER TABLE `module`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `news`
+--
+ALTER TABLE `news`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `node`
 --
 ALTER TABLE `node`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `nodetype`
@@ -313,6 +512,12 @@ ALTER TABLE `nodetype`
 --
 ALTER TABLE `role`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=105;
+
+--
+-- AUTO_INCREMENT for table `route`
+--
+ALTER TABLE `route`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `user`
@@ -341,8 +546,7 @@ ALTER TABLE `acl`
 -- Constraints for table `node`
 --
 ALTER TABLE `node`
-  ADD CONSTRAINT `node_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `node_ibfk_2` FOREIGN KEY (`id_parent_node`) REFERENCES `node` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `node_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `user`
@@ -357,7 +561,3 @@ ALTER TABLE `user_role`
   ADD CONSTRAINT `user_role_ibfk_1` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `user_role_ibfk_2` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

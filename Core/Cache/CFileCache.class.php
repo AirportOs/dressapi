@@ -3,7 +3,7 @@
 /**
  * 
  * DressAPI
- * @version 1.0
+ * @version 1.1
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale
@@ -28,16 +28,17 @@ use Exception;
  */
 class CFileCache
 {
-    private const MAIN_CACHE_PATH = CACHE_PATH; // /dev/shm/
+    private const MAIN_CACHE_PATH = CACHE_PATH; 
     private string $CACHE_PATH;
-    private $area_name;
+    private string $area_name;
 
     /**
      * CFileCache constructor
      *
      * @param string $domain application domain (unique name for each app)
+     * @param string $db_name name of db
      */
-    public function __construct(string $domain, $db_name)
+    public function __construct(string $domain, string $db_name)
     {
         // Crea la cartella cachefiles nella path indicata. Utile ad esempio se scrive in memoria tipo '/dev/shm/'
         $this->CACHE_PATH = self::MAIN_CACHE_PATH . $domain . '/'.$db_name.'/';
@@ -288,12 +289,13 @@ class CFileCache
     {
         if (!is_dir($path))
         {
-            // mkdir($this->CACHE_PATH,0777,true);
-            mkdir($path, 0755, true);
-            chown($path, 'apache');
-            chgrp($path, 'apache');
-            chown($path, 'www-data');
-            chgrp($path, 'www-data');
+            // $apache_user = getenv('APACHE_RUN_USER');
+            // if (!$apache_user)
+            //    $apache_user = posix_getuid();
+            mkdir($path, 0700, true);
+            // @chown($path, $apache_user);
+            // @chgrp($path, $apache_user);
+
             // $this->WriteDebug("$zone $prefix_zone $domain");
             // $this->WriteDebug(debug_backtrace());
         }

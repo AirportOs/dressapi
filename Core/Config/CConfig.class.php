@@ -2,7 +2,7 @@
 /**
  * 
  * DressAPI
- * @version 1.0
+ * @version 1.1
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale
@@ -54,7 +54,7 @@ class CConfig extends CDB
      * 
      * @param string $name name of value
      * 
-     * @return string the value associated to the name or '' if not exists
+     * @return string the value associated to the name or '' if not exist
      */
     public function get(string $name) : string
     {

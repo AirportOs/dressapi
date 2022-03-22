@@ -2,7 +2,7 @@
 /**
  * 
  * DressAPI
- * @version 1.0
+ * @version 1.1
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale
@@ -417,7 +417,7 @@ abstract class CDBMS
      *
      * @param int|string $name_col column name or numeric index (default 0)
      * @param ?int $pos_row position of the row starting from 0, if it is null or not indicated it reads the current value
-     * @return value of the indicated row and column relative to the previously executed query, null if it does not exist
+     * @return ?string value of the indicated row and column relative to the previously executed query, null if it does not exist
      */
     abstract public function getDataValue(int|string $name_col = '0', ?int $pos_row = null): ?string;
 
@@ -614,10 +614,10 @@ abstract class CDBMS
      *
      * @param string $sql string containing the query to execute
      * @param string $name_col column name or numeric index (default 0)
-     * @param int|null $pos_row position of the row starting from 0, if it is null or not indicated it reads the current value
-     * @return string|null indicated value of the row and column (by default it is the first column of current element)
+     * @param ?int $pos_row position of the row starting from 0, if it is null or not indicated it reads the current value
+     * @return ?string indicated value of the row and column (by default it is the first column of current element)
      */
-    public function getQueryDataValue(string $sql, string $name_col = '0', int|null $pos_row = null): string|null
+    public function getQueryDataValue(string $sql, string $name_col = '0', ?int $pos_row = null): ?string
     {
         $this->query($sql);
 
@@ -632,7 +632,7 @@ abstract class CDBMS
      * @param string $sql string containing the query to execute
      * @param ?array $bind_param_values deferred values ​​of the query
      * @param ?array $bind_param_types DB data types
-     * @param ?int $type it can assume the values: DB_ASSOC, DB_NUM and DB_BOTH equivalent to the type of array it must return, 
+     * @param ?int $type it can assume the values: CDB::DB_ASSOC, CDB::DB_NUM and CDB::DB_BOTH equivalent to the type of array it must return, 
      *                  respectively: 
      *                    - numeric index (returned from getDBResultNum())
      *                    - associative index (returned from getDBResultAssoc())

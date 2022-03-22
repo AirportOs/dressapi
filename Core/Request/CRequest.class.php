@@ -2,7 +2,7 @@
 /**
  * 
  * DressAPI
- * @version 1.0
+ * @version 1.1
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale
@@ -33,23 +33,28 @@ class CRequest
 
     protected string $http_autorization = '';
 
-    protected static string $module;           // name of the module to display
+    protected static string $module_name;           // name of the module to display
     protected static string $method;           // method get, head, post, puth, patch, delete OR options 
     protected static string $htmlframe;        // type of form (new or modify) only for HTML response
     protected static string $format = DEFAULT_FORMAT_OUTPUT;
     protected static string $charset = DEFAULT_CHARSET;
 
+    protected CRoute $route;      // Object for change the paths of QUERY_STRING
+
     public function __construct()
     {
         $this->with_relations = false;
-        self::$module = '';
+        self::$module_name = '';
         self::$htmlframe = 'Read';
+
+        $this->route = new CRoute();
 
         $this->setHttpAuthorization();
         $this->setMethod();
         $this->setFormat();
         $this->setParameters();
         $this->setFilters();
+
     }
 
 
@@ -91,17 +96,24 @@ class CRequest
     protected function setFilters()
     {
         // request/table/filters
-        $this->request =  ((isset($_SERVER['QUERY_STRING'])) ? ($_SERVER['QUERY_STRING']) : (''));
+        if (isset($_SERVER['REDIRECT_QUERY_STRING']))
+            $this->request =  $_SERVER['REDIRECT_QUERY_STRING'];
+        else
+            if (isset($_SERVER['QUERY_STRING']))
+                $this->request =  str_replace('index.php&','',$_SERVER['QUERY_STRING']);
         
         if ($this->request)
         {
+            // Change the path if exists
+            $this->route->changeIfExists($this->request);
+
             if (strpos($this->request, '/') === false) // if only one filter is the module/table
-                self::$module = ucfirst(strtolower($this->request));
+                self::$module_name = ucfirst(strtolower($this->request));
             else
             {
                 $filt = explode('/', $this->request);
                 
-                self::$module = ucfirst(strtolower(array_shift($filt)));
+                self::$module_name = ucfirst(strtolower(array_shift($filt)));
 
                 if (count($filt) > 0) // second is an id ("*" for all id)
                 {
@@ -109,7 +121,7 @@ class CRequest
                     if ($probably_id == '*' || preg_match('/^[\d,]+$/', $probably_id) === 1)
                     {
                         array_shift($filt);
-                        $this->filters[str_replace('[table]', self::$module, ITEM_ID)] = ['=', $probably_id];
+                        $this->filters[str_replace('[table]', self::$module_name, ITEM_ID)] = ['=', $probably_id];
                     }
                 }
                 $next_is_page = false;
@@ -182,6 +194,13 @@ class CRequest
                             continue;
                         }
 
+                        if ($f == 'login-form'  || $f == 'signup-form')
+                        {
+                            self::$htmlframe = 'Read_'.str_replace('-f','F',ucfirst($f));
+                            continue;
+                        }
+
+
                         if ($f == 'insert' || $f == 'modify' || $f=='delete')
                         {
                             self::$method = match ($f) 
@@ -208,14 +227,20 @@ class CRequest
                         {
                             if (isset(RELATED_FIELD_NAMES['*']))
                                 $related_item = RELATED_FIELD_NAMES['*']; 
-                            if (isset(RELATED_FIELD_NAMES[self::$module]))
-                                $related_item = RELATED_FIELD_NAMES[self::$module];
+                            if (isset(RELATED_FIELD_NAMES[self::$module_name]))
+                                $related_item = RELATED_FIELD_NAMES[self::$module_name];
                             if (isset($related_item))
                             {
                                 if (is_array($related_item))
                                     $item_name = $related_item[0];
                                 else
+                                if (isset(RELATED_FIELD_NAMES[$related_item]))
                                     $item_name = RELATED_FIELD_NAMES[$related_item];
+                                else
+                                    if (isset(RELATED_FIELD_NAMES['*']))
+                                        $item_name = RELATED_FIELD_NAMES['*'];
+                                    else
+                                        $item_name = $related_item;
                                 $this->filters[$item_name] = ['#',str_replace('-','_',$f)]; // _ is a wildcard
                             }
                         }
@@ -268,7 +293,7 @@ class CRequest
         self::$format = ( ($format == '*') ? (DEFAULT_FORMAT_OUTPUT) : (strtolower($format)) );
     }
 
-        /**
+    /**
      * Import one or more files to upload
      *
      * @return string list of all uploaded files separated by semicolons 
@@ -350,22 +375,21 @@ class CRequest
     }
 
 
-
     public static function getFormat() : string  { return self::$format; }
     public static function getCharset() : string { return self::$charset; }
-    public static function getModule() : string  { return self::$module; }
+    public static function getModuleName() : string  { return self::$module_name; }
     public static function getMethod() : string  { return self::$method; }
     public static function getHtmlFrame() : string    { return self::$htmlframe; }
 
     public function getHttpAuthorization() : string { return $this->http_autorization; }
     public function getRequest() : string      { return $this->request; }
     public function getSets() : string         { return $this->sets; }
-    public function getFilters() : array      { return $this->filters ?? []; }
-    public function getParameters() : array   { return $this->params ?? []; }
+    public function getFilters() : array       { return $this->filters ?? []; }
+    public function getParameters() : array    { return $this->params ?? []; }
     public function getWithRelations() : bool  { return $this->with_relations; }
     public function getCurrentPage() : int     { return $this->page; }
     public function getItemsPerPage() : int    { return $this->items_per_page; }
-    public function getFilter($name) : ?string { return $this->filters[$name] ?? null; }
+    public function getFilter($name) : ?array { return $this->filters[$name] ?? null; }
     public function getParameter($name) : ?string { return $this->params[$name] ?? null; }
     public function getOrderBy() : array     { return $this->order_by ?? []; }
 

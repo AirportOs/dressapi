@@ -3,7 +3,7 @@
 /**
  * 
  * DressAPI
- * @version 1.0
+ * @version 1.1
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale
@@ -48,7 +48,7 @@ class CRedisCache
 {
     private string $CACHE_PATH;
     private \Predis\Client $redis;
-    private $area_name;
+    private string $area_name;
     /**
      * CFileCache constructor
      *

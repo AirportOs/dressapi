@@ -2,7 +2,7 @@
 /**
  * 
  * DressAPI
- * @version 1.0
+ * @version 1.1
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale
@@ -66,7 +66,7 @@ class CBaseModel
         // if ($this->module==='')
         //    $this->module = substr(basename(get_class($this)),1,-5); // form 'CBaseModel' => 'Base'
 
-        $this->module = CRequest::getModule();
+        $this->module = CRequest::getModuleName();
 
         $this->cache = $cache;
         $this->user = $user;
@@ -86,7 +86,7 @@ class CBaseModel
         if ($this->column_list)
             foreach($this->column_list as $field=>&$value)
             {
-                if (str_replace('[table]',$this->table,ITEM_ID)===$field)
+                if (str_replace('[table]',(string)$this->table,ITEM_ID)===$field)
                 {
                     $value['rule'] = self::REGEX_INDEXES;
                     $value['html_type'] = 'hidden';
@@ -485,7 +485,7 @@ class CBaseModel
         if (isset($this->column_list[$field_name]))
             $this->column_list[$field_name]['rule'] = $pattern;
         else
-            throw new Exception("The field $field_name not exists");
+            throw new Exception("The field $field_name not exist");
     }
     
 
@@ -513,7 +513,7 @@ class CBaseModel
                 $this->column_list[$field_name]['max'] = $max_length;
         }
         else
-            throw new Exception("The field $field_name not exists"); 
+            throw new Exception("The field $field_name not exist"); 
     }
     
     /**
@@ -523,7 +523,7 @@ class CBaseModel
      * @param string $pattern regular expression pattern
      * @param string $options fixed and acceptable values separated by "|" (for example 'daily|weekly|monthly')
      *
-     * @throw an exception if the field_name not exists in the current table of DB
+     * @throw an exception if the field_name not exist in the current table of DB
      * 
      * @return void
      */
@@ -536,7 +536,7 @@ class CBaseModel
                 $this->column_list[$field_name]['options'] = $options;
         }
         else
-            throw new Exception("The field $field_name not exists");
+            throw new Exception("The field $field_name not exist");
     }
 
 

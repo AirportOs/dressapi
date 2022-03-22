@@ -2,12 +2,12 @@
 /**
  * 
  * DressAPI
- * @version 1.0
+ * @version 1.1
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale
  * @url https://dressapi.com
- * @year 2021
+ * @year 2020-2022
  * 
  * 
  * Example of a Custom Controller inside a new module

@@ -2,7 +2,7 @@
 /**
  * 
  * DressAPI
- * @version 1.0
+ * @version 1.1
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale
@@ -348,17 +348,17 @@ class CUser extends CDB
      * 
      * @param string|int $role role of user where role can be "Admin", "Publisher" and anything else or a number 1=Admin, 2=Publisher, 3=Normal User
      *                         the role name and type depends from your app
-     * @param string $module normally is the name of DB table but could be not in an custom extension 
+     * @param string $module_name normally is the name of DB table but could be not in an custom extension 
      * @param array $permissions Name of permissions [GET, POST, PATCh, PUT, DELETE, OPTIONS] 
      *               or if you prefer you can use C.R.U.D.O. letters [C=POST (Insert), R=GET (Read), U=PATCH|PUT (Modify), D=DELETE, O=OPTIONS].
      *               Finally, you can use * for all valid permission
      */
-    public function setRolePermissions( string|int $role, string $module, array $permissions )
+    public function setRolePermissions( string|int $role, string $module_name, array $permissions )
     {
         $this->role_permissions[$role] = [];
-        array_map(function($key,&$value) use($role, $module) 
+        array_map(function($key,&$value) use($role, $module_name) 
                   { 
-                        $this->addRolePermission( $role, $module, $value ); 
+                        $this->addRolePermission( $role, $module_name, $value ); 
                   }, $permissions);
     }
 
@@ -368,55 +368,55 @@ class CUser extends CDB
      * 
      * @param string|int $role role of user where role can be "Admin", "Publisher" and anything else or a number 1=Admin, 2=Publisher, 3=Normal User
      *                         the role name and type depends from your app
-     * @param string $module normally is the name of DB table but could be not in an custom extension 
+     * @param string $module_name normally is the name of DB table but could be not in an custom extension 
      * @param array $permissions list of permission (can_read, can_insert, can_delete, can_udate) 
      *              
      */
-    public function addRolePermission( string|int $role, string $module, array $permissions )
+    public function addRolePermission( string|int $role, string $module_name, array $permissions )
     {
         if (!isset($this->role_permissions[$role]))
             $this->role_permissions[$role] = [];
 
-        if (!isset($this->role_permissions[$role][$module]))
-            $this->role_permissions[$role][$module] = [];
+        if (!isset($this->role_permissions[$role][$module_name]))
+            $this->role_permissions[$role][$module_name] = [];
             
         if ($permissions['can_insert']=='YES')
-            $this->role_permissions[$role][$module][] = 'POST';
+            $this->role_permissions[$role][$module_name][] = 'POST';
 
         if ($permissions['can_read']=='YES')
         {
-            $this->role_permissions[$role][$module][] = 'GET';
-            $this->role_permissions[$role][$module][] = 'HEAD';
-            $this->role_permissions[$role][$module][] = 'OPTIONS';
+            $this->role_permissions[$role][$module_name][] = 'GET';
+            $this->role_permissions[$role][$module_name][] = 'HEAD';
+            $this->role_permissions[$role][$module_name][] = 'OPTIONS';
         }
                         
         if ($permissions['can_update']=='YES')
         {
-            $this->role_permissions[$role][$module][] = 'PATCH';
-            $this->role_permissions[$role][$module][] = 'PUT';
+            $this->role_permissions[$role][$module_name][] = 'PATCH';
+            $this->role_permissions[$role][$module_name][] = 'PUT';
         }
                         
         if ($permissions['can_delete']=='YES')
-            $this->role_permissions[$role][$module][] = 'DELETE';                        
+            $this->role_permissions[$role][$module_name][] = 'DELETE';                        
     }
 
 
     /**
      * Set a User Role (Normally detected by DB)
      * 
-     * @param string $module normally is the name of DB table but could be not in an custom extension 
+     * @param string $module_name normally is the name of DB table but could be not in an custom extension 
      * @param string $method method of operation [GET, POST, PATCH. PUT, DELETE, OPTIONS, HEAD] 
      *               Each method corresponds to a C.R.U.D. permission 
      *               [C=Create=POST, R=Read=GET/HEAD/OPTIONS, U=Update=PATCH|PUT, D=DELETE].
      * @return true if the current user have the permission for this method
      */
-    public function checkPermission(string $module, string $method)
+    public function checkPermission(string $module_name, string $method)
     {
         foreach($this->user_roles as $user_role)
             if (isset($this->role_permissions[$user_role]))
             {
-                if (isset($this->role_permissions[$user_role][$module]) &&
-                    in_array($method, $this->role_permissions[$user_role][$module]))
+                if (isset($this->role_permissions[$user_role][$module_name]) &&
+                    in_array($method, $this->role_permissions[$user_role][$module_name]))
                         return true;
                 else // check if it can access all modules
                 if (isset($this->role_permissions[$user_role]['*']) &&
@@ -431,19 +431,19 @@ class CUser extends CDB
     /**
      * Set a User Role (Normally detected by DB)
      * 
-     * @param string $module normally is the name of DB table but could be not in an custom extension 
+     * @param string $module_name normally is the name of DB table but could be not in an custom extension 
      * 
      * return array contains all permissions for selected module
      */
-    public function getPermissions(string $module)
+    public function getPermissions(string $module_name) : array
     {
         $permissions = [];
         $user_roles = array_merge(['*'], $this->user_roles ?? []);
         foreach($user_roles as $role)
         {
-            if (isset($this->role_permissions[$role]) && isset($this->role_permissions[$role][$module]))
+            if (isset($this->role_permissions[$role]) && isset($this->role_permissions[$role][$module_name]))
             {
-                $rp = &$this->role_permissions[$role][$module];
+                $rp = &$this->role_permissions[$role][$module_name];
                 
                 if (in_array('GET',$rp))    $permissions['can_read']   = 'can_read';
                 if (in_array('POST',$rp))   $permissions['can_insert'] = 'can_insert';
@@ -549,7 +549,7 @@ class CUser extends CDB
      */
     public function importACL(CRequest $request) : bool
     {
-        $module = CRequest::getModule(); 
+        $module_name = CRequest::getModuleName(); 
 
         $sc = new CSqlComposer();
         $sql = (string)$sc->select('id_role')->from('user_role')->where('id_user='.$this->id);       
@@ -560,7 +560,7 @@ class CUser extends CDB
         $sc->clear();
         $sql = (string)$sc->select('id_role,can_read,can_update,can_insert,can_delete')->
                     from('acl')->
-                    where("($role_conditions AND (id_module IS NULL OR id_module IN (SELECT id FROM module WHERE name='$module')))");
+                    where("($role_conditions AND (id_module IS NULL OR id_module IN (SELECT id FROM module WHERE name='$module_name')))");
 
         $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
@@ -580,7 +580,7 @@ class CUser extends CDB
             {
                 $role = $row['id_role'] ?? '*';
                 $this->addUserRole( $role );
-                $this->addRolePermission( $role, $module, $row );
+                $this->addRolePermission( $role, $module_name, $row );
             }
 
         return $data !== null;

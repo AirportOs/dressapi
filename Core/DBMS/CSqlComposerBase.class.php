@@ -2,7 +2,7 @@
 /**
  * 
  * DressAPI
- * @version 1.0
+ * @version 1.1
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale
@@ -56,7 +56,7 @@ namespace DressApi\Core\DBMS
          * @param string $table name of table
          * @param ?string $as alias table name
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         private function _getTable($type, string $table, ?string $as = null): CSqlComposerBase
         {
@@ -72,7 +72,7 @@ namespace DressApi\Core\DBMS
          * @param string $type type table: TABLE|JOIN|
          * @param array $tables list of tables in an array containing the name and possibly its alias name (as)
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         private function _getTables($type, array $tables): CSqlComposerBase
         {
@@ -93,7 +93,7 @@ namespace DressApi\Core\DBMS
          * 
          * @param string $items list of db fields separated by a comma
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         public function select(string $items): CSqlComposerBase
         {
@@ -108,7 +108,7 @@ namespace DressApi\Core\DBMS
          * 
          * @param array $items array contains the list of db fields
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         public function selectList(array $items): CSqlComposerBase
         {
@@ -122,7 +122,7 @@ namespace DressApi\Core\DBMS
          * @param string $table name of table
          * @param ?string $as alias table name
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase this object
          */
         public function from(string $table, ?string $as = null): CSqlComposerBase
         {
@@ -133,7 +133,7 @@ namespace DressApi\Core\DBMS
         /**
          * @param array $tables list of table name in the query
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase this object
          */
         public function fromList(array $tables): CSqlComposerBase
         {
@@ -149,7 +149,7 @@ namespace DressApi\Core\DBMS
          * @param string $on_condition condition for crossing with a starting table
          * @param ?string $as alias table name
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         private function _setJoin(string $join_type, string $table, string $on_condition, ?string $as = null): CSqlComposerBase
         {
@@ -168,7 +168,7 @@ namespace DressApi\Core\DBMS
          * @param string $on_condition condition for crossing with a starting table
          * @param ?string $as alias table name
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         public function join(string $table, string $on_condition, ?string $as = null): CSqlComposerBase
         {
@@ -183,7 +183,7 @@ namespace DressApi\Core\DBMS
          * @param string $on_condition condition for crossing with a starting table
          * @param ?string $as alias table name
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         public function leftJoin(string $table, string $on_condition, ?string $as = null): CSqlComposerBase
         {
@@ -198,7 +198,7 @@ namespace DressApi\Core\DBMS
          * @param string $on_condition condition for crossing with a starting table
          * @param ?string $as alias table name
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         public function rightJoin(string $table, string $on_condition, ?string $as = null): CSqlComposerBase
         {
@@ -213,7 +213,7 @@ namespace DressApi\Core\DBMS
          * @param string $on_condition condition for crossing with a starting table
          * @param ?string $as alias table name
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         public function innerJoin(string $table, string $on_condition, ?string $as = null): CSqlComposerBase
         {
@@ -228,7 +228,7 @@ namespace DressApi\Core\DBMS
          * @param string $on_condition condition for crossing with a starting table
          * @param ?string $as alias table name
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         public function outerJoin(string $table, string $on_condition, ?string $as = null): CSqlComposerBase
         {
@@ -239,7 +239,7 @@ namespace DressApi\Core\DBMS
         /**
          * @param string $conditions WHERE conditions
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         public function where(string $conditions): CSqlComposerBase
         {
@@ -252,7 +252,7 @@ namespace DressApi\Core\DBMS
         /**
          * @param string $group_by list of field names to group by
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         public function groupBy(string $group_by): CSqlComposerBase
         {
@@ -265,7 +265,7 @@ namespace DressApi\Core\DBMS
         /**
          * @param array $order_by list of field names to order by
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         public function orderBy(array $order_by): CSqlComposerBase
         {
@@ -278,7 +278,7 @@ namespace DressApi\Core\DBMS
         /**
          * @param string $having conditions for group by having
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         public function having(string $having): CSqlComposerBase
         {
@@ -290,7 +290,7 @@ namespace DressApi\Core\DBMS
         /**
          * @param string $match condition for advanced search
          * 
-         * @return SqlComposerBase $this this object
+         * @return CSqlComposerBase $this this object
          */
         public function match(string $items, string $match): CSqlComposerBase
         {

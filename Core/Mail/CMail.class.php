@@ -10,7 +10,7 @@ use PHPMailer\PHPMailer\Exception;
 
 class CMail
 {
-    protected $mailer = null;
+    protected PHPMailer $mailer;
 
     public function __construct()
     {
@@ -94,7 +94,7 @@ class CMail
             $values = array_values($replaces);
         }
 
-        $fileSubject = realpath(__DIR__.'/templates/'.$template.'.txt');
+        $fileSubject = realpath(__DIR__.'/dynamic/'.$template.'.txt');
         if ($fileSubject){
             $body = str_replace($labels, $values, file_get_contents($fileSubject));
         

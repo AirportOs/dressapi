@@ -2,7 +2,7 @@
 /**
  * 
  * DressAPI
- * @version 1.0
+ * @version 1.1
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale
@@ -15,7 +15,7 @@
 namespace DressApi\Core\Response;
 
 use DressApi\Core\Request\CRequest;
-use DressApi\Core\Response\CHtmlView\CHtmlView;
+use DressApi\Core\Response\CHtmlView;
 
 class CResponse
 {
@@ -78,6 +78,7 @@ class CResponse
      */
     protected function asXML(array|object|null $data, bool $full = true): string
     {
+        $this->setDataHeaders();
         header('Content-Type: application/xml; charset='.CRequest::getCharset());
 
         $table = 'result';
@@ -157,6 +158,7 @@ class CResponse
      */
     protected function asJSON(array|object|null $data): string
     {
+        $this->setDataHeaders();
         header('Content-Type: application/json; charset='.CRequest::getCharset());
         if ($data === null)
             $data = ['message' => 'Empty'];
@@ -173,20 +175,31 @@ class CResponse
      */
     protected function asHTML(array|object|null $data): string
     {
+        $html_frame_name = CRequest::getHtmlFrame();
         header('Content-Type: text/html; charset='.CRequest::getCharset());
         if ($data === null)
             $data = ['message' => 'Empty'];
 
-        $view = new CHtmlView( $data, CRequest::getModule(), 'Default', 'default' );
+        $view = new CHtmlView( $data, CRequest::getModuleName(), 'Default', 'default' );
+        $view->add( [
+                    'Header.tmpl.php',
+                    $html_frame_name.'.tmpl.php',
+                    'Footer.tmpl.php',
+                    ]);
 
-        $view->add(['Header.tmpl.php',CRequest::getHtmlFrame().'.tmpl.php','Footer.tmpl.php']);
-
-        $view->send();
-
-        return '';
+        return $view->send();
     }
 
 
+    protected function setDataHeaders()
+    {
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Max-Age: 1000');
+        header('Content-Type: application/'.$this->format.'; charset='.CRequest::getCharset());
+        header('Access-Control-Allow-Methods: GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+        http_response_code( $this->status_code);
+    }
 
 
     /**
@@ -201,20 +214,6 @@ class CResponse
     public function output(mixed $result): string
     {
         $formatMethod = 'as'.strtoupper($this->format);
-
-        $format = CRequest::getFormat();
-
-        if ($format=='html')
-            header('Content-Type: text/html; charset='.CRequest::getCharset());
-        else
-        {
-            header('Access-Control-Allow-Origin: *');
-            header('Access-Control-Max-Age: 1000');
-            header('Content-Type: application/'.$format.'; charset='.CRequest::getCharset());
-            header('Access-Control-Allow-Methods: GET, HEAD, PUT, PATCH, POST, DELETE, OPTIONS');
-            header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
-            http_response_code( $this->status_code);
-        }
 
         if (method_exists($this, $formatMethod))
             $data_format = $this->$formatMethod($result);
