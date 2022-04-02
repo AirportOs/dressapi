@@ -1,5 +1,5 @@
 <div class="container">
-<b>NEWS - {{creation_date}}</b>
+<b>BASE - {{creation_date}}</b>
 <h1>{{title}}</h1>
 <img src="/upload/img/{{img}}" style="float:right;width:40%;">
 <h2><i>{{abstract}}</i></h2>

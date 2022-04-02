@@ -7,6 +7,8 @@ require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../Core/autoload.php'; // Autoloader dell'applicazione
 
+use DressApi\Core\DBMS\CSqlComposerBase;
+
 use DressApi\Core\DBMS\CMySqlDB as CDB;       // In the future other DBMS as Oracle, PostgreSQL, MS SQL
 use DressApi\Core\Cache\CFileCache as CCache; // An alternative is CRedisCache
 use DressApi\Core\User\CUser;
@@ -19,6 +21,15 @@ try
 {       
     CDB::connect(DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT);
     
+    CSqlComposerBase::setRenamedTables( ['acl'=>'da_acl', 
+                                         'config'=>'da_config',
+                                         'module'=>'da_module',
+                                         'role'=>'da_role',
+                                         'route'=>'da_route',
+                                         'user'=>'da_user',
+                                         'user_role'=>'da_user_role',
+                                        ] );
+
     $cache = new CCache(DOMAIN_NAME,DB_NAME); // Cache manager
 
     $request = new CRequest();        // Input manager (but the validations is the CBaseModel class)
