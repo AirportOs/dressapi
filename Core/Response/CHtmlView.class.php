@@ -20,7 +20,8 @@ use DressApi\Modules\Base\CBaseController;
 
 class CHtmlView
 {
-    protected mixed $data = null;
+    protected mixed $data = null; // data elements
+    protected array $tv = [];   // template variables for replacing in the html code
     protected array $page_info = [];
     protected array $modules = [];
     protected array $html_foldernames = [];
@@ -184,7 +185,20 @@ class CHtmlView
      * string $output the html code to transform
      */
     function replaceTags(string $output)
-    {        
+    {
+/*        
+        // Replace PHP code for print variable
+        preg_match_all('/\{\{(.*?)\}\}/m', $output, $matches, PREG_SET_ORDER, 0);
+
+        if ($matches)
+            foreach($matches as $m)
+            {
+                $tags[] = $m[0];
+                $values[] = $this->_tv[$m[1]];
+            }
+        $output = str_replace($tags, $values, $output);
+*/
+        
         // REPLACE CSS INLINE CODE
         $css_code = '';
         foreach($this->inline_css as $css_filename )

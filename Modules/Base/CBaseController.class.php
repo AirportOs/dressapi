@@ -34,12 +34,13 @@ class CBaseController extends CDB
     protected ?array $all_db_modules = [];
     protected ?array $all_db_tables = [];
 
-    protected string $table;         // name of current table (derived from current module) 
-    protected string $module_name;   // name of current module (derived from current module) 
-
+    protected string $module_name = '';   // name of current module 
+    protected string $table = '';         // name of current table (derived from table of current module) 
+    protected string $table_filter = '';  // basic condition for the current table
+    
     protected string $items_view = '*'; // fields of the table to display 
 
-    protected string $method;         // GET, PUT, PATCH, POST, OPTIONS, HEAD, DELETE 
+    protected string $method = 'GET';         // GET, PUT, PATCH, POST, OPTIONS, HEAD, DELETE 
 
     protected array $bind_params_values = [];
     protected array $bind_params_types = [];
@@ -88,6 +89,8 @@ class CBaseController extends CDB
         $this->bind_params_values = [];
         $this->bind_params_types = [];
 
+        $this->table_filter = '';
+
         try
         {
             // Reads and stores all the tables from the DB
@@ -99,7 +102,10 @@ class CBaseController extends CDB
             $this->module_name = CRequest::getModuleName();
 
             if (isset($this->all_db_modules[$this->module_name]) && isset($this->all_db_modules[$this->module_name]['tablename']))
+            {
                 $this->table = $this->all_db_modules[$this->module_name]['tablename'];
+                $this->table_filter = $this->all_db_modules[$this->module_name]['tablefilter'];
+            }
             else
                 $this->table = strtolower($this->module_name);
 
@@ -192,7 +198,7 @@ class CBaseController extends CDB
 
         if (!$this->all_db_modules)
         {
-            $this->query('SELECT id,name,tablename FROM module');
+            $this->query('SELECT id,name,tablename,tablefilter FROM module');
             $this-> getDataTable($this->all_db_modules, self::DB_ASSOC, 'name');
             if ($this->cache)
                 $this->cache->set('all_db_modules', $this->all_db_modules);
@@ -512,6 +518,15 @@ class CBaseController extends CDB
             else
                 $conditions = $additional_conditions;
         }
+
+        if ($this->table_filter)
+        {
+            if ($conditions)
+                $conditions = "($conditions) AND ($this->table_filter)";
+            else
+                $conditions = $this->table_filter;
+        }
+
         return $conditions;
     }
 
@@ -848,7 +863,7 @@ class CBaseController extends CDB
                 $template_name = CRequest::getHtmlFrame().'_Details';
             else
                 $template_name = CRequest::getHtmlFrame().'_List';
-            $view = new CHtmlView( $data, CRequest::getModuleName(), 'Default', 'default', 'dynamic' );
+            $view = new CHtmlView( $data, CRequest::getModuleName() ); // , 'Default', 'default'
             $view->add($template_name.'.tmpl.php');
             $data['template'] = $view->get(); // debug ."<pre>".print_r($this,true).'</pre>'
                 

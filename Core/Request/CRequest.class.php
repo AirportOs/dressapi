@@ -102,11 +102,11 @@ class CRequest
             if (isset($_SERVER['QUERY_STRING']))
                 $this->request =  str_replace('index.php&','',$_SERVER['QUERY_STRING']);
         
+        // Change the path if exists
+        $this->route->changeIfExists($this->request);
+
         if ($this->request)
         {
-            // Change the path if exists
-            $this->route->changeIfExists($this->request);
-
             if (strpos($this->request, '/') === false) // if only one filter is the module/table
                 self::$module_name = ucfirst(strtolower($this->request));
             else

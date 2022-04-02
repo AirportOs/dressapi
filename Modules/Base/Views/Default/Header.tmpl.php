@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="it">
   <head>
+    <title>{{title}}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
+    <meta name="description" content="{{description}}">
     <meta name="author" content="Pasquale Tufano">
-    <title>Signin · DressApi/Bootstrap-Italia</title>
 
   
     <!-- Bootstrap core CSS -->

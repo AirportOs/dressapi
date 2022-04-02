@@ -7,5 +7,5 @@
  * 
  */
 
-$title = $this->page_info['element']['title'];
-$description = $this->page_info['element']['description'];
+ $this->tv['title'] = $this->page_info['element']['title'];
+ $this->tv['description'] = $this->page_info['element']['description'];
