@@ -855,18 +855,6 @@ class CBaseController extends CDB
 
             if ($this->user!==null)
                 $data['permissions'] = $this->user->getPermissions($this->module_name);
-
-            // bind_params_values
-            // template
-            // user/request/filters/id
-            $vid = $this->request->getFilter('id');
-            if ($vid!==null && $vid[0]=='=' && (int)$vid[1]>0)
-                $template_name = CRequest::getHtmlFrame().'_Details';
-            else
-                $template_name = CRequest::getHtmlFrame().'_List';
-            $view = new CHtmlView( $data, CRequest::getModuleName() ); // , 'Default', 'default'
-            $view->add($template_name.'.tmpl.php');
-            $data['template'] = $view->get(); // debug ."<pre>".print_r($this,true).'</pre>'                
         }
         catch (Exception $ex)
         {
