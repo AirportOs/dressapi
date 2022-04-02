@@ -613,7 +613,7 @@ class CMySqlDB extends CDBMS
             if ($stmt)
             {
                 if ($types != '')
-                $stmt->bind_param($types, ...$bind_param_values);
+                    $stmt->bind_param($types, ...$bind_param_values);
                 $ret = $stmt->execute();
                 if ($ret)
                     self::$results[self::$dbkey] = $stmt->get_result(); // get the mysqli result                

@@ -186,18 +186,12 @@ class CHtmlView
      */
     function replaceTags(string $output)
     {
-/*        
         // Replace PHP code for print variable
         preg_match_all('/\{\{(.*?)\}\}/m', $output, $matches, PREG_SET_ORDER, 0);
-
         if ($matches)
             foreach($matches as $m)
-            {
-                $tags[] = $m[0];
-                $values[] = $this->_tv[$m[1]];
-            }
-        $output = str_replace($tags, $values, $output);
-*/
+                $replacements[$m[0]] = $this->tv[$m[1]];
+        $output = str_replace(array_keys($replacements), array_values($replacements), $output);
         
         // REPLACE CSS INLINE CODE
         $css_code = '';
@@ -295,15 +289,12 @@ class CHtmlView
      */
     public function get() : string
     {
-        global $user, $cache, $controller;
-
         $output = '';
 
-        if (count($this->filenames)>0)
         foreach($this->filenames as $filename)
-            $output .= str_replace(['<?=','<?php print ','?>'],['{{','{{','}}'], file_get_contents($filename));
+            $output .= file_get_contents($filename);
 
-        return preg_replace(array('/<(\?|\%)\=?(php)?/', '/(\%|\?)>/'), array('',''), $output);
+        return $output;
     }    
 };
 
