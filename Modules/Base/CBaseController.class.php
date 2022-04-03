@@ -19,6 +19,7 @@ namespace DressApi\Modules\Base;
 require_once __DIR__ . '/config.php'; // local module config
 
 use Exception;
+use DressApi\Core\DBMS\CSqlComposerBase;
 use DressApi\Core\DBMS\CMySqlComposer as CSqlComposer;
 use DressApi\Core\DBMS\CMySqlDB as CDB;
 use DressApi\Core\Cache\CFileCache as CCache;
@@ -198,7 +199,7 @@ class CBaseController extends CDB
 
         if (!$this->all_db_modules)
         {
-            $this->query('SELECT id,name,tablename,tablefilter FROM module');
+            $this->query('SELECT id,name,tablename,tablefilter FROM '.CSqlComposerBase::getRenamedTable('module'));
             $this-> getDataTable($this->all_db_modules, self::DB_ASSOC, 'name');
             if ($this->cache)
                 $this->cache->set('all_db_modules', $this->all_db_modules);
@@ -854,19 +855,6 @@ class CBaseController extends CDB
 
             if ($this->user!==null)
                 $data['permissions'] = $this->user->getPermissions($this->module_name);
-
-            // bind_params_values
-            // template
-            // user/request/filters/id
-            $vid = $this->request->getFilter('id');
-            if ($vid!==null && $vid[0]=='=' && (int)$vid[1]>0)
-                $template_name = CRequest::getHtmlFrame().'_Details';
-            else
-                $template_name = CRequest::getHtmlFrame().'_List';
-            $view = new CHtmlView( $data, CRequest::getModuleName() ); // , 'Default', 'default'
-            $view->add($template_name.'.tmpl.php');
-            $data['template'] = $view->get(); // debug ."<pre>".print_r($this,true).'</pre>'
-                
         }
         catch (Exception $ex)
         {

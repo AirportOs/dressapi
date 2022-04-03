@@ -22,10 +22,11 @@ namespace DressApi\Core\DBMS
      */
     class CSqlComposerBase
     {
+        static protected array $renamed_tables = []; // list of renamed table (for example 'act' becames 'da_acl' )
+        
         protected array $params = [];
         protected int $page = 0;
         protected int $elements_per_page = 0;
-
 
         /**
          * Constructor
@@ -38,6 +39,16 @@ namespace DressApi\Core\DBMS
             if ($table !== null) $this->params['TABLE'][0] = $table;
         }
 
+
+        static public function setRenamedTables(array $renamed_tables)
+        {
+            self::$renamed_tables = $renamed_tables;
+        }
+
+        static public function getRenamedTable($table)
+        {
+            return ((isset(self::$renamed_tables))?(self::$renamed_tables[$table]):($table));
+        }
 
         /**
          * Reset all internal data (like a new)
@@ -62,6 +73,8 @@ namespace DressApi\Core\DBMS
         {
             if (!isset($this->params[$type]))
                 $this->params[$type] = [];
+            if (isset(self::$renamed_tables[$table]))
+                $table = self::$renamed_tables[$table];
             $this->params[$type][] = "`$table` " . ($as ?? '');
 
             return $this;
@@ -79,10 +92,15 @@ namespace DressApi\Core\DBMS
             $this->params[$type] = [];
             if (isset($tables))
                 foreach ($tables as $table)
+                {
+                    if (isset(self::$renamed_tables[$table]))
+                        $table = self::$renamed_tables[$table];
+        
                     if (is_string($table))
                         $this->params[$type][] = "`$table` ";
                     else
                         $this->params[$type][] = '`' . $table['name'] . '` `' . $table['as'] ?? '`';
+                }
 
             return $this;
         }

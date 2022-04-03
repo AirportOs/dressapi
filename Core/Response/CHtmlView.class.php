@@ -74,9 +74,7 @@ class CHtmlView
         }
 
         if (isset($data['elements']) && count($data['elements'])==1)
-        {
             $this->page_info['element'] = $data['elements'][0];
-        }
         else
             $this->page_info['element'] = $this->page_info['module'];
     }
@@ -189,9 +187,16 @@ class CHtmlView
         // Replace PHP code for print variable
         preg_match_all('/\{\{(.*?)\}\}/m', $output, $matches, PREG_SET_ORDER, 0);
         if ($matches)
+        {
             foreach($matches as $m)
-                $replacements[$m[0]] = $this->tv[$m[1]];
-        $output = str_replace(array_keys($replacements), array_values($replacements), $output);
+                if (isset($this->page_info['element'][$m[1]]))
+                    $replacements[$m[0]] = $this->page_info['element'][$m[1]];
+                else
+                    $replacements[$m[0]] = '';
+            
+            if (count($replacements)>0)
+                $output = str_replace(array_keys($replacements), array_values($replacements), $output);
+        }
         
         // REPLACE CSS INLINE CODE
         $css_code = '';

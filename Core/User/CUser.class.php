@@ -16,12 +16,15 @@
 namespace DressApi\Core\User;
 
 use Exception;
+use DressApi\Core\DBMS\CSqlComposerBase;
+
 use Firebase\JWT\JWT;
 use DressApi\Core\DBMS\CMySqlDB as CDB;
 use DressApi\Core\DBMS\CMySqlComposer as CSqlComposer;
 use DressApi\Core\Request\CRequest;
 use DressApi\Core\Response\CResponse;
 use DressApi\Core\Cache\CFileCache as CCache; // An alternative is CRedisCache
+
 
 use DressApi\Core\Mail\CMail;
 
@@ -560,7 +563,7 @@ class CUser extends CDB
         $sc->clear();
         $sql = (string)$sc->select('id_role,can_read,can_update,can_insert,can_delete')->
                     from('acl')->
-                    where("($role_conditions AND (id_module IS NULL OR id_module IN (SELECT id FROM module WHERE name='$module_name')))");
+                    where("($role_conditions AND (id_module IS NULL OR id_module IN (SELECT id FROM ".CSqlComposerBase::getRenamedTable('module')." WHERE name='$module_name')))");
 
         $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
