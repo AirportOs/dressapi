@@ -42,8 +42,8 @@ class CBaseModel
     public const REGEX_NUMBER = '/^\-?\d*\.?\d*$/';
     public const REGEX_BIT = '/^[0-1]+$/';
     public const REGEX_TIMESTAMP = '/^[\d]{10}$/'; // 1621344928
-    public const REGEX_DATETIME = '/\d{4}\-\d{2}\-\d{2}\s{1}\d{2}:\d{2}:\d{2}/'; // 2021-05-18 15:38:00
-    public const REGEX_TIME = '/^\d{2}:\d{2}:\d{2}$/'; // 15:38:00
+    public const REGEX_DATETIME = '/\d{4}\-\d{2}\-\d{2}\s{1}\d{2}:\d{2}[:\d{2}]?/'; // 2022-04-18 15:38:00 or 2022-04-18 15:38
+    public const REGEX_TIME = '/^\d{2}:\d{2}[:\d{2}]?$/'; // 15:38:00 or 15:38
     public const REGEX_DATE = '/^\d{4}\-\d{2}\-\d{2}$/'; // 2021-05-18
     public const REGEX_YEAR = '/^\d{4}$/'; // 2021
 
@@ -129,26 +129,33 @@ class CBaseModel
                     case 'TIMESTAMP':
                         $value['rule'] = self::REGEX_TIMESTAMP; // 1620344928
                         $value['html_type'] = 'datetime-local';
+                        $value['default'] = time();
                         break;
         
                     case 'DATETIME':
                         $value['rule'] = self::REGEX_DATETIME; // 2020-05-18 15:38
-                        $value['html_type'] = 'datetime-local';
+                        $value['html_type'] = 'datetime';
+                        $value['default'] = sprintf("%04d-%02d-%02d %02d:%02d",
+                                                        date('Y'),date('m'),date('d'),
+                                                        date('H'),date('i') );
                         break;
 
                     case 'TIME':
                         $value['rule'] = self::REGEX_TIME; // 15:38
                         $value['html_type'] = 'time';
+                        $value['default'] = sprintf("%02d:%02d", date('H'),date('i') );
                         break;
 
                     case 'DATE':
                         $value['rule'] = self::REGEX_DATE; // 2020-05-18
                         $value['html_type'] = 'date';
+                        $value['default'] = sprintf("%04d-%02d-%02d",date('Y'),date('m'),date('d') );
                         break;
 
                     case 'YEAR':
                         $value['rule'] = self::REGEX_YEAR; // 2020
                         $value['html_type'] = 'number';
+                        $value['default'] = time('Y');
                         break;
 
                     case 'ENUM':
@@ -317,7 +324,7 @@ class CBaseModel
     }
 
     /**
-     * Set the auto user: if true when a table contains id_user set to id of the current user
+     * Set the auto user: if true when a table contains id__user set to id of the current user
      * 
      * @param bool $value the value to be set;
      */
@@ -332,11 +339,11 @@ class CBaseModel
 
 
     /**
-     * get the auto user: if true when a table contains id_user set to id of the current user
+     * get the auto user: if true when a table contains id__user set to id of the current user
      * 
      * @return bool the value of current auto user
      */
-    protected function getAutoUser() : bool
+    public function getAutoUser() : bool
     {
         return $this->auto_user;
     }
@@ -377,16 +384,16 @@ class CBaseModel
      */
     public function changeItemValues(array &$values, string $operation)
     {   
-        // Force the id_user to current id user value
+        // Force the id__user to current id user value
         $field_id_user = str_replace('[related_table]',USER_TABLE,RELATED_TABLE_ID);
-        if ($this->getAutoUser() && $this->model->existsField($field_id_user))
+        if ($this->getAutoUser() && $this->existsField($field_id_user))
             $values[$field_id_user] = (($this->user!==null)?($this->user->getId()):(NULL));
  
  
         // Force eventual creation_date to current_date
-        if ($operation=='modify' && $this->getAutoCreationDate() && $this->model->existsField(CREATION_DATE))
+        if ($operation=='modify' && $this->getAutoCreationDate() && $this->existsField(CREATION_DATE))
         {
-            if ($this->model->getFieldAttribute(CREATION_DATE,'type')=='DATETIME')
+            if ($this->getFieldAttribute(CREATION_DATE,'type')=='DATETIME')
                 $values[CREATION_DATE] = CDBMS::getCurrentDateTime();
             else
                 $values[CREATION_DATE] = CDBMS::getCurrentDate();
@@ -563,7 +570,7 @@ class CBaseModel
             {
                 $struct = $this->column_list[$name];
                 $struct['ref'] = '';
-                $struct['display_name'] = ucfirst(str_replace('_',' ',$name));
+                $struct['display_name'] = ucfirst(trim(str_replace('_',' ',$name)));
     
                 // if it is an index of an external record
                 $matches = [];
@@ -578,7 +585,7 @@ class CBaseModel
                     if (isset(RELATED_FIELD_NAMES[$table_check]))
                     {
                         $struct['html_type'] = ((!isset($this->all_tables[$rel_table]))?('hidden'):('select'));
-                        $struct['display_name'] = ucfirst($rel_table);
+                        $struct['display_name'] = ucfirst(trim(str_replace('_',' ',$rel_table)));
     
                         if (is_array(RELATED_FIELD_NAMES[$table_check]))
                             $struct['ref'] = $rel_table.':'.str_replace('[table]',$rel_table,ITEM_ID).'-'.implode(',',RELATED_FIELD_NAMES[$table_check]);

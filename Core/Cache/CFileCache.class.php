@@ -238,7 +238,8 @@ class CFileCache
      */
     public function clear(string $needle = '*')
     {
-        if (substr(PHP_OS, 0, 3) == 'Linux')
+        // Linux, BSD, Solaris, etc.
+        if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN')
         {
             $cmd = 'rm -R ' . $this->CACHE_PATH . (($this->area_name != '') ? ($this->area_name . '/') : (''));
             if ($needle !== NULL)
@@ -246,9 +247,7 @@ class CFileCache
 
             shell_exec($cmd);
         }
-
-        // For WINDOWS
-        if (substr(PHP_OS, 0, 3) == 'WIN')
+        else // WINDOWS
         {
             $all_file_to_delete = $this->getCacheNames();
             if ($all_file_to_delete)

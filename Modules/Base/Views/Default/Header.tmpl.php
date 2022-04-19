@@ -102,9 +102,9 @@ if (document.cookie.indexOf('cookies_consent=true') === -1) {
                 </a>
                 <div class="link-list-wrapper collapse" id="menu-principale">
                   <ul class="link-list">
-                    <li><a class="list-item" href="#" onclick="GetList('config');">Config</a></li>
-                    <li><a class="list-item" href="#" onclick="GetList('translations');">Translations</a></li>
-                    <li><a class="list-item" href="#" onclick="GetList('acl');">ACL</a></li>
+                    <li><a class="list-item" href="#" onclick="GetList(CONFIG_TABLE');">Config</a></li>
+                    <li><a class="list-item" href="#" onclick="GetList(TRANSLATIONS_TABLE);">Translations</a></li>
+                    <li><a class="list-item" href="#" onclick="GetList(ACL_TABLE);">ACL</a></li>
                   </ul>
                 </div>
               </nav>

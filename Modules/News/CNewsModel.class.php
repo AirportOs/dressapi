@@ -64,7 +64,7 @@ class CNewsModel extends CBaseModel
         $columns['title']['default'] = 'New Title';
         
         $columns['creation_date']['html_type'] = 'hidden';
-        $columns['id_user']['html_type'] = 'none';
+        $columns['id__user']['html_type'] = 'none';
     }
 
 

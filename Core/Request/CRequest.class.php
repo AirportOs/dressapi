@@ -9,7 +9,7 @@
  * @url https://dressapi.com
  * 
  * 
- * User authentication and authorization 
+ * Request Manager
  */
 
 namespace DressApi\Core\Request;
@@ -23,7 +23,7 @@ class CRequest
     protected string $sets;              // input parameters
     protected array  $params;            // values ​​to register input / update
     protected array $filters;            // filters or input/update parameters
-    protected string $request;           // request table and filters
+    protected string $request;           // request module name and filters
     protected bool $with_relations;      // table with names instead of indexes
 
     protected array $order_by = [];      // Order table by Item and type order (ASC or DESC) - i.e.: order-by/id-DESC
@@ -95,7 +95,7 @@ class CRequest
 
     protected function setFilters()
     {
-        // request/table/filters
+        // request/module name/filters
         if (isset($_SERVER['REDIRECT_QUERY_STRING']))
             $this->request =  $_SERVER['REDIRECT_QUERY_STRING'];
         else
@@ -107,7 +107,7 @@ class CRequest
 
         if ($this->request)
         {
-            if (strpos($this->request, '/') === false) // if only one filter is the module/table
+            if (strpos($this->request, '/') === false) // if only one filter is the module
                 self::$module_name = ucfirst(strtolower($this->request));
             else
             {
@@ -310,7 +310,7 @@ class CRequest
             {
                 foreach ($_FILES as $name => $file)
                 {
-                    $path =  UPLOAD_FILE_PATH . $name . "/";
+                    $path =  UPLOAD_PUBLIC_FILE_PATH ; // strtolower($this->module_name) . "/"
                     // print "\n$path\n";
                     $filename = strtolower($file['name']);
 
@@ -368,7 +368,7 @@ class CRequest
         if (isset($_FILES))
             foreach ($_FILES as $name => $file)
             {
-                $path =  UPLOAD_FILE_PATH . '/' . $name . "/";
+                $path =  UPLOAD_PUBLIC_FILE_PATH ; // . strtolower($this->module_name) . "/";
                 if (file_exists($path . $this->parameters[$name]))
                     unlink($path . $this->parameters[$name]);
             }

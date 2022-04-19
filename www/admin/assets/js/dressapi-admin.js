@@ -66,7 +66,7 @@ function createHTMLMenu(data)
 
 async function createMenuTables() 
 {
-    const response = await requestData('OPTIONS', '/api/all/', null).then(res => 
+    const response = await requestData('OPTIONS', '/all/', null).then(res => 
                                         {
                                         if (res.status == 200)
                                             res.json().then(data => { createHTMLMenu(data); });
@@ -85,6 +85,16 @@ async function requestData(method, url = '', data = null)
         //            'Host': 'dressapi',
     });
 
+    var input = document.querySelector('input[type="file"]');
+
+/*
+    var data_form = new FormData(data);
+    for(var x in data)
+    if (data_form[x].type=='file')
+    {
+        data_form[x].value = data[x].files[0];                
+    }
+*/
     let params = {
         method: method, // *GET, POST, PUT, DELETE, etc.
         mode: 'cors', // no-cors, *cors, same-origin
@@ -92,11 +102,19 @@ async function requestData(method, url = '', data = null)
         credentials: 'same-origin', // include, *same-origin, omit
         redirect: 'follow', // manual, *follow, error
         referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: data // body data type must match "Content-Type" header
     };
 
     if (['POST', 'PATCH', 'PUT'].includes(method)) {
         headers.append('Content-Type', 'application/x-www-form-urlencoded');
+        
+        
+//        for(var x in data)
+//        if (data[x].type=='file')
+//            data[x].value = data[x].files[0].name;                
+            
         params.body = new URLSearchParams([...(new FormData(data))]) // body data type must match "Content-Type" header
+
     }
     params.headers = headers;
 
@@ -120,7 +138,11 @@ function createTable(full_data, options)
                 if (typeof (full_data.metadata) != 'undefined')
                     html += '<th>Operations</th>';
                 for (let col_name in data[i])
-                    html += '<th>' + col_name.toUpperCase() + '</th>';
+                {
+                    if (col_name[0]=='_')
+                        col_name = col_name.substring(1);
+                    html += '<th>' + col_name.replaceAll('_',' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase()) + '</th>';
+                }
 
                 html += '</tr>';
                 head = true;
@@ -194,6 +216,18 @@ function createForm(full_data, item)
         let field = full_data.structure[i]['field'];
         let display_name = full_data.structure[i]['display_name'];
         let value = ((item)?(item.elements[0][field]):(''));
+
+        if (display_name)
+        {
+            if (display_name[0]=='_')
+            display_name = display_name.substring(1);
+            display_name = display_name.replaceAll('_',' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase());
+        }
+        else
+            continue;
+
+        if (value=='' && typeof(full_data.structure[i]['default'])!='undefined')
+            value = full_data.structure[i]['default'];
 // console.log(field); 
         switch(full_data.structure[i]['html_type'])
         {
@@ -204,8 +238,10 @@ function createForm(full_data, item)
             case 'text':
             case 'number':
             case 'datetime': 
+            case 'datetime-local': 
             case 'date': 
             case 'time': 
+            case 'time-local': 
             case 'color':
             case 'email':
             case 'image':
@@ -216,6 +252,24 @@ function createForm(full_data, item)
                                 '<label class="col-sm-2 form-label fw-bold fs-6" for="input_'+field+'">'+display_name+'</label>' +
                                 '<div class="col-sm-10"><input name="'+field+'" value="'+value+'" type="'+full_data.structure[i]['html_type']+'" size="'+size+'" class="form-control" id="input_'+field+'" required></div>' +
                                 '</div>'+"\r\n";
+                    break;
+   
+            case 'file':
+                    html += '<div class="mb-3 row">' +
+                                '<label class="col-sm-2 form-label fw-bold fs-6" for="input_'+field+'">'+display_name+'</label>';
+                            
+                    html += '<div class="col-sm-6"><input name="'+field+'" value="'+value+'" type="'+full_data.structure[i]['html_type']+'" class="form-control" id="input_'+field+'" required></div>';
+                    if (value!='')
+                    {
+                        if (value.includes('.png') || value.includes('.webp') ||
+                            value.includes('.jpg') || value.includes('.jpeg') || 
+                            value.includes('.gif') 
+                           )
+                            html += '<div class="col-sm-4"><img class="img-fluid" src="../public-files/' + value+'"></div>'+"\r\n";
+                        else
+                            html += '<div class="col-sm-4"><a target="_blank" href="../public-files/'+value+'/">'+value+'</a></div>'+"\r\n";
+                    }    
+                    html += '</div>'+"\r\n";
                     break;
    
                 case 'textarea':
@@ -292,7 +346,7 @@ function createForm(full_data, item)
 
     html += '<div class="row position-relative">';
     if (item)
-        html += '  <input value="Update" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="UpdateRow(\''+full_data.metadata.module+'\', document.getElementById(\'editForm\'), '+item.elements[0][full_data.metadata.key]+' )">';
+        html += '  <input value="Save" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="UpdateRow(\''+full_data.metadata.module+'\', document.getElementById(\'editForm\'), '+item.elements[0][full_data.metadata.key]+' )">';
     else
         html += '  <input value="Insert" type="button" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="InsertRow(\''+full_data.metadata.module+'\', document.getElementById(\'editForm\') )">';
     html += '  <input value="Go to List" type="button" class="btn btn-secondary col-sm-3 col-lg-2 m-3 top-50 start-0" onclick="GetList(\''+full_data.metadata.module+'\', \'wr/ob/'+full_data.metadata.key+'-DESC\')">';
@@ -342,7 +396,7 @@ function popolateSelect(type, id_obj, rel_module, options, rel_id_name, rel_disp
         options = '/' + options;
 
     // document.querySelector('h3').innerHTML=module;
-    requestData('GET','/api/' + rel_module + '/' + options)
+    requestData('GET','/' + rel_module + '/' + options)
         .then(res => {
             if (res.status == 200)
                 res.json().then(data => 
@@ -386,7 +440,7 @@ function popolateList(type, id_obj, rel_module, options, rel_id_name, rel_displa
         options = '/' + options;
 
     // document.querySelector('h3').innerHTML=module;
-    requestData('GET','/api/' + rel_module + '/' + options)
+    requestData('GET','/' + rel_module + '/' + options)
         .then(res => {
             if (res.status == 200)
                 res.json().then(data => 
@@ -427,7 +481,7 @@ function GetList(module, options)
         options = '/' + options;
 
     // document.querySelector('h3').innerHTML=module;
-    requestData('GET','/api/' + module + options)
+    requestData('GET','/' + module + options)
         .then(res => {
             if (res.status == 200)
                 res.json().then(data => { createTable(data); });
@@ -443,7 +497,7 @@ function InsertRowForm(module)
     //
     // Get Structure of module (Method OPTIONS)
     //
-    requestData('OPTIONS','/api/'+module)
+    requestData('OPTIONS','/'+module)
     .then(res2 => {
         if (res2.status==200)
             res2.json().then(data => { createForm(data);} );
@@ -464,7 +518,7 @@ function InsertRow(module, formData)
     // formData.append('id', 1000);
     // formData.append(module, 'Lumen is better than DressApi!');
     // formData.append('id_page', 1);
-    requestData('POST', '/api/'+module+'/',formData)
+    requestData('POST', '/'+module+'/',formData)
             .then(data => {
                 if (data.status==201)
                     data.json().then(res => { 
@@ -472,7 +526,10 @@ function InsertRow(module, formData)
                                                 GetList(module);
                                              } );
                 else
-                    setToast('Operation failed with status '+data.status,'bg-danger'); 
+                {
+                    setToast('Operation failed with status '+data.status+"\n"+data.message,'bg-danger'); 
+                    data.json().then(res => { if (typeof(res.message)!='undefined') setToast(res.message,'bg-danger'); } );
+                }
             });
 }
 
@@ -482,7 +539,7 @@ function InsertRow(module, formData)
 //
 function ViewRow(module, key, id)
 {
-    requestData('GET','/api/'+module+'/'+id+'/wr')
+    requestData('GET','/'+module+'/'+id+'/wr')
             .then(res => {
                 if (res.status==200)
                 {
@@ -500,7 +557,10 @@ function ViewDetails(data, key, id)
 {
     let html = '<div class="table-responsive m-1"><table class="table table-striped ">';
     for(let i in data.elements[0])
-        html += '<tr><th class="bg-info">'+i+'</th><td>'+data.elements[0][i]+'<td></tr>';
+    {
+        html += '<tr><th class="bg-info">'+i.replaceAll('_',' ').replace(/(^\w|\s\w)/g, m => m.toUpperCase())+'</th>'+
+                '<td>'+data.elements[0][i]+'<td></tr>';
+    }
     html += '</table></div>';
 
     html += '<div class="row">';
@@ -524,7 +584,7 @@ function UpdateRowForm(module, id)
 {
     var record = null;
     // console.log(id);
-    requestData('GET','/api/'+module+'/'+id)
+    requestData('GET','/'+module+'/'+id)
             .then(res => {
                 if (res.status==200)
                 {
@@ -532,7 +592,7 @@ function UpdateRowForm(module, id)
                     //
                     // Get Structure of module (Method OPTIONS)
                     //
-                    requestData('OPTIONS','/api/'+module)
+                    requestData('OPTIONS','/'+module)
                     .then(res2 => {
                         if (res2.status==200)
                             res2.json().then(data => { createForm(data, record);} );
@@ -555,7 +615,7 @@ function UpdateRow(module, formData, id)
     // formData.append(module, 'Yii is better than DressApi!');
     // formData.append('id_page', 1);
     
-    requestData('PATCH','/api/'+module+'/'+id, formData)
+    requestData('PATCH','/'+module+'/'+id, formData)
         .then(data => {
                         let msg = 'Operation '+((data.status==200)?'successful':'failed'); // +' with status '+data.status;
                         let jsonprom = data.json();
@@ -582,7 +642,7 @@ function DeleteRow(module, id)
     
     if (confirm('Are you sure to delete this element?'))
     {
-        requestData('DELETE','/api/'+module+'/'+id)
+        requestData('DELETE','/'+module+'/'+id)
             .then(data => {
                 if (data.status==200)
                 {

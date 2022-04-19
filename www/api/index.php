@@ -59,7 +59,7 @@ try
         // It excludes the management of the tables or modules listed below.
         // Not necessary if it is managed from ACL
         // if (!$imported_permission && !$user->hasRole('Administrator'))
-        //    $rest->setExcludedControllers(['user']);
+        //    $rest->setExcludedControllers([USER_TABLE]);
         
         if (defined('REQUIRED_ITEMS'))
             $controller->setItemsRequired(REQUIRED_ITEMS);            

@@ -79,7 +79,7 @@ class CUser extends CDB
     {
         $sc = new CSqlComposer();
 
-        $sql = $sc->select(USER_ITEM_ID.','.USER_ITEM_NAME)->from(USER_TABLE)->
+        $sql = (string)$sc->select(USER_ITEM_ID.','.USER_ITEM_NAME)->from(USER_TABLE)->
                     where(USER_ITEM_USERNAME."='$username' AND (".USER_ITEM_PASSWORD."='' OR ".
                           USER_ITEM_PASSWORD."='". hash(PASSWORD_ENC_ALGORITHM, $password)."') AND ".
                           "status='Verified'");
@@ -405,7 +405,7 @@ class CUser extends CDB
 
 
     /**
-     * Set a User Role (Normally detected by DB)
+     * Check permissions by User Role (Normally detected by DB)
      * 
      * @param string $module_name normally is the name of DB table but could be not in an custom extension 
      * @param string $method method of operation [GET, POST, PATCH. PUT, DELETE, OPTIONS, HEAD] 
@@ -474,7 +474,7 @@ class CUser extends CDB
         return $role_conditions;
     }
 
-    private function _queryCache(string $sql, bool $as_ids_array = false, string $folder_cache = 'acl')
+    private function _queryCache(string $sql, bool $as_ids_array = false, string $folder_cache = ACL_TABLE)
     {
         $hash = $folder_cache.'/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
@@ -555,17 +555,17 @@ class CUser extends CDB
         $module_name = CRequest::getModuleName(); 
 
         $sc = new CSqlComposer();
-        $sql = (string)$sc->select('id_role')->from('user_role')->where('id_user='.$this->id);       
+        $sql = (string)$sc->select('id_role')->from(USER_ROLE_TABLE)->where('id_user='.$this->id);       
         $user_role = $this->_queryCache($sql, true);       
 
         $role_conditions = (($user_role)?('(id_role IS NULL OR id_role IN ('.implode(',',$user_role).'))'):('FALSE'));
 
         $sc->clear();
         $sql = (string)$sc->select('id_role,can_read,can_update,can_insert,can_delete')->
-                    from('acl')->
-                    where("($role_conditions AND (id_module IS NULL OR id_module IN (SELECT id FROM ".CSqlComposerBase::getRenamedTable('module')." WHERE name='$module_name')))");
+                    from(ACL_TABLE)->
+                    where("($role_conditions AND (id_module IS NULL OR id_module IN (SELECT id FROM ".MODULE_TABLE." WHERE name='$module_name')))");
 
-        $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
+        $hash = ACL_TABLE.'/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
         if ($this->cache) 
             $data = $this->cache->get($hash);
@@ -599,8 +599,8 @@ class CUser extends CDB
     public function hasRole(string $name) : bool
     {
         $sc = new CSqlComposer();
-        $sql = $sc->select('count(*)')->from('user_role')->
-                    where("id_user=$this->id AND id_role IN (SELECT id FROM role WHERE name='$name')");
+        $sql = $sc->select('count(*)')->from(USER_ROLE_TABLE)->
+                    where("id__user=$this->id AND id_role IN (SELECT id FROM ".ROLE_TABLE." WHERE name='$name')");
 
         return (bool)$this->getQueryDataValue($sql);
     }
@@ -617,7 +617,7 @@ class CUser extends CDB
         $sc = new CSqlComposer();
         $role_conditions = $this->_setRoleConditions();
 
-        $sql = $sc->select('count(*)')->from('acl')->where("$role_conditions AND id_module IS NULL");
+        $sql = $sc->select('count(*)')->from(ACL_TABLE)->where("$role_conditions AND id_module IS NULL");
 
         $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
@@ -647,9 +647,9 @@ class CUser extends CDB
         $role_conditions = $this->_setRoleConditions();
         if ($role_conditions!=='')
             $role_conditions .= ' AND'; 
-        $sql = $sc->select('DISTINCT name')->from('acl')->
-                    leftJoin('module', 'mt.id=acl.id_module OR id_module IS NULL', 'mt')->
-                    where("$role_conditions acl.can_read='YES'");
+        $sql = $sc->select('DISTINCT name')->from(ACL_TABLE)->
+                    leftJoin(MODULE_TABLE, 'mt.id='.ACL_TABLE.'.id_module OR id_module IS NULL', 'mt')->
+                    where("$role_conditions ".ACL_TABLE.".can_read='YES'");
 
         $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         
@@ -686,7 +686,7 @@ class CUser extends CDB
         else
         {
             $sc = new CSqlComposer();
-            $sc->select('count(*)')->from('user')->where('username=\''.str_replace("'","''",$params['dusername']).'\'');
+            $sc->select('count(*)')->from(USER_TABLE)->where('username=\''.str_replace("'","''",$params['dusername']).'\'');
             if ($this->getQueryDataValue($sc))
                 throw new Exception('The username already exists');
         }
@@ -755,7 +755,7 @@ class CUser extends CDB
             $types[] = 'VARCHAR';
             $types[] = 'VARCHAR';
             $types[] = 'VARCHAR';
-            $ret = $this->insertRecord('user', $user, $types);    
+            $ret = $this->insertRecord(USER_TABLE, $user, $types);    
             if ($ret)
             {
                 $mail = new \DressApi\Core\Mail\CMail();

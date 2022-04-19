@@ -20,16 +20,17 @@ use DressApi\Modules\Base\CBaseController;
 try
 {       
     CDB::connect(DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST, DB_PORT);
-    
-    CSqlComposerBase::setRenamedTables( ['acl'=>'da_acl', 
-                                         'config'=>'da_config',
-                                         'module'=>'da_module',
-                                         'role'=>'da_role',
-                                         'route'=>'da_route',
-                                         'user'=>'da_user',
-                                         'user_role'=>'da_user_role',
+  
+/*
+    CSqlComposerBase::setRenamedTables( ['acl'=>'_acl', 
+                                         'config'=>'_config',
+                                         'module'=>'_module',
+                                         'role'=>'_role',
+                                         'route'=>'_route',
+                                         'user'=>'_user',
+                                         'user_role'=>'_user_role',
                                         ] );
-
+*/
     $cache = new CCache(DOMAIN_NAME,DB_NAME); // Cache manager
 
     $request = new CRequest();        // Input manager (but the validations is the CBaseModel class)
@@ -73,7 +74,7 @@ try
         // It excludes the management of the tables or modules listed below.
         // Not necessary if it is managed from ACL
         // if (!$imported_permission && !$user->hasRole('Administrator'))
-        //    $rest->setExcludedControllers(['user']);
+        //    $rest->setExcludedControllers([USER_TABLE]);
         
         if (defined('REQUIRED_ITEMS'))
             $controller->setItemsRequired(REQUIRED_ITEMS);            

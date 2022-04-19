@@ -35,7 +35,7 @@ class CConfig extends CDB
         $this->cache = $cache;
 
         $sc = new CSqlComposer();
-        $sql = $sc->select('name,val')->from('config');
+        $sql = $sc->select('name,val')->from(CONFIG_TABLE);
 
         if ($this->cache && $this->cache->exists('values','configurations'))
             $this->values = $this->cache->get('values','configurations');

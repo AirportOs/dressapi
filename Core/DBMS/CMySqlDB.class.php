@@ -567,7 +567,9 @@ class CMySqlDB extends CDBMS
 
         $info = [];
         if (isset($db_tables)) foreach ($db_tables as $name => $dummy) // Per ogni colonna
-            if ($table === null || (strstr($name, '_') && in_array($table, explode('_', $name))))
+        {
+            $trimmed_name = trim($name, '_');
+            if ($table === null || (strstr($trimmed_name, '_') && in_array($table, explode('_', $trimmed_name))))
             {
                 if ($with_sizes)
                 {
@@ -577,6 +579,7 @@ class CMySqlDB extends CDBMS
                 else
                     $info[$name] = $name;
             }
+        }
 
         return $info;
     }

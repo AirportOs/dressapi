@@ -84,7 +84,7 @@ class CExampleModel extends \DressApi\Modules\Base\CBaseModel
     public function getListItems() : array
     {
         // i.e.:
-        // return ['id', 'id_user', 'name'];
+        // return ['id', 'id__user', 'name'];
 
         // default all fields of current table
         
@@ -100,7 +100,7 @@ class CExampleModel extends \DressApi\Modules\Base\CBaseModel
 //    public function getListItemsByAdmin() : array
 //    {
 //        // i.e.:
-//        // return ['id', 'id_user', 'name'];
+//        // return ['id', 'id__user', 'name'];
 //
 //        // default all fields of current table
 //
@@ -152,7 +152,7 @@ class CExampleModel extends \DressApi\Modules\Base\CBaseModel
 //    }
 //
 //    /**
-//     * Set the auto user: if true when a table contains id_user set to id of the current user
+//     * Set the auto user: if true when a table contains id__user set to id of the current user
 //     * 
 //     * @param bool $value the value to be set;
 //     */

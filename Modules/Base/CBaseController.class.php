@@ -199,7 +199,7 @@ class CBaseController extends CDB
 
         if (!$this->all_db_modules)
         {
-            $this->query('SELECT id,name,tablename,tablefilter FROM '.CSqlComposerBase::getRenamedTable('module'));
+            $this->query('SELECT id,name,tablename,tablefilter FROM '.MODULE_TABLE);
             $this-> getDataTable($this->all_db_modules, self::DB_ASSOC, 'name');
             if ($this->cache)
                 $this->cache->set('all_db_modules', $this->all_db_modules);
@@ -372,7 +372,7 @@ class CBaseController extends CDB
      * @example
      *   $controller = CBaseController::getControllerName();
      *   $rest = new $controller( );
-     *   $rest->setRelatedFieldNames( ['user'=>'email','*'=>'name'] );
+     *   $rest->setRelatedFieldNames( ['_user'=>'email','*'=>'name'] );
      */
     public function setRelatedFieldNames(array $list): void
     {
@@ -409,7 +409,7 @@ class CBaseController extends CDB
      */
     protected function _revalidateHttpCache(): void
     {
-        $seconds_to_cache = 0; // 0=nessuna cache
+        $seconds_to_cache = 0; // 0=no cache
         $ts = gmdate("D, d M Y H:i:s", time() + $seconds_to_cache) . " GMT";
         header("Expires: $ts");
         header("Pragma: cache");
@@ -900,7 +900,6 @@ class CBaseController extends CDB
         else
         {
             $ret = ['message' => 'Operation completed successfully'];
-
             $this->_invalidateRelatedCache();
         }
 

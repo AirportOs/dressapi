@@ -1,8 +1,8 @@
--- MariaDB dump 10.19  Distrib 10.5.12-MariaDB, for debian-linux-gnu (x86_64)
+-- MariaDB dump 10.19  Distrib 10.5.15-MariaDB, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: dressapi-test
 -- ------------------------------------------------------
--- Server version	10.5.12-MariaDB-0+deb11u1
+-- Server version	10.5.15-MariaDB-0+deb11u1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,13 +16,13 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `acl`
+-- Table structure for table `_acl`
 --
 
-DROP TABLE IF EXISTS `acl`;
+DROP TABLE IF EXISTS `_acl`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `acl` (
+CREATE TABLE `_acl` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_role` int(11) DEFAULT NULL COMMENT 'Role of the user',
   `id_module` int(11) DEFAULT NULL COMMENT 'contains the index of module or table name managed by the base module',
@@ -30,49 +30,213 @@ CREATE TABLE `acl` (
   `can_insert` enum('YES','NO') DEFAULT 'NO',
   `can_update` enum('YES','NO') DEFAULT 'NO',
   `can_delete` enum('YES','NO') DEFAULT 'NO',
-  `only_owner` enum('NO','YES') NOT NULL DEFAULT 'NO',
+  `only_owner` enum('NO','YES') NOT NULL DEFAULT 'NO' COMMENT 'if exist id__user in the module''s table',
   PRIMARY KEY (`id`),
   KEY `id_module` (`id_module`),
   KEY `id_role` (`id_role`),
-  CONSTRAINT `acl_ibfk_1` FOREIGN KEY (`id_module`) REFERENCES `module` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `acl_ibfk_2` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `_acl_ibfk_1` FOREIGN KEY (`id_module`) REFERENCES `_module` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `_acl_ibfk_2` FOREIGN KEY (`id_role`) REFERENCES `_role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `acl`
+-- Dumping data for table `_acl`
 --
 
-LOCK TABLES `acl` WRITE;
-/*!40000 ALTER TABLE `acl` DISABLE KEYS */;
-INSERT INTO `acl` VALUES (1,1,NULL,'YES','YES','YES','YES','NO'),(2,NULL,1,'YES','YES','YES','YES','YES'),(4,NULL,2,'YES','NO','NO','NO','NO'),(5,101,2,'YES','YES','YES','YES','NO');
-/*!40000 ALTER TABLE `acl` ENABLE KEYS */;
+LOCK TABLES `_acl` WRITE;
+/*!40000 ALTER TABLE `_acl` DISABLE KEYS */;
+INSERT INTO `_acl` VALUES (1,1,NULL,'YES','YES','YES','YES','NO'),(2,NULL,1,'YES','YES','YES','YES','YES'),(4,NULL,2,'YES','NO','NO','NO','NO'),(5,101,2,'YES','YES','YES','YES','NO');
+/*!40000 ALTER TABLE `_acl` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `config`
+-- Table structure for table `_config`
 --
 
-DROP TABLE IF EXISTS `config`;
+DROP TABLE IF EXISTS `_config`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `config` (
+CREATE TABLE `_config` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(60) NOT NULL,
   `val` varchar(250) NOT NULL,
   `description` varchar(80) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `config`
+-- Dumping data for table `_config`
 --
 
-LOCK TABLES `config` WRITE;
-/*!40000 ALTER TABLE `config` DISABLE KEYS */;
-INSERT INTO `config` VALUES (1,'HOMEPAGE_RELATIVE_URL','/page/1','The homepage relative url'),(2,'WEBSITE_OWNER','DressApi','');
-/*!40000 ALTER TABLE `config` ENABLE KEYS */;
+LOCK TABLES `_config` WRITE;
+/*!40000 ALTER TABLE `_config` DISABLE KEYS */;
+INSERT INTO `_config` VALUES (1,'WEBSITE_OWNER','DressApi','');
+/*!40000 ALTER TABLE `_config` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `_module`
+--
+
+DROP TABLE IF EXISTS `_module`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `_module` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(80) NOT NULL,
+  `tablename` varchar(40) NOT NULL,
+  `tablefilter` varchar(200) NOT NULL,
+  `title` varchar(65) NOT NULL,
+  `description` varchar(160) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `_module`
+--
+
+LOCK TABLES `_module` WRITE;
+/*!40000 ALTER TABLE `_module` DISABLE KEYS */;
+INSERT INTO `_module` VALUES (1,'Sign','user','','Sign','Login, Logout, Subscription, Unsubscription'),(2,'Pages','node','id_nodetype=11','Page Module',''),(3,'News','news','','News',''),(4,'Events','event','','Events',''),(5,'Faq','faq','','Faq',''),(6,'Documents','document','','Documents','List of Documents');
+/*!40000 ALTER TABLE `_module` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `_role`
+--
+
+DROP TABLE IF EXISTS `_role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `_role` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(60) NOT NULL,
+  `description` varchar(120) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `_role`
+--
+
+LOCK TABLES `_role` WRITE;
+/*!40000 ALTER TABLE `_role` DISABLE KEYS */;
+INSERT INTO `_role` VALUES (1,'Administrator','Can read - All permissions for anonymous is valid for all user'),(2,'Anonymous','Can read - All permissions for anonymous is valid for all user'),(101,'Editor','Full power: can Delete or publish a post'),(102,'Writer','Can write a post'),(103,'Commentator','Can write a comment');
+/*!40000 ALTER TABLE `_role` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `_route`
+--
+
+DROP TABLE IF EXISTS `_route`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `_route` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `origin_path` varchar(512) NOT NULL,
+  `destination_path` varchar(512) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `_route`
+--
+
+LOCK TABLES `_route` WRITE;
+/*!40000 ALTER TABLE `_route` DISABLE KEYS */;
+INSERT INTO `_route` VALUES (1,'login','sign/login-form'),(2,'logout','sign/logout'),(3,'','pages/1');
+/*!40000 ALTER TABLE `_route` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `_translation`
+--
+
+DROP TABLE IF EXISTS `_translation`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `_translation` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `content` text NOT NULL,
+  `translation` text NOT NULL,
+  `lang` varchar(6) NOT NULL DEFAULT '''en''',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `_translation`
+--
+
+LOCK TABLES `_translation` WRITE;
+/*!40000 ALTER TABLE `_translation` DISABLE KEYS */;
+/*!40000 ALTER TABLE `_translation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `_user`
+--
+
+DROP TABLE IF EXISTS `_user`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(180) NOT NULL,
+  `id_contact` int(11) DEFAULT NULL,
+  `domain` varchar(60) DEFAULT 'local',
+  `nickname` varchar(60) NOT NULL,
+  `username` varchar(255) NOT NULL,
+  `pwd` varchar(120) NOT NULL DEFAULT '-HsjK673Hf@fhs',
+  `status` enum('Subscribed','Verified','Refused') NOT NULL DEFAULT 'Subscribed',
+  PRIMARY KEY (`id`),
+  KEY `id_contact` (`id_contact`),
+  CONSTRAINT `_user_ibfk_1` FOREIGN KEY (`id_contact`) REFERENCES `contact` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=116 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `_user`
+--
+
+LOCK TABLES `_user` WRITE;
+/*!40000 ALTER TABLE `_user` DISABLE KEYS */;
+INSERT INTO `_user` VALUES (1,'Administrator',NULL,'local','admin','admin','51c3f5f5d8a8830bc5d8b7ebcb5717dfb4892d4766c2a77d','Verified'),(2,'Anonymous',NULL,'local','Anonymous','','','Verified'),(101,'Joe Sample',1,'local','Big Joe','jsample','1d628e0dd73490f28e5717bb2564f4760a6caf3922051f3a','Verified'),(102,'Michael Franks',2,'local','Mr Blue','mfranks','292498b56f83154fc913b173e51ca43c898cc35944280aaa','Verified'),(103,'Pasquale Tufano',3,'local','Pask','ptufano','9444701720f616c4a8985f7d4022c1507389a33208c9afb2','Verified'),(115,'J.Sample',21,'DressApi.com','Joe','Joe','119dcb517fedfaba6f41824968610987702bf221b8e6afdd','Verified');
+/*!40000 ALTER TABLE `_user` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `_user_role`
+--
+
+DROP TABLE IF EXISTS `_user_role`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `_user_role` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id_user` int(11) NOT NULL,
+  `id_role` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_user` (`id_user`),
+  KEY `id_role` (`id_role`),
+  CONSTRAINT `_user_role_ibfk_1` FOREIGN KEY (`id_role`) REFERENCES `_role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `_user_role_ibfk_2` FOREIGN KEY (`id_user`) REFERENCES `_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=107 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `_user_role`
+--
+
+LOCK TABLES `_user_role` WRITE;
+/*!40000 ALTER TABLE `_user_role` DISABLE KEYS */;
+INSERT INTO `_user_role` VALUES (1,1,1),(11,2,2),(101,101,101),(102,102,102),(103,103,103);
+/*!40000 ALTER TABLE `_user_role` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -101,7 +265,7 @@ CREATE TABLE `contact` (
 
 LOCK TABLES `contact` WRITE;
 /*!40000 ALTER TABLE `contact` DISABLE KEYS */;
-INSERT INTO `contact` VALUES (1,'Joe','Sample','Via 1 Febbraio','15005','Rome','Italy','jxsample@userdressapi.com'),(2,'Michael','Franks','The art of the tea street, 1046','01975','Los Angeles','California','mfranks@userdressapi.com'),(3,'Pasquale','Tufano','Via Roccavione, 216','10047','Turin','Italy','ptufano@userdressapi.com'),(21,'Joe','Sample','Via 1 Febbraio','15005','Turin','Italy','jsample@userdressapi.com');
+INSERT INTO `contact` VALUES (1,'Joe','Sample','Via 112 Febbraio','15005','Rome','Italy','jxsample@userdressapi.com'),(2,'Michael','Franks','The art of the tea street, 1046','01975','Los Angeles','California','mfranks@userdressapi.com'),(3,'Pasquale','Tufano','Via Roccavione, 216','10047','Turin','Italy','ptufano@userdressapi.com'),(21,'Joe','Sample','Via 94 Febbraio','15005','Turin','Italy','jsample@userdressapi.com');
 /*!40000 ALTER TABLE `contact` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -120,9 +284,9 @@ CREATE TABLE `document` (
   `filename` varchar(255) DEFAULT NULL,
   `url` varchar(255) DEFAULT NULL,
   `creation_date` datetime NOT NULL DEFAULT current_timestamp(),
-  `id_user` int(11) NOT NULL,
+  `id__user` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `id_user` (`id_user`)
+  KEY `id_user` (`id__user`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -132,7 +296,7 @@ CREATE TABLE `document` (
 
 LOCK TABLES `document` WRITE;
 /*!40000 ALTER TABLE `document` DISABLE KEYS */;
-INSERT INTO `document` VALUES (3,'Electro','','jpg','1636638666_img_20181130_180133.jpg','https://dressapi.com','2021-11-11 14:52:55',0);
+INSERT INTO `document` VALUES (3,'Electro','','','[object File]','https://dressapi.com','2021-11-11 14:52:55',101);
 /*!40000 ALTER TABLE `document` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -155,10 +319,10 @@ CREATE TABLE `event` (
   `site` varchar(120) NOT NULL,
   `url` varchar(300) NOT NULL,
   `creation_date` datetime NOT NULL DEFAULT current_timestamp(),
-  `id_user` int(11) NOT NULL,
+  `id__user` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `id_user` (`id_user`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  KEY `id_user` (`id__user`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -167,6 +331,7 @@ CREATE TABLE `event` (
 
 LOCK TABLES `event` WRITE;
 /*!40000 ALTER TABLE `event` DISABLE KEYS */;
+INSERT INTO `event` VALUES (1,'zcbz','cbzcbzcb','zcbzcb','2022-04-05','no','draft','','','','2022-04-05 02:44:18',1),(2,'dfjs','fjsfjsfj','sfjsfjs','2022-04-05','no','draft','adhah','aha','http://www.test.com','2022-04-05 01:35:00',1);
 /*!40000 ALTER TABLE `event` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -198,34 +363,6 @@ LOCK TABLES `faq` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `module`
---
-
-DROP TABLE IF EXISTS `module`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `module` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(80) NOT NULL,
-  `tablename` varchar(40) NOT NULL,
-  `tablefilter` varchar(200) NOT NULL,
-  `title` varchar(65) NOT NULL,
-  `description` varchar(160) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `module`
---
-
-LOCK TABLES `module` WRITE;
-/*!40000 ALTER TABLE `module` DISABLE KEYS */;
-INSERT INTO `module` VALUES (1,'Sign','user','','Sign','Login, Logout, Subscription, Unsubscription'),(2,'Pages','node','id_nodetype=11','Page Module',''),(3,'News','news','','News',''),(4,'Events','event','','Events',''),(5,'Faq','faq','','Faq',''),(6,'Documents','document','','Documents','List of Documents');
-/*!40000 ALTER TABLE `module` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `news`
 --
 
@@ -241,9 +378,9 @@ CREATE TABLE `news` (
   `status` enum('draft','reserved','public') NOT NULL DEFAULT 'draft',
   `img` varchar(80) NOT NULL,
   `creation_date` datetime NOT NULL DEFAULT current_timestamp(),
-  `id_user` int(11) NOT NULL,
+  `id__user` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `id_user` (`id_user`)
+  KEY `id_user` (`id__user`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -253,7 +390,7 @@ CREATE TABLE `news` (
 
 LOCK TABLES `news` WRITE;
 /*!40000 ALTER TABLE `news` DISABLE KEYS */;
-INSERT INTO `news` VALUES (3,'New Titlefh 56','sfhj','Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.','yes','public','1636638573_img_20181130_180150.jpg','2021-11-11 14:56:13',0);
+INSERT INTO `news` VALUES (3,'New Titlefh 56','sfhj','Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.','yes','public','1636638573_img_20181130_180150.jpg','2021-11-11 14:56:13',101);
 /*!40000 ALTER TABLE `news` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -274,11 +411,11 @@ CREATE TABLE `node` (
   `visible` enum('no','yes') NOT NULL DEFAULT 'no',
   `status` enum('draft','reserved','public') NOT NULL DEFAULT 'draft',
   `creation_date` date NOT NULL DEFAULT current_timestamp(),
-  `id_user` int(11) NOT NULL,
+  `id__user` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `id_user` (`id_user`),
+  KEY `id_user` (`id__user`),
   KEY `id_nodetype` (`id_nodetype`),
-  CONSTRAINT `node_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `node_ibfk_1` FOREIGN KEY (`id__user`) REFERENCES `_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -317,117 +454,6 @@ LOCK TABLES `nodetype` WRITE;
 INSERT INTO `nodetype` VALUES (1,'container',''),(2,'menu',''),(3,'link',''),(4,'file',''),(11,'page',''),(12,'article',''),(13,'news',''),(14,'event',''),(15,'comment','');
 /*!40000 ALTER TABLE `nodetype` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `role`
---
-
-DROP TABLE IF EXISTS `role`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `role` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(60) NOT NULL,
-  `description` varchar(120) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `role`
---
-
-LOCK TABLES `role` WRITE;
-/*!40000 ALTER TABLE `role` DISABLE KEYS */;
-INSERT INTO `role` VALUES (1,'Administrator','Can read - All permissions for anonymous is valid for all user'),(2,'Anonymous','Can read - All permissions for anonymous is valid for all user'),(101,'Editor','Full power: can Delete or publish a post'),(102,'Writer','Can write a post'),(103,'Commentator','Can write a comment');
-/*!40000 ALTER TABLE `role` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `route`
---
-
-DROP TABLE IF EXISTS `route`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `route` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `origin_path` varchar(512) NOT NULL,
-  `destination_path` varchar(512) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `route`
---
-
-LOCK TABLES `route` WRITE;
-/*!40000 ALTER TABLE `route` DISABLE KEYS */;
-INSERT INTO `route` VALUES (1,'login','sign/login-form'),(2,'logout','sign/logout'),(3,'','pages/1');
-/*!40000 ALTER TABLE `route` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `user`
---
-
-DROP TABLE IF EXISTS `user`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `user` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(180) NOT NULL,
-  `id_contact` int(11) DEFAULT NULL,
-  `domain` varchar(60) DEFAULT 'local',
-  `nickname` varchar(60) NOT NULL,
-  `username` varchar(255) NOT NULL,
-  `pwd` varchar(120) NOT NULL DEFAULT '-HsjK673Hf@fhs',
-  `status` enum('Subscribed','Verified','Refused') NOT NULL DEFAULT 'Subscribed',
-  PRIMARY KEY (`id`),
-  KEY `id_contact` (`id_contact`),
-  CONSTRAINT `user_ibfk_1` FOREIGN KEY (`id_contact`) REFERENCES `contact` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=116 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user`
---
-
-LOCK TABLES `user` WRITE;
-/*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'Administrator',NULL,'local','admin','admin','51c3f5f5d8a8830bc5d8b7ebcb5717dfb4892d4766c2a77d','Verified'),(2,'Anonymous',NULL,'local','Anonymous','','','Verified'),(101,'Joe Sample',1,'local','Big Joe','jsample','1d628e0dd73490f28e5717bb2564f4760a6caf3922051f3a','Verified'),(102,'Michael Franks',2,'local','Mr Blue','mfranks','292498b56f83154fc913b173e51ca43c898cc35944280aaa','Verified'),(103,'Pasquale Tufano',3,'local','Pask','ptufano','9444701720f616c4a8985f7d4022c1507389a33208c9afb2','Verified'),(115,'J.Sample',21,'DressApi.com','Joe','Joe','119dcb517fedfaba6f41824968610987702bf221b8e6afdd','Verified');
-/*!40000 ALTER TABLE `user` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `user_role`
---
-
-DROP TABLE IF EXISTS `user_role`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `user_role` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_user` int(11) NOT NULL,
-  `id_role` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_user` (`id_user`),
-  KEY `id_role` (`id_role`),
-  CONSTRAINT `user_role_ibfk_1` FOREIGN KEY (`id_role`) REFERENCES `role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `user_role_ibfk_2` FOREIGN KEY (`id_user`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=107 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `user_role`
---
-
-LOCK TABLES `user_role` WRITE;
-/*!40000 ALTER TABLE `user_role` DISABLE KEYS */;
-INSERT INTO `user_role` VALUES (1,1,1),(11,2,2),(101,101,101),(102,102,102),(103,103,103);
-/*!40000 ALTER TABLE `user_role` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -438,4 +464,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-04-03  2:03:18
+-- Dump completed on 2022-04-19  8:00:57

@@ -69,7 +69,7 @@ class CPagesModel extends CBaseModel
     public function changeStructureTable(array &$columns) : void
     {
         if (!$this->user->isAdmin())
-            $columns['id_user']['html_type'] = 'hidden';
+            $columns['id__user']['html_type'] = 'hidden';
     }
 
 

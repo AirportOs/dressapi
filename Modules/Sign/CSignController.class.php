@@ -33,7 +33,7 @@ class CSignController extends CBaseController
      */
     public function __construct(CRequest $request, CResponse $response, ?CUser $user = null, ?CCache $cache = null)
     {
-        $this->setDBTable('user'); // Default dbtable
+        $this->setDBTable(USER_TABLE); // Default dbtable
         parent::__construct($request, $response, $user, $cache);
 
 /*

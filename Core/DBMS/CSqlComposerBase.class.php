@@ -22,7 +22,7 @@ namespace DressApi\Core\DBMS
      */
     class CSqlComposerBase
     {
-        static protected array $renamed_tables = []; // list of renamed table (for example 'act' becames 'da_acl' )
+        static protected array $renamed_tables = []; // list of renamed table (for example 'news' becames 'da_news' )
         
         protected array $params = [];
         protected int $page = 0;
@@ -47,7 +47,7 @@ namespace DressApi\Core\DBMS
 
         static public function getRenamedTable($table)
         {
-            return ((isset(self::$renamed_tables))?(self::$renamed_tables[$table]):($table));
+            return ((isset(self::$renamed_tables[$table]))?(self::$renamed_tables[$table]):($table));
         }
 
         /**

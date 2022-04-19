@@ -109,7 +109,7 @@ define('DBMS_TYPE', 'MySql'); // Oracle, PostgreSQL,...
 // Name of user table in your database
 // NOTE: if Empty string not use the user table 
 //       and the authentication is not necessary!
-define('USER_TABLE', 'user');
+define('USER_TABLE', '_user');
 
 // id user in your database
 define('USER_ITEM_ID', 'id');
@@ -122,6 +122,16 @@ define('USER_ITEM_USERNAME', 'username');
 
 // Password name of user table in your database
 define('USER_ITEM_PASSWORD', 'pwd');
+
+// Other DB table names
+define('ACL_TABLE',        '_acl');
+define('CONFIG_TABLE',     '_config');
+define('MODULE_TABLE',     '_module');
+define('ROUTE_TABLE',      '_route');
+define('ROLE_TABLE',       '_role');
+define('TRANSLATION_TABLE','_translation');
+define('USER_ROLE_TABLE',  '_user_role');
+
 
 // User Token
 define('SECRET_KEY', 'bGS6lzFqvvSQ8ALbOxatm7/Vk7mLQyzqaS34Q4oR1ew=');

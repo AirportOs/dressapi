@@ -104,7 +104,7 @@ class CRoute extends CDB
     {
         $sc = new CSqlComposer();
 
-        $sql = $sc->select('origin_path,destination_path')->from('route');
+        $sql = $sc->select('origin_path,destination_path')->from(ROUTE_TABLE);
 
         // echo "\n$sql\n";
         $this->query($sql);   
