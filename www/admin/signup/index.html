@@ -9,7 +9,7 @@
   
 
     <!-- Bootstrap core CSS -->
-    <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/admin/frameworks/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
       .bd-placeholder-img {
@@ -29,7 +29,7 @@
 
     
     <!-- Custom styles for this template -->
-    <link href="../css/sign.css" rel="stylesheet">
+    <link href="/admin/assets/css/sign.css" rel="stylesheet">
   </head>
   <body class="text-center">
     
@@ -85,7 +85,7 @@
         f.addEventListener('submit', (e) => {
                     let fdata = new URLSearchParams([...(new FormData(f))]);
                     localStorage.username = f['dusername'].value;        
-                    sign('/api/account/', fdata)
+                    sign('/user/', fdata)
                         .then(data => {
                             if (data.status==200)
                             {

@@ -24,7 +24,7 @@
     f.addEventListener('submit', (e) => {
                 let fdata = new URLSearchParams([...(new FormData(f))]);
                 localStorage.username = f['dusername'].value;        
-                sign('/api/user/',fdata)
+                sign('/user/',fdata)
                     .then(data => {
                         if (data.status==200)
                         {

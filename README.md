@@ -211,7 +211,7 @@ define('USER_ITEM_PASSWORD', 'pwd');
 * Try to run a login request as admin:
 
 ```bash
-curl -X POST http://localhost/api/user/ -d "username=admin&password=admin"
+curl -X POST http://localhost/user/ -d "username=admin&password=admin"
 ```
 
 * Copy your token, it will be your passkey for all future requests as an admin user until the token expires. It must be like this: **eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpYXQiOjE2MjYwNDAwMjYsImp0aSI6IlJkSUx2SHdJT3FxQ3pXMkorUVdZdGc9PSIsImlzcyI6IkRyZXNzQXBpLmNvbSIsIm5iZiI6MTYyNjA0MDAyNiwiZXhwIjoxNjQxOTQxMjI2LCJkYXRhIjp7InVzZXJuYW1lIjoiYWRtaW4iLCJpZCI6MX19.CqBqDHEPWs5ZAmwew5FaOqAeQgM7XWbESEHlkceRwaPhfg_jL3xvrWPVs7hj8obEljQ9av_JJQVg29-u0s8VMw**
@@ -219,7 +219,7 @@ curl -X POST http://localhost/api/user/ -d "username=admin&password=admin"
 * Now make your request inside DB
 
 ```bash
-curl -H  "Authorization: Bearer [YOUR TOKEN]" -X GET [http://localhost/api/page/1](http://localhost/api/page/1)
+curl -H  "Authorization: Bearer [YOUR TOKEN]" -X GET [http://localhost/page/1](http://localhost/page/1)
 ```
 
 Which requires the **id=1** of the **page** table
@@ -248,18 +248,18 @@ Here are some examples of possible operations:
 
 ```bash
 #CREATE/INSERT
-curl -H  "Authorization: Bearer [YOUR TOKEN]" -X POST http://dressapi/api/comment -d "comment=Wonderful!&creation_date=2022-01-13&id_page=1"
-curl -H  "Authorization: Bearer [YOUR TOKEN]" -X POST http://dressapi/api/comment -d "comment=Bleah! Lumen is better than DressApi!&id_page=1"
+curl -H  "Authorization: Bearer [YOUR TOKEN]" -X POST http://dressapi/comment -d "comment=Wonderful!&creation_date=2022-01-13&id_page=1"
+curl -H  "Authorization: Bearer [YOUR TOKEN]" -X POST http://dressapi/comment -d "comment=Bleah! Lumen is better than DressApi!&id_page=1"
 
 #UPDATE/MODIFY
-curl -H  "Authorization: Bearer [YOUR TOKEN]" -X PATCH http://dressapi/api/page/1 -d "creation_date=2021-01-13"
+curl -H  "Authorization: Bearer [YOUR TOKEN]" -X PATCH http://dressapi/page/1 -d "creation_date=2021-01-13"
 
 #DELETE
-curl -H  "Authorization: Bearer [YOUR TOKEN]" -X DELETE http://dressapi/api/logger/3
+curl -H  "Authorization: Bearer [YOUR TOKEN]" -X DELETE http://dressapi/logger/3
 
 #READ
-curl -H  "Authorization: Bearer [YOUR TOKEN]" -X GET http://dressapi/api/page/1
-curl -H  "Authorization: Bearer [YOUR TOKEN]" -X GET http://dressapi/api/page/id_user=102/
+curl -H  "Authorization: Bearer [YOUR TOKEN]" -X GET http://dressapi/page/1
+curl -H  "Authorization: Bearer [YOUR TOKEN]" -X GET http://dressapi/page/id_user=102/
 ```
 
 Especially in queries, i.e. in reading, it is possible to do much more thanks to some options such as:
@@ -275,9 +275,9 @@ You can set the number of page and the total elements per page using /p or /page
 For example:
 
 ```bash
--X GET http://dressapi/api/logger/wr/p/2 # Page 2
--X GET http://dressapi/api/logger/wr/p/2,10 # Page 2, 10 rows per page
--X GET http://dressapi/api/page/wr/page/1,10 # For module/table "page" the first page with 10 rows per page
+-X GET http://dressapi/logger/wr/p/2 # Page 2
+-X GET http://dressapi/logger/wr/p/2,10 # Page 2, 10 rows per page
+-X GET http://dressapi/page/wr/page/1,10 # For module/table "page" the first page with 10 rows per page
 ```
 
 ### The sorting
@@ -285,15 +285,15 @@ For example:
 You can determine the order in which the request records should be submitted using /ob or /order-by option followed by the name of the field to be ordered and optionally by the type of order (DESC or ASC):
 
 ```bash
--X GET http://dressapi/api/logger/ob/id
--X GET http://dressapi/api/logger/ob/id-ASC
--X GET http://dressapi/api/logger/ob/id-DESC/wr/p/1,10
+-X GET http://dressapi/logger/ob/id
+-X GET http://dressapi/logger/ob/id-ASC
+-X GET http://dressapi/logger/ob/id-DESC/wr/p/1,10
 ```
 
 Each option is independent from the other so it is possible to combine it with the layout and filters:
 
 ```bash
--X GET http://dressapi/api/logger/ob/id-ASC/wr
+-X GET http://dressapi/logger/ob/id-ASC/wr
 ```
 
 ### The flag of the relations between two fields of two different tables of the db
@@ -302,8 +302,8 @@ You can set the number of page and the total elements per page using /wr or /wit
 For example:
 
 ```bash
--X GET http://dressapi/api/logger/wr
--X GET http://dressapi/api/logger/with-relations
+-X GET http://dressapi/logger/wr
+-X GET http://dressapi/logger/with-relations
 ```
 
 If everything is set correctly the result will be for example that "id_user" will be replaced by the equivalent "username", "email" or "name" in the user table.
@@ -317,9 +317,9 @@ The **~** filter indicates that the searched text must be contained (and therefo
 Some examples:
 
 ```bash
--X GET http://dressapi/api/page/id_user=102/
--X GET http://dressapi/api/page/name~Welcome
--X GET http://dressapi/api/logger/wr/id_user>=100/p/1,10
+-X GET http://dressapi/page/id_user=102/
+-X GET http://dressapi/page/name~Welcome
+-X GET http://dressapi/logger/wr/id_user>=100/p/1,10
 ```
 
 Filters can be combined with each other by appending the condition to the uri.

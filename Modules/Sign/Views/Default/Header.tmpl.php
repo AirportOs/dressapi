@@ -9,7 +9,7 @@
 
   
     <!-- Bootstrap core CSS -->
-    <link href="/assets/bootstrap-italia/dist/css/bootstrap-italia.min.css" rel="stylesheet">
+    <link href="/frameworks/bootstrap-italia/dist/css/bootstrap-italia.min.css" rel="stylesheet">
 
     <!-- [[INLINE-STYLES]] -->
     <!-- [[INLINE-BEGIN-JS]] -->    

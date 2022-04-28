@@ -328,10 +328,10 @@
             let output = document.getElementById('output');
             output.querySelector('.operation').innerHTML = 'List of <b>'+table+'</b> table';
             output.querySelector('.method').innerHTML = 'GET';
-            output.querySelector('.request').innerHTML = '/api/'+table+options;
+            output.querySelector('.request').innerHTML = '/'+table+options;
             output.querySelector('.parameters').innerHTML = '';
             output.querySelector('.accept').innerHTML = 'application/json';
-            getData('/api/'+table+options)
+            getData('/'+table+options)
                 .then(res => {
                         output.querySelector('.status').innerHTML = res.status+ ' (' + res.statusText + ')';
                         if (res.status==200)
@@ -347,10 +347,10 @@
             let output = document.getElementById('output');
             output.querySelector('.operation').innerHTML = 'Get the structure of <b>'+table+'</b> table';
             output.querySelector('.method').innerHTML = 'OPTIONS';
-            output.querySelector('.request').innerHTML = '/api/'+table;
+            output.querySelector('.request').innerHTML = '/'+table;
             output.querySelector('.parameters').innerHTML = '';
             output.querySelector('.accept').innerHTML = 'application/json';
-            optionsData('/api/'+table)
+            optionsData('/'+table)
                     .then(res => {
                         output.querySelector('.status').innerHTML = res.status+ ' (' + res.statusText + ')';
                         if (res.status==200)
@@ -367,10 +367,10 @@
             let output = document.getElementById('output');
             output.querySelector('.operation').innerHTML = 'Get the structure of <b>all</b> table';
             output.querySelector('.method').innerHTML = 'OPTIONS';
-            output.querySelector('.request').innerHTML = '/api/all';
+            output.querySelector('.request').innerHTML = '/all';
             output.querySelector('.parameters').innerHTML = '';
             output.querySelector('.accept').innerHTML = 'plain/text';
-            optionsData('/api/all')
+            optionsData('/all')
                         .then(res => {
                         output.querySelector('.status').innerHTML = res.status+ ' (' + res.statusText + ')';
                         if (res.status==200)
@@ -386,7 +386,7 @@
             let output = document.getElementById('output');
             output.querySelector('.operation').innerHTML = 'Insert a row (id=1000) in <b>'+table+'</b> table';
             output.querySelector('.method').innerHTML = 'POST';
-            output.querySelector('.request').innerHTML = '/api/'+table;
+            output.querySelector('.request').innerHTML = '/'+table;
             output.querySelector('.parameters').innerHTML = '';
             output.querySelector('.accept').innerHTML = 'plain/text';
 
@@ -395,7 +395,7 @@
             // formData.append(table, 'Lumen is better than DressApi!');
             // formData.append('id_page', 1);
         
-            postData('/api/'+table+'/',formData)
+            postData('/'+table+'/',formData)
                     .then(data => {
                         output.querySelector('.status').innerHTML = data.status+ ' (' + data.statusText + ')';
                         // if (data.status==201)
@@ -420,10 +420,10 @@
             let output = document.getElementById('output');
             output.querySelector('.operation').innerHTML = 'Insert a row (id=1000) in <b>'+table+'</b> table';
             output.querySelector('.method').innerHTML = 'PATCH';
-            output.querySelector('.request').innerHTML = '/api/'+table;
+            output.querySelector('.request').innerHTML = '/'+table;
             output.querySelector('.parameters').innerHTML = '';
             output.querySelector('.accept').innerHTML = 'plain/text';
-            postData('/api/'+table, formData)
+            postData('/'+table, formData)
                 .then(data => {
                             output.querySelector('.status').innerHTML = data.status+ ' (' + data.statusText + ')';
                             if (data.status==200)
@@ -447,10 +447,10 @@
             let output = document.getElementById('output');
             output.querySelector('.operation').innerHTML = 'Insert a row (id=1000) in <b>'+table+'</b> table';
             output.querySelector('.method').innerHTML = 'PATCH';
-            output.querySelector('.request').innerHTML = '/api/'+table;
+            output.querySelector('.request').innerHTML = '/'+table;
             output.querySelector('.parameters').innerHTML = '';
             output.querySelector('.accept').innerHTML = 'plain/text';
-            deleteData('/api/'+table+'/'+id)
+            deleteData('/'+table+'/'+id)
                     .then(data => {
                         output.querySelector('.status').innerHTML = data.status+ ' (' + data.statusText + ')';
                         if (data.status==200)
@@ -465,7 +465,7 @@
 
         function setPage()
         {
-            getData('/api/page')
+            getData('/page')
                 .then(res => {
                         if (res.status==200)
                             res.json().then(data => 
