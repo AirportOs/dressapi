@@ -89,6 +89,7 @@ CREATE TABLE `_module` (
   `tablefilter` varchar(200) NOT NULL,
   `title` varchar(65) NOT NULL,
   `description` varchar(160) NOT NULL,
+  `visible` enum('yes','no') NOT NULL DEFAULT 'yes',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -99,7 +100,7 @@ CREATE TABLE `_module` (
 
 LOCK TABLES `_module` WRITE;
 /*!40000 ALTER TABLE `_module` DISABLE KEYS */;
-INSERT INTO `_module` VALUES (1,'Sign','user','','Sign','Login, Logout, Subscription, Unsubscription'),(2,'Pages','node','id_nodetype=11','Page Module',''),(3,'News','news','','News',''),(4,'Events','event','','Events',''),(5,'Faq','faq','','Faq',''),(6,'Documents','document','','Documents','List of Documents');
+INSERT INTO `_module` VALUES (1,'Sign','user','','Sign','Login, Logout, Subscription, Unsubscription','no'),(2,'Pages','node','id_nodetype=11','Page Module','','yes'),(3,'News','news','','News','','yes'),(4,'Events','event','','Events','','yes'),(5,'Faq','faq','','Faq','','yes'),(6,'Documents','document','','Documents','List of Documents','yes');
 /*!40000 ALTER TABLE `_module` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -464,4 +465,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-04-19  8:00:57
+-- Dump completed on 2022-04-29 10:14:22

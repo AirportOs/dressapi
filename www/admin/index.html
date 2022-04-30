@@ -9,7 +9,7 @@
     <title>DressApi Test</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="./frameworks/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/frameworks/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         .bd-placeholder-img {
@@ -29,10 +29,10 @@
 
 
     <!-- Custom styles for this template -->
-    <link href="./assets/css/dressapi-admin.css" rel="stylesheet">
+    <link href="/assets/css/dressapi-admin.css" rel="stylesheet">
     <script>
         if (localStorage.token == null)
-            document.location = './signin/';
+            document.location = '/signin/';
 
         let list_options = 'with-relations';
         localStorage.list_options = list_options;
@@ -52,7 +52,7 @@
         <div class="nav-link px-3 text-white" id="username_viewer"></div>
         <div class="navbar-nav">
             <div class="nav-item text-nowrap">
-                <a class="nav-link px-3" href="#" onclick="localStorage.token=null;document.location='./signin/';">Sign out</a>
+                <a class="nav-link px-3" href="#" onclick="localStorage.token=null;document.location='/signin/';">Sign out</a>
             </div>
         </div>
     </header>
@@ -120,13 +120,13 @@
         </div>    
     </div>
 
-    <script src="./frameworks/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="./assets/js/dressapi-admin.js"></script>
+    <script src="/frameworks/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/js/dressapi-admin.js"></script>
 
     <script>
         (function () {
             if (!localStorage.token)
-                document.location('./signin/');
+                document.location('/login');
 
             document.getElementById('token').innerHTML = localStorage.token;
             document.getElementById('username_viewer').innerHTML = localStorage.username;

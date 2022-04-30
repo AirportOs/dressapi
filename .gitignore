@@ -8,5 +8,6 @@ logs/*.log
 config.php
 dresser.txt
 www/cms/*
+www/NOUSE-cms/*
 www/upload/*
 

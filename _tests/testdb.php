@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../../Core/autoload.php'; // Autoloader dell'applicazione
+require_once __DIR__ . '/../../core/autoload.php'; // Autoloader dell'applicazione
 
 define('DB_HOST', 'localhost');
 define('DB_PORT', 3306);
@@ -8,8 +8,8 @@ define('DB_NAME', 'cardcomics');
 define('DB_USERNAME', 'root');
 define('DB_PASSWORD', '');
 
-use DressApi\Core\DBMS\CMySqlDB as CDB;       // In the future other DBMS as Oracle, PostgreSQL, MS SQL
-use DressApi\Core\DBMS\CMySqlDB;
+use DressApi\core\dbms\CMySqlDB as CDB;       // In the future other DBMS as Oracle, PostgreSQL, MS SQL
+use DressApi\core\dbms\CMySqlDB;
 
 try
 {

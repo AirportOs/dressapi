@@ -21,12 +21,13 @@ function createHTMLMenu(data)
 {
     let main_menu = document.getElementById('mainMenu');
     if (main_menu && data.modules)
-        for (let i in data.modules) {
+        for (let i in data.modules) 
+        {
             let module = data.modules[i];
 
             let a = document.createElement('a');
             a.className = "nav-link"+((i==0)?(' active'):(''));
-            a.href = '#'+module;
+            a.href = ''+module;
             a.areaCurrent = module;
             a.addEventListener('click', (e) => { GetList(module, list_options); document.getElementById('search_on_table').value=''; e.stopPropagation(); });
             a.innerHTML = module;
@@ -44,7 +45,8 @@ function createHTMLMenu(data)
             if (!data.tables)
                 document.getElementById('mainMenuTable').style.display = 'none';
             else
-                for (let i in data.tables) {
+                for (let i in data.tables) 
+                {
                     let table = data.tables[i];
                     let a = document.createElement('a');
                     a.className = "list-item"+((i==0)?(' active'):(''));
@@ -117,7 +119,7 @@ async function requestData(method, url = '', data = null)
                 
                         // fd.set(item, file);
                         fd.append(item, file);
-                        console.log(data[i].name + ' ' + data[i].files[0]);
+//                        console.log(data[i].name + ' ' + data[i].files[0]);
 
                         // headers.append('Content-Type', 'multipart/form-data');
                         

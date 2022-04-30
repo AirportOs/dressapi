@@ -117,7 +117,7 @@ async function requestData(method, url = '', data = null)
 
     }
     params.headers = headers;
-alert('URL: '+url);
+
     return await fetch(url, params);
 }
 

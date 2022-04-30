@@ -1,21 +1,23 @@
 <?php
  declare(strict_types=1);
 
+ session_start();
+
 // echo "<pre>";print_r($_SERVER);exit;
 
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../Core/autoload.php'; // Autoloader dell'applicazione
+require_once __DIR__ . '/../core/autoload.php'; // Autoloader dell'applicazione
 
-use DressApi\Core\DBMS\CSqlComposerBase;
+use DressApi\core\dbms\CSqlComposerBase;
 
-use DressApi\Core\DBMS\CMySqlDB as CDB;       // In the future other DBMS as Oracle, PostgreSQL, MS SQL
-use DressApi\Core\Cache\CFileCache as CCache; // An alternative is CRedisCache
-use DressApi\Core\User\CUser;
-use DressApi\Core\Request\CRequest;
-use DressApi\Core\Response\CResponse;
-use DressApi\Core\Logger\CLogger;
-use DressApi\Modules\Base\CBaseController;
+use DressApi\core\dbms\CMySqlDB as CDB;       // In the future other DBMS as Oracle, PostgreSQL, MS SQL
+use DressApi\core\cache\CFileCache as CCache; // An alternative is CRedisCache
+use DressApi\core\user\CUser;
+use DressApi\core\request\CRequest;
+use DressApi\core\response\CResponse;
+use DressApi\core\logger\CLogger;
+use DressApi\modules\base\CBaseController;
 
 try
 {       
@@ -82,6 +84,10 @@ try
         // sets all the related tables with an array and the method setRelatedFieldNames()
         if (defined('RELATED_FIELD_NAMES'))
             $controller->setRelatedFieldNames(RELATED_FIELD_NAMES);  
+
+
+//        $metainfo = []; 
+//        $metainfo['modules'] = $user->getAllAvaiableModules(); 
 
         print $controller->exec();
     }

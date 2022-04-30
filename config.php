@@ -76,6 +76,8 @@ define('DEFAULT_ITEMS_PER_PAGE', 50);
 // Max total rows for each request, if the value is greater it will be reset to MAX_ITEMS_PER_PAGE value
 define('MAX_ITEMS_PER_PAGE', 200);
 
+// Max elements for every related tables
+define('MAX_ELEMENTS_RELATED_TABLE', 50);
 
 
 //

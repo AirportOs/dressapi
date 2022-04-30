@@ -1,9 +1,9 @@
 <?php
     define('DOMAIN_NAME','dressapi.com');
     
-    require_once __DIR__.'/../../Core/autoload.php';
+    require_once __DIR__.'/../../core/autoload.php';
 
-    use DressApi\Core\Cache\CRedisCache as CCache;
+    use DressApi\core\cache\CRedisCache as CCache;
 
     $obj = new stdClass();
     $obj->value = 45;
