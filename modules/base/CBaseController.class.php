@@ -773,7 +773,8 @@ class CBaseController extends CDB
     {
         try
         {
-            if (!isset($this->all_db_modules[$this->module_name]) && !in_array($this->module_name,ACCEPTED_TABLE_AS_MODULE))
+            if (!isset($this->all_db_modules[$this->module_name]) && 
+                 !in_array($this->module_name,ACCEPTED_TABLE_AS_MODULE) && !in_array('*',ACCEPTED_TABLE_AS_MODULE))
                 throw new Exception('You must set a valid module name');
 
             $this->response->setStatusCode(CResponse::HTTP_STATUS_OK);
