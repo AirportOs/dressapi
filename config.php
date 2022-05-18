@@ -13,6 +13,10 @@ define('DEFAULT_FORMAT_OUTPUT', 'json'); // json, xml, plain (text/csv), debug
 define('ACCEPTED_FORMAT_OUTPUT', ['json','html','xml','text']); // json, xml, plain (text/csv), debug
 
 
+// Accettable table names as module name
+define('ACCEPTED_TABLE_AS_MODULE', ['nodetype']); 
+
+
 // Level of log info
 define('LOG_LEVEL_MIN', 'info');
 
