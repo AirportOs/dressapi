@@ -84,7 +84,7 @@ define('CREATION_DATE', 'creation_date');
 // id_[table] => [table]:name
 // NOTE: you can also set relationships in the controller with addRelatedFieldName()
 define('RELATED_FIELD_NAMES', ['page'=>['title','creation_date'], // the value can be an array of strings
-                               'contact'=>['email','city'],
+                               '_contact'=>['email','city'],
                                '*'=>'name']);                     // or a simple string
 
 
@@ -259,7 +259,7 @@ curl -H  "Authorization: Bearer [YOUR TOKEN]" -X DELETE http://dressapi/logger/3
 
 #READ
 curl -H  "Authorization: Bearer [YOUR TOKEN]" -X GET http://dressapi/page/1
-curl -H  "Authorization: Bearer [YOUR TOKEN]" -X GET http://dressapi/page/id_user=102/
+curl -H  "Authorization: Bearer [YOUR TOKEN]" -X GET http://dressapi/page/id__user=102/
 ```
 
 Especially in queries, i.e. in reading, it is possible to do much more thanks to some options such as:
@@ -306,7 +306,7 @@ For example:
 -X GET http://dressapi/logger/with-relations
 ```
 
-If everything is set correctly the result will be for example that "id_user" will be replaced by the equivalent "username", "email" or "name" in the user table.
+If everything is set correctly the result will be for example that "id__user" will be replaced by the equivalent "username", "email" or "name" in the user table.
 
 ### The filters
 
@@ -317,9 +317,9 @@ The **~** filter indicates that the searched text must be contained (and therefo
 Some examples:
 
 ```bash
--X GET http://dressapi/page/id_user=102/
+-X GET http://dressapi/page/id__user=102/
 -X GET http://dressapi/page/name~Welcome
--X GET http://dressapi/logger/wr/id_user>=100/p/1,10
+-X GET http://dressapi/logger/wr/id__user>=100/p/1,10
 ```
 
 Filters can be combined with each other by appending the condition to the uri.

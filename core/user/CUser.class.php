@@ -477,12 +477,12 @@ class CUser extends CDB
      */
     private function _setRoleConditions()
     {
-        $role_conditions = '(id_role IS NULL)';
+        $role_conditions = '(id__role IS NULL)';
         if (in_array('*',$this->user_roles))
             $role_conditions = '';
         else
             if (count($this->user_roles)>0)
-                $role_conditions = '(id_role IN ('.implode(',',$this->user_roles).') OR id_role IS NULL) ';
+                $role_conditions = '(id__role IN ('.implode(',',$this->user_roles).') OR id__role IS NULL) ';
         
         return $role_conditions;
     }
@@ -568,15 +568,15 @@ class CUser extends CDB
         $module_name = CRequest::getModuleName(); 
 
         $sc = new CSqlComposer();
-        $sql = (string)$sc->select('id_role')->from(USER_ROLE_TABLE)->where('id_user='.$this->id);       
+        $sql = (string)$sc->select('id__role')->from(USER_ROLE_TABLE)->where('id__user='.$this->id);       
         $user_role = $this->_queryCache($sql, true);       
 
-        $role_conditions = (($user_role)?('(id_role IS NULL OR id_role IN ('.implode(',',$user_role).'))'):('FALSE'));
+        $role_conditions = (($user_role)?('(id__role IS NULL OR id__role IN ('.implode(',',$user_role).'))'):('FALSE'));
 
         $sc->clear();
-        $sql = (string)$sc->select('id_role,can_read,can_update,can_insert,can_delete')->
+        $sql = (string)$sc->select('id__role,can_read,can_update,can_insert,can_delete')->
                     from(ACL_TABLE)->
-                    where("($role_conditions AND (id_module IS NULL OR id_module IN (SELECT id FROM ".MODULE_TABLE." WHERE name='$module_name')))");
+                    where("($role_conditions AND (id__module IS NULL OR id__module IN (SELECT id FROM ".MODULE_TABLE." WHERE name='$module_name')))");
 
         $hash = ACL_TABLE.'/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
@@ -594,7 +594,7 @@ class CUser extends CDB
         if ($data !== null)
             foreach($data as $row)
             {
-                $role = $row['id_role'] ?? '*';
+                $role = $row['id__role'] ?? '*';
                 $this->addUserRole( $role );
                 $this->addRolePermission( $role, $module_name, $row );
             }
@@ -613,7 +613,7 @@ class CUser extends CDB
     {
         $sc = new CSqlComposer();
         $sql = $sc->select('count(*)')->from(USER_ROLE_TABLE)->
-                    where("id__user=$this->id AND id_role IN (SELECT id FROM ".ROLE_TABLE." WHERE name='$name')");
+                    where("id__user=$this->id AND id__role IN (SELECT id FROM ".ROLE_TABLE." WHERE name='$name')");
 
         return (bool)$this->getQueryDataValue($sql);
     }
@@ -630,7 +630,7 @@ class CUser extends CDB
         $sc = new CSqlComposer();
         $role_conditions = $this->_setRoleConditions();
 
-        $sql = $sc->select('count(*)')->from(ACL_TABLE)->where("$role_conditions AND id_module IS NULL");
+        $sql = $sc->select('count(*)')->from(ACL_TABLE)->where("$role_conditions AND id__module IS NULL");
 
         $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
@@ -661,7 +661,7 @@ class CUser extends CDB
         if ($role_conditions!=='')
             $role_conditions .= ' AND'; 
         $sql = $sc->select('DISTINCT name')->from(ACL_TABLE)->
-                    leftJoin(MODULE_TABLE, 'mt.id='.ACL_TABLE.'.id_module OR id_module IS NULL', 'mt')->
+                    leftJoin(MODULE_TABLE, 'mt.id='.ACL_TABLE.'.id__module OR id__module IS NULL', 'mt')->
                     where("$role_conditions ".ACL_TABLE.".can_read='YES' AND visible='yes'");
 
         $hash = 'acl/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
@@ -717,7 +717,7 @@ class CUser extends CDB
             else
             {
                 $sc = new CSqlComposer();
-                $sc->select('count(*)')->from('contact')->where('email=\''.str_replace("'","''",$params['email']).'\'');
+                $sc->select('count(*)')->from('_contact')->where('email=\''.str_replace("'","''",$params['email']).'\'');
                 if ($this->getQueryDataValue($sc))
                     throw new Exception('The email address already exists');
             }
@@ -742,13 +742,13 @@ class CUser extends CDB
         $types[] = 'VARCHAR';
         $types[] = 'VARCHAR';
 
-        if ($this->insertRecord('contact', $contact, $types))
+        if ($this->insertRecord('_contact', $contact, $types))
         {
             // USER
-            // id, name, id_contact, domain, nickname, username, pwd, status
+            // id, name, id__contact, domain, nickname, username, pwd, status
             $user = [];
             $user['name'] =  $contact['name'][0].'.'.$contact['surname'];
-            $user['id_contact'] = $this->getLastID();
+            $user['id__contact'] = $this->getLastID();
             $user['domain'] = DOMAIN_NAME;
             $user['nickname'] = $params['nickname'];
             $user['username'] = $params['dusername'];            
@@ -787,7 +787,7 @@ class CUser extends CDB
             
 
         // USER
-        // id, name, id_contact, domain, nickname, username, pwd, status
+        // id, name, id__contact, domain, nickname, username, pwd, status
         
 
       //   throw new Exception("subscribe todo");

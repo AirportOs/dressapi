@@ -24,18 +24,18 @@ DROP TABLE IF EXISTS `_acl`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `_acl` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_role` int(11) DEFAULT NULL COMMENT 'Role of the user',
-  `id_module` int(11) DEFAULT NULL COMMENT 'contains the index of module or table name managed by the base module',
+  `id__role` int(11) DEFAULT NULL COMMENT 'Role of the user',
+  `id__module` int(11) DEFAULT NULL COMMENT 'contains the index of module or table name managed by the base module',
   `can_read` enum('YES','NO') DEFAULT 'NO',
   `can_insert` enum('YES','NO') DEFAULT 'NO',
   `can_update` enum('YES','NO') DEFAULT 'NO',
   `can_delete` enum('YES','NO') DEFAULT 'NO',
   `only_owner` enum('NO','YES') NOT NULL DEFAULT 'NO' COMMENT 'if exist id__user in the module''s table',
   PRIMARY KEY (`id`),
-  KEY `id_module` (`id_module`),
-  KEY `id_role` (`id_role`),
-  CONSTRAINT `_acl_ibfk_1` FOREIGN KEY (`id_module`) REFERENCES `_module` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `_acl_ibfk_2` FOREIGN KEY (`id_role`) REFERENCES `_role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `id__module` (`id__module`) USING BTREE,
+  KEY `id__role` (`id__role`) USING BTREE,
+  CONSTRAINT `_acl_ibfk_1` FOREIGN KEY (`id__module`) REFERENCES `_module` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `_acl_ibfk_2` FOREIGN KEY (`id__role`) REFERENCES `_role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -76,6 +76,36 @@ INSERT INTO `_config` VALUES (1,'WEBSITE_OWNER','DressApi','');
 UNLOCK TABLES;
 
 --
+-- Table structure for table `_contact`
+--
+
+DROP TABLE IF EXISTS `_contact`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `_contact` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(80) NOT NULL,
+  `surname` varchar(80) NOT NULL,
+  `address` varchar(160) NOT NULL,
+  `zip_code` varchar(10) NOT NULL,
+  `city` varchar(80) NOT NULL,
+  `state` varchar(30) NOT NULL,
+  `email` varchar(60) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `_contact`
+--
+
+LOCK TABLES `_contact` WRITE;
+/*!40000 ALTER TABLE `_contact` DISABLE KEYS */;
+INSERT INTO `_contact` VALUES (1,'Joe','Sample','Via 112 Febbraio','15005','Rome','Italy','jxsample@userdressapi.com'),(2,'Michael','Franks','The art of the tea street, 1046','01975','Los Angeles','California','mfranks@userdressapi.com'),(3,'Pasquale','Tufano','Via Roccavione, 216','10047','Turin','Italy','ptufano@userdressapi.com'),(21,'Joe','Sample','Via 94 Febbraio','15005','Turin','Italy','jsample@userdressapi.com');
+/*!40000 ALTER TABLE `_contact` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `_module`
 --
 
@@ -100,7 +130,7 @@ CREATE TABLE `_module` (
 
 LOCK TABLES `_module` WRITE;
 /*!40000 ALTER TABLE `_module` DISABLE KEYS */;
-INSERT INTO `_module` VALUES (1,'Sign','user','','Sign','Login, Logout, Subscription, Unsubscription','no'),(2,'Pages','node','id_nodetype=11','Page Module','','yes'),(3,'News','news','','News','','yes'),(4,'Events','event','','Events','','yes'),(5,'Faq','faq','','Faq','','yes'),(6,'Documents','document','','Documents','List of Documents','yes');
+INSERT INTO `_module` VALUES (1,'sign','user','','Sign','Login, Logout, Subscription, Unsubscription','no'),(2,'pages','node','id_nodetype=11','Page Module','','yes'),(3,'news','news','','News','','yes'),(4,'events','event','','Events','','yes'),(5,'faq','faq','','Faq','','yes'),(6,'documents','document','','Documents','List of Documents','yes');
 /*!40000 ALTER TABLE `_module` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -189,15 +219,15 @@ DROP TABLE IF EXISTS `_user`;
 CREATE TABLE `_user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(180) NOT NULL,
-  `id_contact` int(11) DEFAULT NULL,
+  `id__contact` int(11) DEFAULT NULL,
   `domain` varchar(60) DEFAULT 'local',
   `nickname` varchar(60) NOT NULL,
   `username` varchar(255) NOT NULL,
   `pwd` varchar(120) NOT NULL DEFAULT '-HsjK673Hf@fhs',
   `status` enum('Subscribed','Verified','Refused') NOT NULL DEFAULT 'Subscribed',
   PRIMARY KEY (`id`),
-  KEY `id_contact` (`id_contact`),
-  CONSTRAINT `_user_ibfk_1` FOREIGN KEY (`id_contact`) REFERENCES `contact` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `id__contact` (`id__contact`) USING BTREE,
+  CONSTRAINT `_user_ibfk_1` FOREIGN KEY (`id__contact`) REFERENCES `_contact` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=116 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -220,13 +250,13 @@ DROP TABLE IF EXISTS `_user_role`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `_user_role` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_user` int(11) NOT NULL,
-  `id_role` int(11) NOT NULL,
+  `id__user` int(11) NOT NULL,
+  `id__role` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `id_user` (`id_user`),
-  KEY `id_role` (`id_role`),
-  CONSTRAINT `_user_role_ibfk_1` FOREIGN KEY (`id_role`) REFERENCES `_role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `_user_role_ibfk_2` FOREIGN KEY (`id_user`) REFERENCES `_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  KEY `id__user` (`id__user`) USING BTREE,
+  KEY `id__role` (`id__role`) USING BTREE,
+  CONSTRAINT `_user_role_ibfk_1` FOREIGN KEY (`id__role`) REFERENCES `_role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `_user_role_ibfk_2` FOREIGN KEY (`id__user`) REFERENCES `_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=107 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -238,36 +268,6 @@ LOCK TABLES `_user_role` WRITE;
 /*!40000 ALTER TABLE `_user_role` DISABLE KEYS */;
 INSERT INTO `_user_role` VALUES (1,1,1),(11,2,2),(101,101,101),(102,102,102),(103,103,103);
 /*!40000 ALTER TABLE `_user_role` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `contact`
---
-
-DROP TABLE IF EXISTS `contact`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `contact` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(80) NOT NULL,
-  `surname` varchar(80) NOT NULL,
-  `address` varchar(160) NOT NULL,
-  `zip_code` varchar(10) NOT NULL,
-  `city` varchar(80) NOT NULL,
-  `state` varchar(30) NOT NULL,
-  `email` varchar(60) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `contact`
---
-
-LOCK TABLES `contact` WRITE;
-/*!40000 ALTER TABLE `contact` DISABLE KEYS */;
-INSERT INTO `contact` VALUES (1,'Joe','Sample','Via 112 Febbraio','15005','Rome','Italy','jxsample@userdressapi.com'),(2,'Michael','Franks','The art of the tea street, 1046','01975','Los Angeles','California','mfranks@userdressapi.com'),(3,'Pasquale','Tufano','Via Roccavione, 216','10047','Turin','Italy','ptufano@userdressapi.com'),(21,'Joe','Sample','Via 94 Febbraio','15005','Turin','Italy','jsample@userdressapi.com');
-/*!40000 ALTER TABLE `contact` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -287,7 +287,7 @@ CREATE TABLE `document` (
   `creation_date` datetime NOT NULL DEFAULT current_timestamp(),
   `id__user` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `id_user` (`id__user`)
+  KEY `id__user` (`id__user`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -322,7 +322,7 @@ CREATE TABLE `event` (
   `creation_date` datetime NOT NULL DEFAULT current_timestamp(),
   `id__user` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `id_user` (`id__user`)
+  KEY `id__user` (`id__user`) USING BTREE
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -381,8 +381,8 @@ CREATE TABLE `news` (
   `creation_date` datetime NOT NULL DEFAULT current_timestamp(),
   `id__user` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `id_user` (`id__user`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
+  KEY `id__user` (`id__user`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -406,7 +406,7 @@ CREATE TABLE `node` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_nodetype` int(11) NOT NULL DEFAULT 11,
   `label` varchar(40) NOT NULL,
-  `title` varchar(180) NOT NULL,
+  `title` varchar(120) NOT NULL COMMENT 'title of element',
   `body` text NOT NULL,
   `description` varchar(160) NOT NULL,
   `visible` enum('no','yes') NOT NULL DEFAULT 'no',
@@ -414,8 +414,8 @@ CREATE TABLE `node` (
   `creation_date` date NOT NULL DEFAULT current_timestamp(),
   `id__user` int(11) NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `id_user` (`id__user`),
-  KEY `id_nodetype` (`id_nodetype`),
+  KEY `id__user` (`id__user`) USING BTREE,
+  KEY `id__nodetype` (`id_nodetype`) USING BTREE,
   CONSTRAINT `node_ibfk_1` FOREIGN KEY (`id__user`) REFERENCES `_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -426,7 +426,7 @@ CREATE TABLE `node` (
 
 LOCK TABLES `node` WRITE;
 /*!40000 ALTER TABLE `node` DISABLE KEYS */;
-INSERT INTO `node` VALUES (1,11,'HOME','Welcome to DressApi: the new ORM REST API','The name \"Dress\" means it \"dress\" up your database, substantially it provides a quick REST API, to your db schema. \nORM means Object-relational mapping and DressApi maps your database dynamically. Although it is structured as an MVC (Model, View, Controller) it does not need to define a model for each table in the DB but if it automatically reads it from the DB. \nThe most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code.','Example of use DressApi','yes','draft','2021-01-13',2),(2,1,'Experience','DressApi is new but contains long experience inside','I have a very long experience in programming with various languages, for the web I have always preferred PHP.\nIn about twenty years of developing web applications, I have always developed and used a personal framework that adopts the dynamic ORM logic and has evolved over time. Now a large part of the code has been rewritten from scratch in the most modern view of the REST API but the idea has remained the same and the experience has certainly allowed to create a solid and functional platform.','','no','reserved','2021-01-15',101),(3,1,'Test','title test','I have a very long experience in programming with various languages, for the web I have always preferred PHP.\nIn about twenty years of developing web applications, I have always developed and used a personal framework that adopts the dynamic ORM logic and has evolved over time. Now a large part of the code has been rewritten from scratch in the most modern view of the REST API but the idea has remained the same and the experience has certainly allowed to create a solid and functional platform.','Title Test OK!','yes','reserved','2021-01-15',2);
+INSERT INTO `node` VALUES (1,11,'HOME','Welcome to DressApi: the new ORM REST API','The name \"Dress\" means it \"dress\" up your database, substantially it provides a quick REST API, to your db schema.\nORM means Object-relational mapping and DressApi maps your database dynamically. Although it is structured as an MVC (Model, View, Controller) it does not need to define a model for each table in the DB but if it automatically reads it from the DB. \nThe most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code.','Example of use DressApi','yes','draft','2022-07-07',1),(2,1,'Experience','DressApi is new but contains long experience inside','I have a very long experience in programming with various languages, for the web I have always preferred PHP.\nIn about twenty years of developing web applications, I have always developed and used a personal framework that adopts the dynamic ORM logic and has evolved over time. Now a large part of the code has been rewritten from scratch in the most modern view of the REST API but the idea has remained the same and the experience has certainly allowed to create a solid and functional platform.','','no','reserved','2021-01-15',101),(3,1,'Test','title test','I have a very long experience in programming with various languages, for the web I have always preferred PHP.\nIn about twenty years of developing web applications, I have always developed and used a personal framework that adopts the dynamic ORM logic and has evolved over time. Now a large part of the code has been rewritten from scratch in the most modern view of the REST API but the idea has remained the same and the experience has certainly allowed to create a solid and functional platform.','Title Test OK!','yes','reserved','2021-01-15',2);
 /*!40000 ALTER TABLE `node` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -465,4 +465,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-04-29 10:14:22
+-- Dump completed on 2022-07-07 16:18:54

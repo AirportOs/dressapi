@@ -46,7 +46,7 @@ define('CREATION_DATE', 'creation_date');
 // id_[table] => [table]:name
 // NOTE: you can also set relationships in the controller with addRelatedFieldName()
 define('RELATED_FIELD_NAMES', ['page'=>['title','creation_date'], // the value can be an array of strings
-                               'contact'=>['email','city'],
+                               '_contact'=>['email','city'],
                                '*'=>'name']);                     // or a simple string
 
 

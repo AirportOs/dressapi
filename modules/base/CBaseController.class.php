@@ -773,9 +773,16 @@ class CBaseController extends CDB
     {
         try
         {
-            if (!isset($this->all_db_modules[$this->module_name]) && 
-                !in_array($this->module_name, ADDITIONAL_TABLE_NAME_AS_MODULE))
+            if (!isset($this->all_db_modules[$this->module_name]))
+            { 
+                if ($this->user->isAdmin()) 
+                    $tables_available = array_keys($this->model->getAllAvailableTables());
+                else
+                    $tables_available = array_intersect(array_keys($this->model->getAllAvailableTables()),ADDITIONAL_TABLE_NAME_AS_MODULE);
+                
+                if (!in_array($this->module_name, $tables_available))
                     throw new Exception('You must set a valid module name');
+            }
 
             $this->response->setStatusCode(CResponse::HTTP_STATUS_OK);
 
@@ -1000,7 +1007,9 @@ class CBaseController extends CDB
                 if ($this->user!==null)
                 {
                     if ($this->user->isAdmin()) 
-                        $data['tables'] = array_keys($this->model->getAllAvailableTables());                
+                        $data['tables'] = array_keys($this->model->getAllAvailableTables());
+                    else
+                        $data['tables'] = array_intersect(array_keys($this->model->getAllAvailableTables()),ADDITIONAL_TABLE_NAME_AS_MODULE);
                     $data['modules'] = $this->user->getAllAvaiableModules();
                 }
             }
