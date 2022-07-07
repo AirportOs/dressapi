@@ -297,7 +297,7 @@ function createForm(full_data, item)
                         
                         [rel_module,rel_sitems] = full_data.structure[i]['ref'].split(':');
                         [rel_id_name,rel_items] = rel_sitems.split('-');
-                        popolateLists.push(['select','input_'+field, rel_module, '/page/1,500', rel_id_name, rel_items, value, (full_data.structure[i]['null']=='YES')]);
+                        popolateLists.push(['select','input_'+field, rel_module, 'page/1,500', rel_id_name, rel_items, value, (full_data.structure[i]['null']=='YES')]);
                         break;
 
             case 'datalist': 
@@ -309,7 +309,7 @@ function createForm(full_data, item)
                         
                         [rel_module,rel_sitems] = full_data.structure[i]['ref'].split(':');
                         [rel_id_name,rel_items] = rel_sitems.split('-');
-                        popolateLists.push(['datalist','input_'+field, rel_module, '/page/1,500', rel_id_name, rel_items, value, full_data.structure[i]['null']=='YES']);
+                        popolateLists.push(['datalist','input_'+field, rel_module, 'page/1,500', rel_id_name, rel_items, value, full_data.structure[i]['null']=='YES']);
                         break;
 
             case 'checkbox-list-ex': 

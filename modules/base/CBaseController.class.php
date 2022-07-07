@@ -773,8 +773,9 @@ class CBaseController extends CDB
     {
         try
         {
-            if (!isset($this->all_db_modules[$this->module_name]))
-                throw new Exception('You must set a valid module name');
+            if (!isset($this->all_db_modules[$this->module_name]) && 
+                !in_array($this->module_name, ADDITIONAL_TABLE_NAME_AS_MODULE))
+                    throw new Exception('You must set a valid module name');
 
             $this->response->setStatusCode(CResponse::HTTP_STATUS_OK);
 
@@ -993,7 +994,7 @@ class CBaseController extends CDB
         $data = $this->_getCachedData($cache_key, 'structures') ?? [];
         if (!$data)
         {
-            if ($this->module_name == 'All')
+            if ($this->module_name == 'all')
             {
                 // if ($this->user->canViewAllModules())                
                 if ($this->user!==null)
