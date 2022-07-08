@@ -512,6 +512,18 @@ class CBaseController extends CDB
     {
         $conditions = $this->getConditionsByFilters();
         $additional_conditions = $this->model->getAdditionalConditions();
+
+        // OnlyOwner Condition
+        if (isset($this->all_db_tables[$this->table]['id__user']) &&  
+            $this->user->isOnlyOwnerPermissions(CRequest::getModuleName(), $this->method))
+        {
+            $owner_condition = "(id__user=".$this->user->GetId().")";
+            if ($conditions)
+                $conditions = "($conditions) AND ($owner_condition)";
+            else
+                $conditions = $owner_condition;
+        }
+
         if ($additional_conditions)
         {
             if ($conditions)
@@ -867,7 +879,7 @@ class CBaseController extends CDB
             $format = CRequest::getFormat();
             if ($format=='html')
             {
-                $_SESSION[DB_NAME]['user'] = $user;
+                $_SESSION[DB_NAME]['user'] = $this->user;
                 $fields = $this->model->getFields();
                 $data['structure'] = $fields['structure'];
                 $data['related_tables'] = $fields['related_tables'];

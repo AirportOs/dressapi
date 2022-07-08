@@ -333,7 +333,7 @@ class CMySqlDB extends CDBMS
 
                 if ($items_values !== null)
                     $stmt->bind_param($stypes, ...$items_values);
-                $ret = $stmt->execute();
+                $ret = ($stmt->execute() && $stmt->affected_rows>0);
                 $stmt->close();
 
                 if (self::getLastDBErrorNumber())
@@ -538,6 +538,38 @@ class CMySqlDB extends CDBMS
         else
             self::alert("No DB " . self::$dbkey . " found");
 
+        return $names;
+    }
+
+
+    /**
+     * Returns an array containing the names of all columns of $tablename
+     *
+     * @return ?array an array with all fields
+     *                or null if the table was not found
+     */
+    public function getTableColumnsName($tablename): array
+    {
+        $names = [];
+
+        $sql = "SHOW COLUMNS FROM $tablename";
+        
+        $db = self::$handle[self::$dbkey] ?? null;
+
+        if ($db)
+        {        
+            try
+            {
+                $result = $db->query($sql);
+            
+                while($result && $row = $result->fetch_array())
+                    $names[] = $row['Field'];
+            }
+            catch(Exception $e)
+            {
+                // probably the table not exists 
+            }
+        }
         return $names;
     }
 

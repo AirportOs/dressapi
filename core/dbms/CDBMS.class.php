@@ -321,6 +321,14 @@ abstract class CDBMS
 
 
     /**
+     * Returns an array containing the names of all columns of $tablename
+     *
+     * @return ?array an array with all fields
+     *                or null if the table was not found
+     */
+    abstract public function getTableColumnsName($tablename): array;
+
+    /**
      * Returns an array containing the names of all columns for the last query executed
      *
      * @return ?array the associative having as index and value the column names of the queries or null if it fails

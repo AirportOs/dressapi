@@ -62,7 +62,7 @@ try
         // {
         //     $user->setUserRole(['all']); // // Add role "all" to current user
         //     $powers = ['can_read'=>'YES','can_insert'=>'YES','can_update'=>'YES','can_delete'=>'YES'];
-        //     $user->addRolePermission('all', '*', $powers); // Role=all, All modules, all permission
+        //     $user->addRolePermission('all', '*', $powers, false); // Role=all, All modules, all permission, only_owner  
         // }
 
         // Create an appropriate Controller for the request 

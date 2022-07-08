@@ -116,9 +116,9 @@ class CUser extends CDB
             {
                 $decoded = JWT::decode($this->token,
                                        SECRET_KEY,             // The signing key
-                                       TOKEN_ENC_ALGORITHM);   // Algorithm used to sign the token, see https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40#section-3
-                $this->id = $decode['elements']['id'];
-                $this->name = $decode['elements']['name'];
+                                       [TOKEN_ENC_ALGORITHM]);   // Algorithm used to sign the token, see https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40#section-3
+                $this->id = $decoded['elements']['id'];
+                $this->name = $decoded['elements']['name'];
             }
             else
                 $this->id = self::USER_ID_ANONYMOUS;
@@ -364,17 +364,18 @@ class CUser extends CDB
      * 
      * @param string|int $role role of user where role can be "Admin", "Publisher" and anything else or a number 1=Admin, 2=Publisher, 3=Normal User
      *                         the role name and type depends from your app
-     * @param string $module_name normally is the name of DB table but could be not in an custom extension 
-     * @param array $permissions Name of permissions [GET, POST, PATCh, PUT, DELETE, OPTIONS] 
+     * @param string $module_name the name of module (see "_module" db table) 
+     * @param array  $permissions Name of permissions [GET, POST, PATCh, PUT, DELETE, OPTIONS] 
      *               or if you prefer you can use C.R.U.D.O. letters [C=POST (Insert), R=GET (Read), U=PATCH|PUT (Modify), D=DELETE, O=OPTIONS].
      *               Finally, you can use * for all valid permission
+     * @param bool $only_owner if true the permission is valid only for the owners (see id__user in the table)
      */
-    public function setRolePermissions( string|int $role, string $module_name, array $permissions )
+    public function setRolePermissions( string|int $role, string $module_name, array $permissions, $only_owner = false )
     {
         $this->role_permissions[$role] = [];
-        array_map(function($key,&$value) use($role, $module_name) 
+        array_map(function($key,&$value) use($role, $module_name, $only_owner) 
                   { 
-                        $this->addRolePermission( $role, $module_name, $value ); 
+                        $this->addRolePermission( $role, $module_name, $value, $only_owner ); 
                   }, $permissions);
     }
 
@@ -384,18 +385,25 @@ class CUser extends CDB
      * 
      * @param string|int $role role of user where role can be "Admin", "Publisher" and anything else or a number 1=Admin, 2=Publisher, 3=Normal User
      *                         the role name and type depends from your app
-     * @param string $module_name normally is the name of DB table but could be not in an custom extension 
+     * @param string $module_name the name of module (see "_module" db table) 
      * @param array $permissions list of permission (can_read, can_insert, can_delete, can_udate) 
+     * @param bool $only_owner if true the permission is valid only for the owners (see id__user in the table)
      *              
      */
-    public function addRolePermission( string|int $role, string $module_name, array $permissions )
+    public function addRolePermission( string|int $role, string $module_name, array $permissions, $only_owner = false )
     {
+        $role = $role ?? '*';
+
         if (!isset($this->role_permissions[$role]))
             $this->role_permissions[$role] = [];
 
         if (!isset($this->role_permissions[$role][$module_name]))
             $this->role_permissions[$role][$module_name] = [];
-            
+
+
+        if ($only_owner)
+            $this->role_permissions[$role][$module_name][] = 'ONLY_OWNER';
+
         if ($permissions['can_insert']=='YES')
             $this->role_permissions[$role][$module_name][] = 'POST';
 
@@ -413,20 +421,41 @@ class CUser extends CDB
         }
                         
         if ($permissions['can_delete']=='YES')
-            $this->role_permissions[$role][$module_name][] = 'DELETE';                        
+            $this->role_permissions[$role][$module_name][] = 'DELETE';
+    }
+
+
+    /**
+     * Set a User Role (Normally detected by DB)
+     * 
+     * @param string $module_name the name of module (see "_module" db table) 
+     * @param string $method method of operation [GET, POST, PATCH, PUT, DELETE, OPTIONS, HEAD] 
+     * @return bool if true the permission is valid only for the owners (see id__user in the table)
+     *              
+     */
+    public function isOnlyOwnerPermissions( string $module_name, $method ) : bool
+    {
+        if (isset($this->role_permissions))
+            foreach( $this->role_permissions as &$role )
+                if (isset($role[$module_name]) &&
+                    ($role[$module_name][0] == 'ONLY_OWNER' &&
+                     in_array($method, $role[$module_name]) 
+                    )
+                ) return true;
+        return false;
     }
 
 
     /**
      * Check permissions by User Role (Normally detected by DB)
      * 
-     * @param string $module_name normally is the name of DB table but could be not in an custom extension 
-     * @param string $method method of operation [GET, POST, PATCH. PUT, DELETE, OPTIONS, HEAD] 
+     * @param string $module_name the name of module (see "_module" db table) 
+     * @param string $method method of operation [GET, POST, PATCH, PUT, DELETE, OPTIONS, HEAD] 
      *               Each method corresponds to a C.R.U.D. permission 
      *               [C=Create=POST, R=Read=GET/HEAD/OPTIONS, U=Update=PATCH|PUT, D=DELETE].
      * @return true if the current user have the permission for this method
      */
-    public function checkPermission(string $module_name, string $method)
+    public function checkPermission(string $module_name, string $method) : bool
     {
         foreach($this->user_roles as $user_role)
             if (isset($this->role_permissions[$user_role]))
@@ -447,7 +476,7 @@ class CUser extends CDB
     /**
      * Set a User Role (Normally detected by DB)
      * 
-     * @param string $module_name normally is the name of DB table but could be not in an custom extension 
+     * @param string $module_name the name of module (see "_module" db table) 
      * 
      * return array contains all permissions for selected module
      */
@@ -568,15 +597,24 @@ class CUser extends CDB
         $module_name = CRequest::getModuleName(); 
 
         $sc = new CSqlComposer();
+        $sql = (string)$sc->select('id')->from(MODULE_TABLE)->where("name='$module_name'");       
+        $module_info = $this->_queryCache($sql, true);
+        if ($module_info===null)
+            $module_id = 0; 
+        else 
+            $module_id = $module_info[0];
+
+        $sc = new CSqlComposer();
         $sql = (string)$sc->select('id__role')->from(USER_ROLE_TABLE)->where('id__user='.$this->id);       
         $user_role = $this->_queryCache($sql, true);       
 
         $role_conditions = (($user_role)?('(id__role IS NULL OR id__role IN ('.implode(',',$user_role).'))'):('FALSE'));
 
+        $module_conditions = "(id__module IS NULL OR id__module IN ($module_id))";
         $sc->clear();
-        $sql = (string)$sc->select('id__role,can_read,can_update,can_insert,can_delete')->
+        $sql = (string)$sc->select('id__role,can_read,can_update,can_insert,can_delete,only_owner')->
                     from(ACL_TABLE)->
-                    where("($role_conditions AND (id__module IS NULL OR id__module IN (SELECT id FROM ".MODULE_TABLE." WHERE name='$module_name')))");
+                    where("($role_conditions AND $module_conditions)");
 
         $hash = ACL_TABLE.'/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
@@ -595,8 +633,9 @@ class CUser extends CDB
             foreach($data as $row)
             {
                 $role = $row['id__role'] ?? '*';
+                $only_owner = ($row['only_owner']=='YES');
                 $this->addUserRole( $role );
-                $this->addRolePermission( $role, $module_name, $row );
+                $this->addRolePermission( $role, $module_name, $row, $only_owner );
             }
 
         return $data !== null;
