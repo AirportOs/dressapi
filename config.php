@@ -106,7 +106,7 @@ define('DBMS_TYPE', 'MySql'); // Oracle, PostgreSQL,...
 
 
 // list of table names accepted as module name
-define('ADDITIONAL_TABLE_NAME_AS_MODULE', ['nodetype','_user']);
+define('ADDITIONAL_TABLE_NAME_AS_MODULE', ['cmsnodetype','_user']);
 
 
 //

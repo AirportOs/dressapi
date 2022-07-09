@@ -41,7 +41,7 @@ class CPagesModel extends CBaseModel
      */
     public function getAdditionalConditions() : string
     {
-        $conditions = ""; // id_nodetype IN (SELECT id FROM nodetype WHERE name='$this->module')";
+        $conditions = ""; // id_cmsnodetype IN (SELECT id FROM cmsnodetype WHERE name='$this->module')";
 
         return $conditions;
     }

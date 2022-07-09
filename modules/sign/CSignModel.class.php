@@ -110,7 +110,7 @@ class CSignModel extends \DressApi\modules\base\CBaseModel
 //    public function getAdditionalConditions() : string
 //    {
 //        // i.e.: 
-//        return "id_nodetype IN (SELECT id FROM nodetype WHERE name='$this->module')";
+//        return "id_cmsnodetype IN (SELECT id FROM cmsnodetype WHERE name='$this->module')";
 //
 //        return parent::getAdditionalConditions();
 //    }

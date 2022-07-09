@@ -76,7 +76,7 @@ class CHtmlView
         foreach(($this->data['structure'] ?? []) as $elem_struct)
             if ($elem_struct['ref'])
             {
-                // TO DO (example: "nodetype:id-name")
+                // TO DO (example: "cmsnodetype:id-name")
                 list($rel_table,$sitems) = explode(':', $elem_struct['ref']);
 
                 $items = explode('-',$sitems);

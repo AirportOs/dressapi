@@ -37,24 +37,6 @@ class CExampleController extends CBaseController
         $this->setDBTable('page'); // Default dbtable
         parent::__construct($request, $response, $user, $cache);
 
-/*
-        $cache_attr_name = 'nodetype';
-        if ($this->cache && $this->cache->exists($cache_attr_name,'structures'))
-            $this->nodetypes = $this->cache->get($cache_attr_name);
-        else
-        {
-            $sql = new CSqlComposer();
-            $sql->select('id,name')->from('nodetype');
-
-            $db = new CDB(); 
-            $db->query($sql);
-            $this->nodetypes = $db->getIdsArray(0, 'name');
-    
-            if ($this->cache)
-                $this->cache->set($cache_attr_name, $this->nodetypes);    
-        }
-*/
-
     }
 
 
