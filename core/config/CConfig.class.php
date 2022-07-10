@@ -42,14 +42,14 @@ class CConfig extends CDB
         $sc = new CSqlComposer();
         $sql = $sc->select('name,val')->from(CONFIG_TABLE);
 
-        if ($this->cache && $this->cache->exists('values','configurations'))
-            $this->values = $this->cache->get('values','configurations');
+        if ($this->cache && $this->cache->existsGlobal('values','configurations'))
+            $this->values = $this->cache->getGlobal('values','configurations');
         else
         {
             $this->values = [];
             $this->getQueryDataTable($this->values, $sql, null, null, self::DB_ASSOC, 'name');
             if ($this->cache!==null && $this->values !== null)     
-                $this->cache->set('values', $this->values, 'configurations');           
+                $this->cache->setGlobal('values', $this->values, 'configurations');           
         }
         
     }

@@ -1,5 +1,6 @@
 <?php
 define('DOMAIN_NAME', 'dressapi.com');
+define('APP_NAME', 'test');
 
 // Only for HTML
 define('DEFAULT_PAGE_TITLE', 'dressapi.com - TEST');
@@ -102,12 +103,6 @@ define('DB_PASSWORD', 'drapi22');
 
 // For the moment you can use only MySql
 define('DBMS_TYPE', 'MySql'); // Oracle, PostgreSQL,...
-
-
-
-// list of table names accepted as module name
-define('ADDITIONAL_TABLE_NAME_AS_MODULE', ['cmsnodetype','_user']);
-
 
 //
 // USER DB

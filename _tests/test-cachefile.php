@@ -1,5 +1,7 @@
 <?php
     define('DOMAIN_NAME','dressapi.com');
+    define('APP_NAME','test');
+
 
     require_once '../../core/autoload.php';
 
@@ -9,7 +11,7 @@
     $obj->value = 45;
     $obj->svalue = 'Hello';
 
-    $cache = new CCache(DOMAIN_NAME);
+    $cache = new CCache(DOMAIN_NAME, APP_NAME);
     $cache->setArea('MyArea1');
     $cache->set('test1', [1,2,3,4]);
     $cache->set('test2', $obj);

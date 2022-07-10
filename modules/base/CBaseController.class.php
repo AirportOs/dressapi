@@ -192,17 +192,14 @@ class CBaseController extends CDB
     private function _importAllDbModules(): void
     {
         if ($this->cache)
-        {
-            $this->cache->setArea('structures');
-            $this->all_db_modules = $this->cache->get('all_db_modules') ?? [];
-        }
+            $this->all_db_modules = $this->cache->getGlobal('all_db_modules','structures') ?? [];
 
         if (!$this->all_db_modules)
         {
             $this->query('SELECT id,name,tablename,tablefilter FROM '.MODULE_TABLE);
             $this-> getDataTable($this->all_db_modules, self::DB_ASSOC, 'name');
             if ($this->cache)
-                $this->cache->set('all_db_modules', $this->all_db_modules);
+                $this->cache->setGlobal('all_db_modules', $this->all_db_modules, 'structures');
         }
 
     }
@@ -214,10 +211,7 @@ class CBaseController extends CDB
     private function _importAllDbTables(): void
     {
         if ($this->cache)
-        {
-            $this->cache->setArea('structures');
-            $this->all_db_tables = $this->cache->get('all_db_tables');
-        }
+            $this->all_db_tables = $this->cache->getGlobal('all_db_tables', 'structures');
 
         if (!$this->all_db_tables)
         {
@@ -226,7 +220,7 @@ class CBaseController extends CDB
             if ($this->all_db_tables)
             {
                 if ($this->cache)
-                    $this->cache->set('all_db_tables', $this->all_db_tables);
+                    $this->cache->setGlobal('all_db_tables', $this->all_db_tables, 'structures');
             }
             else
                 throw new Exception("No table available");
@@ -698,7 +692,7 @@ class CBaseController extends CDB
             $key .= '.'.implode('.',$this->bind_params_values);
 
         if ($this->cache)
-            $cache_key = (($this->cache_per_user && $this->user!==null) ? ($this->user->getId() . '.') : ('')) . hash('sha256', $key);
+            $cache_key = hash('sha256', $key);
 
         return $cache_key;
     }
@@ -707,19 +701,21 @@ class CBaseController extends CDB
     /**
      * Get a content in cache if exists
      *
-     * @param $cache_key name of cache
+     * @param string $cache_key name of cache
      * @param string $area_name name of area (null or not declared is the implicit "current area") 
+     * @param bool $is_global true if is for all user
      * 
      * @return ?array results of query or null if there is no data in the cache
      */
-    protected function _getCachedData(string $cache_key, $area_name = null): ?array
+    protected function _getCachedData(string $cache_key, $area_name = null, bool $is_global = false): ?array
     {
         $data = null; // request new data
         if ($this->cache)
         {
+            $get = 'get'.(($is_global)?('Global'):(''));
             try
             {
-                $data = $this->cache->get($cache_key, $area_name);
+                $data = $this->cache->$get($cache_key, $area_name);
             }
             catch (\Exception)
             {
@@ -785,12 +781,9 @@ class CBaseController extends CDB
     {
         try
         {
-            if (!isset($this->all_db_modules[$this->module_name]))
-            { 
-                if ($this->user->isAdmin()) 
-                    $tables_available = array_keys($this->model->getAllAvailableTables());
-                else
-                    $tables_available = array_intersect(array_keys($this->model->getAllAvailableTables()),ADDITIONAL_TABLE_NAME_AS_MODULE);
+            if (!isset($this->all_db_modules[$this->module_name]) && !$this->user->isAdmin())
+            {
+                $tables_available = array_keys($this->model->getAllAvailableTables());
                 
                 if (!in_array($this->module_name, $tables_available))
                     throw new Exception('You must set a valid module name');
@@ -1003,14 +996,14 @@ class CBaseController extends CDB
     /**
      * Manager of HTTP Method OPTIONS
      * 
-     * @return array array with a structure of table or if table=all, the list of all tables available 
+     * @return array array with a structure of table associated to module or if module=all, the list of all modules available 
      */
     public function execOPTIONS(): array
     {
         $data = [];
 
         $cache_key = $this->_getCacheKey($this->module_name.'.options');
-        $data = $this->_getCachedData($cache_key, 'structures') ?? [];
+        $data = $this->_getCachedData($cache_key, 'structures', true) ?? [];
         if (!$data)
         {
             if ($this->module_name == 'all')
@@ -1018,10 +1011,7 @@ class CBaseController extends CDB
                 // if ($this->user->canViewAllModules())                
                 if ($this->user!==null)
                 {
-                    if ($this->user->isAdmin()) 
-                        $data['tables'] = array_keys($this->model->getAllAvailableTables());
-                    else
-                        $data['tables'] = array_intersect(array_keys($this->model->getAllAvailableTables()),ADDITIONAL_TABLE_NAME_AS_MODULE);
+                    $data['tables'] = ($this->user->isAdmin()? (array_keys($this->model->getAllAvailableTables())):([]));
                     $data['modules'] = $this->user->getAllAvaiableModules();
                 }
             }
@@ -1032,7 +1022,7 @@ class CBaseController extends CDB
             }
 
             if ($this->cache && $cache_key && $data && count($data) > 0)
-                $this->cache->set($cache_key, $data, 'structures');
+                $this->cache->setGlobal($cache_key, $data, 'structures');
         }
 
         return $data;

@@ -20,29 +20,34 @@ namespace DressApi\core\cache;
 require_once __DIR__ . '/config.php';
 
 use Exception;
+use DressApi\core\cache\ICache;
 
 /**
  * Class CCache
  *
  * @package DressApi\core\cache
  */
-class CFileCache
+class CFileCache implements ICache
 {
     private const MAIN_CACHE_PATH = CACHE_PATH; 
     private string $CACHE_PATH;
     private string $area_name;
+    private int $uid; // _user::id__user
 
     /**
      * CFileCache constructor
      *
      * @param string $domain application domain (unique name for each app)
      * @param string $db_name name of db
+     * @param string $area_name name of area 
+     * @param int $uid the id of current user in table _user (optional)
      */
-    public function __construct(string $domain, string $db_name)
+    public function __construct(string $domain, string $db_name, string $area_name = '', int $uid = 0)
     {
-        // Crea la cartella cachefiles nella path indicata. Utile ad esempio se scrive in memoria tipo '/dev/shm/'
+        // Create the cachefiles folder in the given path. Useful for example if it writes to memory like '/dev/shm/'
         $this->CACHE_PATH = self::MAIN_CACHE_PATH . $domain . '/'.$db_name.'/';
-        $this->area_name = '';
+        $this->area_name = $area_name;
+        $this->uid = $uid;
         $this->_createPathIfNotExists($this->CACHE_PATH);
 
         //    print $this->CACHE_PATH;
@@ -87,6 +92,21 @@ class CFileCache
 
 
     /**
+     * setUid
+     *
+     * Set the id of current user
+     * 
+     * @param int $uid id of current user (optional)
+     * 
+     * @return void
+     */
+    public function setUid(int $uid): void
+    {
+        $this->uid = $uid;
+    }
+
+
+    /**
      * getCachePath
      *
      * Returns the path where it writes the cache files
@@ -119,14 +139,33 @@ class CFileCache
 
 
     /**
-     * get
+     * getName method
      *
-     * Writes a message to a cache-specific log file
+     * Given the name of a key determines the actual internal key to be used
      *
-     * @param string $s message to write on file log
+     * @param string $name message to write on file log
+     *
+     * @return string the internal key
+     */
+    public function getName(string $name): string
+    {
+        return $this->CACHE_PATH . 
+               (($this->area_name != '') ? ($this->area_name . '/') : ('')) . 
+               (($this->uid != 0) ? ($this->uid) : ('global')) . '.' . 
+               $name . 
+               '.cache';
+    }
+
+
+    /**
+     * get Method
+     * 
+     * Get the value of an stored element
+     *
+     * @param string $name key of the item to be stored
      * @param string $area_name name of area (null or not declared is the implicit "current area") 
      *
-     * @return mixed The cached item: it can be a scalar value, an object or an array
+     * @return mixed The cached element value: it can be a scalar value, an object or an array
      */
     public function get(string $name, ?string $area_name = null): mixed
     {
@@ -153,6 +192,27 @@ class CFileCache
 
 
     /**
+     * getGlobal Method
+     * 
+     * Get the value of an stored element valid for all users
+     *
+     * @param string $name key of the item to be stored
+     * @param string $area_name name of area (null or not declared is the implicit "current area") 
+     *
+     * @return mixed The cached element value: it can be a scalar value, an object or an array
+     */
+    public function getGlobal(string $name, ?string $area_name = null): mixed
+    {
+        $uid = $this->uid;
+        $this->uid = 0;
+        $ret = $this->get($name, $area_name);
+        $this->uid = $uid;
+
+        return $ret;
+    }
+
+
+    /**
      * exists method
      *
      * Check if a key exists and is in the cache
@@ -172,17 +232,23 @@ class CFileCache
 
 
     /**
-     * getName method
+     * existsGlobal method
      *
-     * Given the name of a key determines the actual internal key to be used
+     * Check if a key exists for all user and is in the cache
      *
-     * @param string $name message to write on file log
+     * @param string $name key of the item to be stored
+     * @param string $area_name name of area (null or not declared is the implicit "current area") 
      *
-     * @return string the internal key
+     * @return bool true if the key $name exists
      */
-    public function getName(string $name): string
+    public function existsGlobal(string $name, ?string $area_name = null): bool
     {
-        return $this->CACHE_PATH . (($this->area_name != '') ? ($this->area_name . '/') : ('')) . $name . '.cache';
+        $uid = $this->uid;
+        $this->uid = 0;
+        $ret = $this->exists($name, $area_name);
+        $this->uid = $uid;
+
+        return $ret;
     }
 
 
@@ -211,6 +277,25 @@ class CFileCache
         $serialized = serialize($value);
         if (strlen($serialized) <= CACHE_MAX_SIZE_PER_ELEMENT) // save only if it is below the maximum allowed size 
             file_put_contents($filename, $serialized, LOCK_EX);
+    }
+
+
+    /**
+     * setGlobal Method
+     * 
+     * Sets the value of an item to be stored valid for all user
+     *
+     * @param string $name key of the item to be stored
+     * @param mixed $value value to be stored
+     * @param string $area_name name of area (null or not declared is the implicit "current area")
+     *  
+     */
+    public function setGlobal(string $name, mixed $value, ?string $area_name = null): void
+    {
+        $uid = $this->uid;
+        $this->uid = 0;
+        $this->set($name, $value, $area_name);
+        $this->uid = $uid;
     }
 
 

@@ -1,7 +1,14 @@
-<i><?=$this->page_info['module']['title'];?></i>
-<h1><?=$title?></h1>
-<h2><?=$description?></h2>
-<?php if (isset($element)) print '<p>'.$element['body'].'</p>'; ?>
+<?php 
+if (isset($this->page_info)) 
+{
+    if (isset($this->page_info['module'])) $module = $this->page_info['module']; 
+    if (isset($this->page_info['element'])) $element = $this->page_info['element']; 
+}
+?>
+<i><?=$module['title'];?></i>
+<h1><?=$element['name'] ?? '';?></h1>
+<h2><?=$element['description'];?></h2>
+<?php print '<p>'.($element['body'] ?? '').'</p>'; ?>
 
 <pre>        
 
@@ -18,6 +25,6 @@
 </pre>
 
 <!-- h2>EDITOR</h2>
-<div id="editor" contenteditable="true" placeholder='write something'>
+<div id="editor" contenteditable="true" placeholder="write something">
 write something here....
 </div -->

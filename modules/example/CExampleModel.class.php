@@ -23,7 +23,7 @@ class CExampleModel extends \DressApi\modules\base\CBaseModel
     public const REGEX_CF = '/^[A-Z]{6}\d{2}[ABCDEHLMPRST]{1}\d{2}[A-Z]{1}[\d]{3}[A-Z]{1}$/';
 
     /**
-     * @param $table $table current table name
+     * @param string $table current table name
      * @param array $all_tables list of all tables of current DB with column_list list
      * @param ?CUser $user object that manages user data
      * @param ?CCache $cache object that manages cached data

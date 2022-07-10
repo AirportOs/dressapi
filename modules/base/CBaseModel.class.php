@@ -553,8 +553,8 @@ class CBaseModel
     final public function getFields() : array 
     {
         $cache_attr_name = 'fields_'.$this->module.($this->user->isAdmin()??'');
-        if ($this->cache && $this->cache->exists($cache_attr_name,'structures'))
-            $fields = $this->cache->get($cache_attr_name);
+        if ($this->cache && $this->cache->existsGlobal($cache_attr_name,'structures'))
+            $fields = $this->cache->getGlobal($cache_attr_name);
         else
         {
             $related_table_from_id = '/^'.str_replace('[related_table]','([\S]*)',RELATED_TABLE_ID).'/';
@@ -609,7 +609,7 @@ class CBaseModel
                        'related_tables'=>$related_tables ]; 
             
             if ($fields && $this->cache)
-                $this->cache->set($cache_attr_name, $fields);
+                $this->cache->setGlobal($cache_attr_name, $fields);
         }
 
         return $fields; 

@@ -41,6 +41,6 @@
                     }) // end then
                     e.stopPropagation();
                     e.preventDefault();
-                    alert('test');
+                    // alert('test');
                     return false;
                 });

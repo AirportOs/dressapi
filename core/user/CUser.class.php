@@ -516,12 +516,16 @@ class CUser extends CDB
         return $role_conditions;
     }
 
-    private function _queryCache(string $sql, bool $as_ids_array = false, string $folder_cache = ACL_TABLE)
+
+    private function _queryCache(string $sql, bool $as_ids_array = false, string $area_name = '', bool $is_global = false)
     {
-        $hash = $folder_cache.'/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
+        $get = 'get'.(($is_global)?('Global'):(''));
+        $set = 'set'.(($is_global)?('Global'):(''));
+        
+        $hash = hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
         if ($this->cache) 
-            $data = $this->cache->get($hash);
+            $data = $this->cache->$get($hash, $area_name);
 
         if ($data === null)
         {
@@ -532,7 +536,7 @@ class CUser extends CDB
             else
                 $this->getDataTable($data);
             if ($data !== null)     
-                $this->cache->set($hash, $data);           
+                $this->cache->$set($hash, $data, $area_name);    
         }
 
         return $data;
@@ -598,7 +602,7 @@ class CUser extends CDB
 
         $sc = new CSqlComposer();
         $sql = (string)$sc->select('id')->from(MODULE_TABLE)->where("name='$module_name'");       
-        $module_info = $this->_queryCache($sql, true);
+        $module_info = $this->_queryCache($sql, true, MODULE_TABLE, true);
         if ($module_info===null)
             $module_id = 0; 
         else 
@@ -606,7 +610,7 @@ class CUser extends CDB
 
         $sc = new CSqlComposer();
         $sql = (string)$sc->select('id__role')->from(USER_ROLE_TABLE)->where('id__user='.$this->id);       
-        $user_role = $this->_queryCache($sql, true);       
+        $user_role = $this->_queryCache($sql, true, USER_ROLE_TABLE);       
 
         $role_conditions = (($user_role)?('(id__role IS NULL OR id__role IN ('.implode(',',$user_role).'))'):('FALSE'));
 
@@ -616,17 +620,17 @@ class CUser extends CDB
                     from(ACL_TABLE)->
                     where("($role_conditions AND $module_conditions)");
 
-        $hash = ACL_TABLE.'/'.hash(PASSWORD_ENC_ALGORITHM, $sql);
+        $hash = hash(PASSWORD_ENC_ALGORITHM, $sql);
         $data = null;
         if ($this->cache) 
-            $data = $this->cache->get($hash);
+            $data = $this->cache->get($hash,ACL_TABLE);
 
         if ($data === null)
         {
             $data = [];
             $this->getQueryDataTable($data, $sql);
             if ($data !== null)     
-                $this->cache->set($hash, $data);           
+                $this->cache->set($hash, $data, ACL_TABLE);           
         }
 
         if ($data !== null)
@@ -716,7 +720,7 @@ class CUser extends CDB
             if ($dat !== null)
             {
                 $data = $dat;
-                $this->cache->set($hash, $dat);           
+                $this->cache->set($hash, $data);           
             }     
         }
                

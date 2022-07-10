@@ -49,16 +49,13 @@ class CHtmlView
         $this->page_info['app'] = ['title'=>DEFAULT_PAGE_TITLE,'description'=>DEFAULT_PAGE_DESCRIPTION];
 
         if ($cache)
-        {
-            $cache->setArea($module_name);
-            $this->page_info['module'] = $cache->get('module_info');
-        }
+            $this->page_info['module'] = $cache->getGlobal('module_info',$module_name);
 
-        if (!$this->page_info['module'])
+        if (!($this->page_info['module'] ?? false))
         {
             // Info of web site
             $sql = new CSqlComposer();
-            $sql->from('module');        
+            $sql->from(MODULE_TABLE);        
             $sql->select('title,description');
             $sql->where("name='$module_name'");
 
@@ -69,12 +66,12 @@ class CHtmlView
             if (!$this->page_info['module'])
                 $this->page_info['module'] =  $this->page_info['app'];
             
-            if ($cache) 
-                $cache->set('module_info',$this->page_info['module']);
+            if ($cache && $this->page_info['module']) 
+                $cache->setGlobal('module_info', $this->page_info['module'], $module_name);
         }
 
         foreach(($this->data['structure'] ?? []) as $elem_struct)
-            if ($elem_struct['ref'])
+            if ($elem_struct['ref'] ?? false)
             {
                 // TO DO (example: "cmsnodetype:id-name")
                 list($rel_table,$sitems) = explode(':', $elem_struct['ref']);
@@ -99,9 +96,9 @@ class CHtmlView
 
 
     /**
-     * Accoda un template alla lista di quelli da visualizzare
+     * Queues a template to the list of those to be displayed
      *
-     * @param array|string|null $files o array contenente i nomi dei frammenti di codice HTML da visualizare
+     * @param array|string|null $files filename or array containing the names of the HTML code snippets to be visualized
      */
     public function add(array|string|null $files)
     {
@@ -294,7 +291,7 @@ class CHtmlView
         {
             include($filename);
             $output .= ob_get_contents();
-            ob_flush(); // scarica il buffer ad ogni include per non far attendere troppo
+            ob_flush(); // Empties the buffer for each include so that it doesn't wait too long
         }
         
         ob_end_clean();
@@ -306,7 +303,7 @@ class CHtmlView
     }
 
     /**
-     * Spedisce il codice HTML
+     * Sends out the HTML code
      *
      * @param string|null $cachefilename
      */

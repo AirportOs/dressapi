@@ -33,7 +33,7 @@ try
                                          'user_role'=>'_user_role',
                                         ] );
 */
-    $cache = new CCache(DOMAIN_NAME,DB_NAME); // Cache manager
+    $cache = new CCache(DOMAIN_NAME,APP_NAME); // Cache manager
 
     $request = new CRequest();        // Input manager (but the validations is the CBaseModel class)
     $response = new CResponse();      // Output manager
@@ -50,6 +50,10 @@ try
     }
     else
     {
+        // 
+        $cache->setUid($user->getId());
+
+
         // import user permissions directly from the DB
         // if the appropriate acl, module and role tables exist
         $imported_permission = $user->importACL($request);

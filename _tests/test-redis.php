@@ -1,6 +1,7 @@
 <?php
     define('DOMAIN_NAME','dressapi.com');
-    
+    define('APP_NAME', 'test');
+
     require_once __DIR__.'/../../core/autoload.php';
 
     use DressApi\core\cache\CRedisCache as CCache;
@@ -11,7 +12,7 @@
 
     try
     {
-        $redis = new CCache(DOMAIN_NAME);
+        $redis = new CCache(DOMAIN_NAME, APP_NAME);
         $redis->clear();
         $redis->setArea('pippo');
         $redis->set('test1', [1,2,3,4]);
