@@ -259,12 +259,95 @@ class CHtmlView
     }
 
 
+    protected function createMenu( array &$menu, CSqlComposer $sql, $level = 1 )
+    {
+        global $user;
+
+        // Create Menu
+        $db = new CDB();
+        $db->query($sql);
+        $db->getDataTable($menu,CDB::DB_ASSOC,'name');
+
+        if ($menu)
+        {
+            foreach($menu as &$item1)
+            {
+                $sql->select('*')
+                ->where('id_parent='.$item1['id']);
+                $db->query($sql);
+
+                $item1['submenu'] = [];
+                $db->getDataTable($item1['submenu'],CDB::DB_ASSOC,'name');
+                $this->createMenu($item1['submenu'], $sql);
+
+
+                if (isset($item1['query']) && $item1['query']!='')
+                {
+                    $q = $item1['query'];
+                    if (str_contains($q,'TABLE LIST') || str_contains($q,'|'))
+                    {
+                        $qsql = new CSqlComposer();
+                        if (str_contains($q,'TABLE LIST'))
+                        {
+                            $qsql = str_replace('{{','}}',$q);
+                            $all_tables = [];
+                            $db->getAllTables($all_tables);
+                            foreach(array_keys($all_tables) as $tab)
+                                $item1['submenu'][$tab] = ['name'=>$tab];
+                        }
+                        else
+                        {
+                            $v = explode('|',$q);
+                            $qsql->select('*')
+                                ->from($v[0])
+                                ->where($v[1])
+                                ->orderBy([$v[2] ?? 'id ASC']);
+                            $db->query($qsql);    
+                            $add_dynamic_voices = [];
+                            $db->getDataTable($add_dynamic_voices, CDB::DB_ASSOC, 'name');
+                            $this->createMenu( $add_dynamic_voices, $qsql);
+                            $item1['submenu'] = array_merge($item1['submenu'],$add_dynamic_voices);
+                        }
+                        
+                        foreach($menu['submenu'] as &$it)
+                        {
+                            if (!isset($it['url']))
+                                $it['url'] = $item1['url'];
+    
+                            if (str_contains($it['url'],'{{'))
+                                foreach($it as $nm=>$val)
+                                    $it['url'] = str_replace('{{'.$nm.'}}', $val, $it['url']);
+                        }
+                    }
+                }
+    
+
+                if ($item1['submenu']==[]) 
+                    unset($item1['submenu']);
+            }
+        }
+
+        if ($menu['submenu']==[]) 
+            unset($menu['submenu']);
+
+        return true;
+    }
+
+
     /**
      * Send the HTML code
      */
     public function send() : string
     {
         global $user, $cache, $controller, $request, $response;
+
+
+        $sql = new CSqlComposer();
+        $sql->from(CMS_MENU_TABLE);        
+        $sql->where('id_parent IS NULL');
+
+        $menu = [];
+        $this->createMenu($menu, $sql);
 
         // PreProcessor
         foreach ( $this->modules as $module_name)

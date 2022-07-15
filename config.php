@@ -135,6 +135,11 @@ define('TRANSLATION_TABLE','_translation');
 define('USER_ROLE_TABLE',  '_user_role');
 
 
+define('CMS_MENU_TABLE',     'cmsmenu');
+define('CMS_NODE_TABLE',     'cmsnode');
+define('CMS_NODETYPE_TABLE', 'cmsnodetype');
+
+
 // User Token
 define('SECRET_KEY', 'bGS6lzFqvvSQ8ALbOxatm7/Vk7mLQyzqaS34Q4oR1ew=');
 define('TOKEN_ENC_ALGORITHM', 'HS512'); 

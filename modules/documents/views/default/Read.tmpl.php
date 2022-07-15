@@ -11,6 +11,8 @@ if (isset($this->page_info))
 <?php print '<p>'.($element['body'] ?? '').'</p>'; ?>
 
 <pre>        
+    <h2>MENU</h2>
+    <?php print_r($menu); ?>
 
     <h2>PAGE INFO (PAGE MODULE)</h2>
     <?php print_r($this->page_info); ?>

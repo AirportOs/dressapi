@@ -228,11 +228,51 @@ localStorage.list_options = list_options;
                   <ul class="navbar-nav" id="mainMenu">
 <?php
 $module_names = $user->getAllAvaiableModules();
-foreach($module_names as $module_name)
+foreach($menu['MainMenu']['submenu'] as $voice_name=>$voice)
 {
-  $module_id = 'menu_module_'.strtolower(str_replace(' ','_',$module_name));
+  $voice_id = 'menu_voice_'.strtolower(str_replace(' ','_',$voice_name));
+  if (!isset($voice['submenu'])) 
+  {
+?>
+<li class="nav-item"><a class="nav-link" id="<?=$voice_id?>" href="<?=$voice['url'] ?>"><?=ucwords($voice_name)?></a></li>
+<?php
+  }
+  else
+  {
+?>
+    <li class="nav-item dropdown" id="<?=$voice_id?>_drop_down">
+        <a class="nav-link dropdown-toggle" href="/#" data-toggle="dropdown" aria-expanded="false">
+          <span><?=ucwords($voice_name)?></span>
+          <svg class="icon icon-xs">
+            <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-expand"></use>
+          </svg>
+        </a>
+        <div class="dropdown-menu">
+          <div class="link-list-wrapper">
+            <ul class="link-list" id="<?=$voice_id?>_list">
+              <!-- li><h3 class="no_toc" id="heading">DB Tables</h3></li -->
+              <li><span class="divider"></span></li>
+<?php
+    if (isset($voice['submenu']))
+      foreach($voice['submenu'] as $subvoice_name=>$subvoice)
+      {
+        $subvoice_id = 'menu_subvoice_'.strtolower(str_replace(' ','_',$subvoice_name));
+        if (!isset($subvoice['submenu'])) 
+        {
+      ?>
+      <!-- li class="nav-item"><a class="nav-link" id="<?=$subvoice_id?>" href="<?=$subvoice['url'] ?>"><?=ucwords($subvoice_name)?></a></li -->
+      <li><a class="list-item" href="<?=$subvoice['url'] ?>"><span><?=ucwords($subvoice_name)?></span></a></li>
+      <?php
+        }
+}
+?>              
+              </ul>
+          </div>
+        </div>
+      </li>                      
+<?php
+  }
 
-  ?><li class="nav-item"><a class="nav-link" id="<?=$module_id?>" href="/<?=strtolower(htmlspecialchars($module_name)) ?>"><?=ucwords($module_name)?></a></li><?php
 }
 ?>                    
                     <!-- li class="nav-item dropdown" id="mainMenuTable">
