@@ -31,6 +31,6 @@ if (isset($this->data) && isset($this->data['elements']))
 <h5><i>{{description}}</i></h5>
 <div>{{body}}</div>
 <hr>
-<pre><?php
+<?php
 
-// print_r($this);
+// echo '<pre>'; print_r($config);echo '</pre>';

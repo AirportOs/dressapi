@@ -7,13 +7,10 @@
         <div class="row clearfix">
           <div class="col-sm-12">
             <div class="it-brand-wrapper">
-              <a href="/#">
-                <svg class="icon">
-                  <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-code-circle"></use>
-                </svg>
+              <a href="/"><?=$CONFIG['WEBSITE_ICON'] ?>
                 <div class="it-brand-text">
-                  <h2 class="no_toc">Lorem Ipsum</h2>
-                  <h3 class="no_toc d-none d-md-block">Inserire qui la tag line</h3>
+                  <h2 class="no_toc"><?=$CONFIG['WEBSITE_TITLE'] ?></h2>
+                  <h3 class="no_toc d-none d-md-block"><?=$CONFIG['WEBSITE_TAG_LINE'] ?></h3>
                 </div>
               </a>
             </div>
@@ -150,8 +147,8 @@
 <!-- script src="/assets/js/dressapi.js"></script -->
 
 <!-- Notification per tornare alla pagina principale -->
-<div class="notification dismissable with-icon" role="alert" id="liveToast" aria-labelledby="liveToast-title">
-  <h5 id="liveToast-title">
+<div class="notification dismissable with-icon" role="alert" id="liveToast1" aria-labelledby="liveToast1-title">
+  <h5 id="liveToast1-title">
     <svg class="icon">
       <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-info-circle"></use></svg>Esempio di utilizzo
   </h5>
@@ -168,7 +165,7 @@
 
 
 <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-    <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+    <div id="liveToast2" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
       <div class="toast-header">
         <strong class="me-auto">DressApi</strong>
         <small>Just now</small>
@@ -195,7 +192,7 @@
         document.getElementById('username_viewer').innerHTML = localStorage.username;
 
 
-        createMenuTables();
+        // createMenuTables();
 
         // console.log(localStorage.token);
 

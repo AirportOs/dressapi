@@ -36,7 +36,7 @@ CREATE TABLE `_acl` (
   KEY `id__role` (`id__role`) USING BTREE,
   CONSTRAINT `_acl_ibfk_1` FOREIGN KEY (`id__module`) REFERENCES `_module` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `_acl_ibfk_2` FOREIGN KEY (`id__role`) REFERENCES `_role` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -45,7 +45,7 @@ CREATE TABLE `_acl` (
 
 LOCK TABLES `_acl` WRITE;
 /*!40000 ALTER TABLE `_acl` DISABLE KEYS */;
-INSERT INTO `_acl` VALUES (1,1,NULL,'YES','YES','YES','YES','NO'),(2,NULL,1,'YES','YES','YES','YES','YES'),(4,NULL,2,'YES','NO','NO','NO','NO'),(5,101,2,'YES','YES','YES','YES','YES');
+INSERT INTO `_acl` VALUES (1,1,NULL,'YES','YES','YES','YES','NO'),(2,NULL,1,'YES','NO','YES','YES','YES'),(3,2,1,'NO','YES','NO','NO','YES'),(4,NULL,2,'YES','NO','NO','NO','NO'),(5,101,2,'YES','YES','YES','YES','YES');
 /*!40000 ALTER TABLE `_acl` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -130,7 +130,7 @@ CREATE TABLE `_module` (
 
 LOCK TABLES `_module` WRITE;
 /*!40000 ALTER TABLE `_module` DISABLE KEYS */;
-INSERT INTO `_module` VALUES (1,'sign','user','','Sign','Login, Logout, Subscription, Unsubscription','no'),(2,'pages','cmsnode','id_nodetype=11','Page Module','','yes'),(3,'news','news','','News','','yes'),(4,'events','event','','Events','','yes'),(5,'faq','faq','','Faq','','yes'),(6,'documents','document','','Documents','List of Documents','yes');
+INSERT INTO `_module` VALUES (1,'sign','user','','Sign','Login, Logout, Subscription, Unsubscription','no'),(2,'pages','cmsnode','id_cmsnodetype=11','Pages','','yes'),(3,'news','news','','News','','yes'),(4,'events','event','','Events','','yes'),(5,'faq','faq','','FAQ','','yes'),(6,'documents','document','','Documents','List of Documents','yes');
 /*!40000 ALTER TABLE `_module` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -281,11 +281,16 @@ CREATE TABLE `cmsmenu` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(80) NOT NULL,
   `description` varchar(250) NOT NULL,
+  `icon` varchar(80) NOT NULL,
   `query` varchar(500) NOT NULL,
+  `url` varchar(80) NOT NULL,
   `id_parent` int(11) DEFAULT NULL,
   `priority` int(11) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=303 DEFAULT CHARSET=utf8mb4;
+  `id_role` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `id_role` (`id_role`),
+  CONSTRAINT `cmsmenu_ibfk_1` FOREIGN KEY (`id_role`) REFERENCES `_role` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=30106 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -294,38 +299,8 @@ CREATE TABLE `cmsmenu` (
 
 LOCK TABLES `cmsmenu` WRITE;
 /*!40000 ALTER TABLE `cmsmenu` DISABLE KEYS */;
-INSERT INTO `cmsmenu` VALUES (1,'TopMenu','','[id,title][_module][visible=\'yes\'][priority ASC]',NULL,0),(2,'FooterMenu','','',NULL,0),(3,'MainMenu','','',NULL,0),(300,'DressApi','','[name][cmsmenu][id_parent=3][priority ASC]',3,10),(301,'Pages','','[name][cmsnode][id_cmsnodetype=11][priority ASC]',3,20),(302,'News','','/news',3,30);
+INSERT INTO `cmsmenu` VALUES (1,'TopLeftMenu','','','','',NULL,0,NULL),(2,'TopRightMenu','','','','',NULL,0,NULL),(3,'MainMenu','','','','',NULL,0,NULL),(4,'FooterMenu','','','','',NULL,0,NULL),(201,'Config','','','','/_config',2,10,1),(202,'Translation','','','','/_translation',2,20,1),(203,'ACL','','','','/_acl',2,30,1),(204,'Tables','','','{{TABLE LIST}}','/{{name}}',2,30,1),(300,'Home','','','','/',3,-1,NULL),(301,'DressApi','','','','',3,0,NULL),(302,'Pages','','','cmsnode|id_cmsnodetype=11|priority ASC','/pages/{{id}}',3,20,NULL),(303,'Modules','','','_module|visible=\'yes\'','/{{name}}',3,30,NULL),(30101,'Write us','','','','mailto:info@dressapi.com',301,10,NULL),(30102,'Web Site','','','','https://dressapi.com',301,30,1);
 /*!40000 ALTER TABLE `cmsmenu` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `cmsmenuitem`
---
-
-DROP TABLE IF EXISTS `cmsmenuitem`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `cmsmenuitem` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(80) NOT NULL,
-  `description` varchar(160) NOT NULL,
-  `url` varchar(500) NOT NULL,
-  `priority` int(11) NOT NULL,
-  `id_cmsmenu` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `id_cmsmenu` (`id_cmsmenu`),
-  CONSTRAINT `cmsmenuitem_ibfk_1` FOREIGN KEY (`id_cmsmenu`) REFERENCES `cmsmenu` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `cmsmenuitem`
---
-
-LOCK TABLES `cmsmenuitem` WRITE;
-/*!40000 ALTER TABLE `cmsmenuitem` DISABLE KEYS */;
-INSERT INTO `cmsmenuitem` VALUES (1,'Homepage','Homepage','https://dressapi.com',-1,3),(3,'dressapi.com','Dressapi.com Homepage','https://dressapi.com',10,300),(4,'Write us','Write us','mailto:info@dressapi.com',20,300);
-/*!40000 ALTER TABLE `cmsmenuitem` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -338,7 +313,7 @@ DROP TABLE IF EXISTS `cmsnode`;
 CREATE TABLE `cmsnode` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `id_cmsnodetype` int(11) NOT NULL DEFAULT 11,
-  `label` varchar(40) NOT NULL,
+  `name` varchar(60) NOT NULL,
   `title` varchar(120) NOT NULL COMMENT 'title of element',
   `body` text NOT NULL,
   `description` varchar(160) NOT NULL,
@@ -346,10 +321,12 @@ CREATE TABLE `cmsnode` (
   `status` enum('draft','reserved','public') NOT NULL DEFAULT 'draft',
   `creation_date` date NOT NULL DEFAULT current_timestamp(),
   `id__user` int(11) NOT NULL,
+  `id_parent` int(11) DEFAULT NULL,
   `priority` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id__user` (`id__user`) USING BTREE,
   KEY `id__nodetype` (`id_cmsnodetype`) USING BTREE,
+  KEY `id_parent` (`id_parent`),
   CONSTRAINT `cmsnode_ibfk_1` FOREIGN KEY (`id__user`) REFERENCES `_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -360,7 +337,7 @@ CREATE TABLE `cmsnode` (
 
 LOCK TABLES `cmsnode` WRITE;
 /*!40000 ALTER TABLE `cmsnode` DISABLE KEYS */;
-INSERT INTO `cmsnode` VALUES (1,11,'HOME','Welcome to DressApi: the new ORM REST API','The name \"Dress\" means it \"dress\" up your database, substantially it provides a quick REST API, to your db schema.\nORM means Object-relational mapping and DressApi maps your database dynamically. Although it is structured as an MVC (Model, View, Controller) it does not need to define a model for each table in the DB but if it automatically reads it from the DB. \nThe most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code.','Example of use DressApi','yes','draft','2022-07-08',101,0),(2,1,'Experience','DressApi is new but contains long experience inside','I have a very long experience in programming with various languages, for the web I have always preferred PHP.\nIn about twenty years of developing web applications, I have always developed and used a personal framework that adopts the dynamic ORM logic and has evolved over time. Now a large part of the code has been rewritten from scratch in the most modern view of the REST API but the idea has remained the same and the experience has certainly allowed to create a solid and functional platform.','','no','reserved','2021-01-15',101,0);
+INSERT INTO `cmsnode` VALUES (1,11,'HOME','Welcome to DressApi: the new ORM REST API','The name \"Dress\" means it \"dress\" up your database, substantially it provides a quick REST API, to your db schema.\nORM means Object-relational mapping and DressApi maps your database dynamically. Although it is structured as an MVC (Model, View, Controller) it does not need to define a model for each table in the DB but if it automatically reads it from the DB. \nThe most obvious advantage is that if the data structure changes over time, even significantly, the model fits automatically without touching a line of your code.','Example of use DressApi','yes','draft','2022-07-09',101,NULL,0),(2,1,'Experience','DressApi is new but contains long experience inside','I have a very long experience in programming with various languages, for the web I have always preferred PHP.\nIn about twenty years of developing web applications, I have always developed and used a personal framework that adopts the dynamic ORM logic and has evolved over time. Now a large part of the code has been rewritten from scratch in the most modern view of the REST API but the idea has remained the same and the experience has certainly allowed to create a solid and functional platform.','','no','reserved','2021-01-15',101,NULL,0);
 /*!40000 ALTER TABLE `cmsnode` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -511,7 +488,7 @@ CREATE TABLE `news` (
 
 LOCK TABLES `news` WRITE;
 /*!40000 ALTER TABLE `news` DISABLE KEYS */;
-INSERT INTO `news` VALUES (3,'New Titlefh 56','sfhj','Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.','yes','public','1636638573_img_20181130_180150.jpg','2021-11-11 14:56:13',101);
+INSERT INTO `news` VALUES (3,'New Titlefh 564','sfhj','Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.','yes','public','[object File]','2022-07-09 23:08:54',1);
 /*!40000 ALTER TABLE `news` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -524,4 +501,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-07-09 18:16:10
+-- Dump completed on 2022-07-22 17:16:23

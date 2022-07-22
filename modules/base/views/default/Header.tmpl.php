@@ -79,66 +79,134 @@ localStorage.list_options = list_options;
     <div class="container">
       <div class="row">
         <div class="col-12">
+          
           <div class="it-header-slim-wrapper-content">
-            <a class="d-none d-lg-block navbar-brand" href="/#">Ente appartenenza/Owner</a>
-            <div class="nav-mobile">
+            <a class="d-none d-lg-block navbar-brand p-2" href="<?=$CONFIG['WEBSITE_OWNER_URI'] ?>"><?=$CONFIG['WEBSITE_OWNER_NAME'] ?></a>
+            
+            <div class="nav-mobile">              
               <nav>
-                <a class="it-opener d-lg-none" data-toggle="collapse" href="#menu-principale" role="button" aria-expanded="false" aria-controls="menu-principale">
-                  <span>Ente appartenenza/Owner</span>
+                <a class="it-opener d-lg-none" data-toggle="collapse" href="#top-menu" role="button" aria-expanded="false" aria-controls="top-menu">
+                  <span><?=$CONFIG['WEBSITE_OWNER_NAME'] ?></span>
                   <svg class="icon">
                     <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-expand"></use>
                   </svg>
                 </a>
-                <div class="link-list-wrapper collapse" id="menu-principale">
-                  <ul class="link-list">
-                    <li><a class="list-item" href="/#" onclick="GetList(CONFIG_TABLE);">Config</a></li>
-                    <li><a class="list-item" href="/#" onclick="GetList(TRANSLATIONS_TABLE);">Translations</a></li>
-                    <li><a class="list-item" href="/#" onclick="GetList(ACL_TABLE);">ACL</a></li>
-                    <li id="mainMenuTable">
-                        <a class="list-item" href="/#" data-toggle="dropdown" aria-expanded="false">
-                          Tables
-                          <svg class="icon icon-xs">
-                            <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-expand"></use>
-                          </svg>
-                        </a>
-                        <div class="dropdown-menu">
-                          <div class="link-list-wrapper">
-                            <ul class="link-list" id="mainMenuTableList">
-                              <li>
-                                <h3 class="no_toc" id="heading">DB Tables</h3>
-                              </li>
-                              <li><span class="divider"></span></li>
-                              <li><a class="list-item" href="/#"><span>Link list 4</span></a></li>
-                            </ul>
-                          </div>
-                        </div>
-                      </li>      
-                  </ul>
-                </div>
-              </nav>
-            </div>
-            <div class="it-header-slim-right-zone">
-                <div class="nav-link px-3 text-white bg-danger" id="username_viewer"></div>
-                <div class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="/#" data-toggle="dropdown" aria-expanded="false">
-                  <span>ITA</span>
-                  <svg class="icon d-none d-lg-block">
-                    <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-expand"></use>
-                  </svg>
-                </a>
-                <div class="dropdown-menu">
+                <div class="link-list-wrapper collapse" id="top-menu">
                   <div class="row">
                     <div class="col-12">
-                      <div class="link-list-wrapper">
-                        <ul class="link-list">
-                          <li><a class="list-item" href="/#"><span>ITA</span></a></li>
-                          <li><a class="list-item" href="/#"><span>ENG</span></a></li>
-                        </ul>
-                      </div>
+                      <ul<?=((isset($menu['TopLeftMenu']) && $menu['TopLeftMenu']['submenu'])?(' class="link-list"'):(''))?>>
+<?php
+if (isset($menu['TopLeftMenu']) && $menu['TopLeftMenu']['submenu'])
+foreach($menu['TopLeftMenu']['submenu'] as $voice_name=>$voice)
+{
+  $voice_id = 'left_menu_voice_'.strtolower(str_replace(' ','_',$voice_name));
+  if (!isset($voice['submenu'])) 
+  {
+?>
+                        <li><a id="<?=$voice_id?>" class="list-item" href="<?=$voice['url'] ?>"><?=ucwords($voice_name)?></a></li>
+<?php
+  }
+  else
+  {
+?>
+                        <li id="<?=$voice_id?>">
+                          <a class="nav-link dropdown-toggle" href="/#" data-toggle="dropdown" aria-expanded="false">
+                            <?=ucwords($voice_name)?>
+                            <svg class="icon icon-xs">
+                              <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-expand"></use>
+                            </svg>
+                          </a>
+                          
+                          <div class="dropdown-menu">
+                            <div class="link-list-wrapper">
+                              <ul class="link-list" id="<?=$voice_id?>List">
+<?php
+    if (isset($voice['submenu']))
+      foreach($voice['submenu'] as $subvoice_name=>$subvoice)
+      {
+        $subvoice_id = 'left_submenu_voice_'.strtolower(str_replace(' ','_',$subvoice_name));
+        if (!isset($subvoice['submenu'])) 
+        {
+?>
+                                <li><a id="<?=$subvoice_id?>" class="list-item" href="<?=$subvoice['url'] ?>"><span><?=ucwords($subvoice_name)?></span></a></li>
+<?php
+        }
+      }
+?>
+                              </ul>
+                              </div>
+                              </div>
+                            </div>
+                          </div>
+                        </li>      
+<?php
+    }
+}
+?>
+                      </ul>
                     </div>
                   </div>
                 </div>
+              </nav>
+            </div>
+
+
+
+
+            <div class="it-header-slim-right-zone">                
+<?php
+  if (isset($menu['TopRightMenu']) && $menu['TopRightMenu']['submenu'])
+  {
+    
+    foreach($menu['TopRightMenu']['submenu'] as $voice_name=>$voice)
+    {
+      $voice_id = 'right_menu_voice_'.strtolower(str_replace(' ','_',$voice_name));
+      if (!isset($voice['submenu'])) 
+      {
+?>
+              <a class="nav-link" href="<?=$voice['url'] ?>">
+                <span><?=ucwords($voice_name)?></span>
+              </a>
+<?php
+      }
+      else
+      {
+?>
+              <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false">
+                <?=ucwords($voice_name)?>
+                <svg class="icon icon-xs">
+                  <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-expand"></use>
+                </svg>
+              </a>
+              
+              <div class="dropdown-menu">
+                <div class="link-list-wrapper">
+                <div class="menu-wrapper">
+                  <ul class="link-list" id="<?=$voice_id?>List">
+<?php
+        if (isset($voice['submenu']))
+          foreach($voice['submenu'] as $subvoice_name=>$subvoice)
+          {
+            $subvoice_id = 'submenu_voice_'.strtolower(str_replace(' ','_',$subvoice_name));
+            if (isset($voice['submenu'])) 
+            {
+?>
+                    <li><a id="<?=$subvoice_id?>" class="list-item" href="<?=$subvoice['url'] ?>"><span><?=ucwords($subvoice_name)?></span></a></li>
+<?php
+            }
+          }
+?>
+                  </ul>      
+                </div>      
+              </div>      
+              </div>      
+<?php
+      }
+    }
+  }
+?>              
               </div>
+              <div class="nav-link px-3 text-white bg-danger" id="username_viewer"></div>
               <div class="it-access-top-wrapper">
                 <a class="btn btn-primary btn-sm" href="/login">Accedi</a>
               </div>
@@ -155,13 +223,10 @@ localStorage.list_options = list_options;
           <div class="col-12">
             <div class="it-header-center-content-wrapper">
               <div class="it-brand-wrapper">
-                <a href="/#">
-                  <svg class="icon">
-                    <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-code-circle"></use>
-                  </svg>
+                <a href="/#"><?=$CONFIG['WEBSITE_ICON'] ?>
                   <div class="it-brand-text">
-                    <h2 class="no_toc">DressApi CMS</h2>
-                    <h3 class="no_toc d-none d-md-block">Programmable, modular, CMS</h3>
+                    <h2 class="no_toc"><?=$CONFIG['WEBSITE_TITLE'] ?></h2>
+                    <h3 class="no_toc d-none d-md-block"><?=$CONFIG['WEBSITE_TAG_LINE'] ?></h3>
                   </div>
                 </a>
               </div>
@@ -208,155 +273,82 @@ localStorage.list_options = list_options;
         </div>
       </div>
     </div>
-    <div class="it-header-navbar-wrapper">
-      <div class="container">
-        <div class="row">
-          <div class="col-12">
+  </div>
+  <div class="it-header-navbar-wrapper">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
 
-            <nav class="navbar navbar-expand-lg has-megamenu">
-              <button class="custom-navbar-toggler" type="button" aria-controls="nav10" aria-expanded="false" aria-label="Toggle navigation" data-target="#nav10">
-                <svg class="icon">
-                  <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-burger"></use>
-                </svg>
-              </button>
-              <div class="navbar-collapsable" id="nav10">
-                <div class="overlay"></div>
-                <div class="close-div sr-only">
-                  <button class="btn close-menu" type="button"><span class="it-close"></span>close</button>
-                </div>
-                <div class="menu-wrapper">
-                  <ul class="navbar-nav" id="mainMenu">
+          <nav class="navbar navbar-expand-lg">
+            <button class="custom-navbar-toggler" type="button" aria-controls="nav10" aria-expanded="false" aria-label="Toggle navigation" data-target="#nav10">
+              <svg class="icon">
+                <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-burger"></use>
+              </svg>
+            </button>
+            <div class="navbar-collapsable" id="nav10">
+              <div class="overlay"></div>
+              <div class="close-div sr-only">
+                <button class="btn close-menu" type="button"><span class="it-close"></span>close</button>
+              </div>
+              <div class="menu-wrapper">
+                <ul class="navbar-nav" id="mainMenu">
 <?php
-$module_names = $user->getAllAvaiableModules();
-foreach($menu['MainMenu']['submenu'] as $voice_name=>$voice)
-{
-  $voice_id = 'menu_voice_'.strtolower(str_replace(' ','_',$voice_name));
-  if (!isset($voice['submenu'])) 
-  {
-?>
-<li class="nav-item"><a class="nav-link" id="<?=$voice_id?>" href="<?=$voice['url'] ?>"><?=ucwords($voice_name)?></a></li>
-<?php
-  }
-  else
-  {
-?>
-    <li class="nav-item dropdown" id="<?=$voice_id?>_drop_down">
-        <a class="nav-link dropdown-toggle" href="/#" data-toggle="dropdown" aria-expanded="false">
-          <span><?=ucwords($voice_name)?></span>
-          <svg class="icon icon-xs">
-            <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-expand"></use>
-          </svg>
-        </a>
-        <div class="dropdown-menu">
-          <div class="link-list-wrapper">
-            <ul class="link-list" id="<?=$voice_id?>_list">
-              <!-- li><h3 class="no_toc" id="heading">DB Tables</h3></li -->
-              <li><span class="divider"></span></li>
-<?php
-    if (isset($voice['submenu']))
-      foreach($voice['submenu'] as $subvoice_name=>$subvoice)
+    if (isset($menu['MainMenu']) && $menu['MainMenu']['submenu'])
+      foreach($menu['MainMenu']['submenu'] as $voice_name=>$voice)
       {
-        $subvoice_id = 'menu_subvoice_'.strtolower(str_replace(' ','_',$subvoice_name));
-        if (!isset($subvoice['submenu'])) 
+        $voice_id = 'mr_menu_voice_'.strtolower(str_replace(' ','_',$voice_name));
+        if (!isset($voice['submenu'])) 
         {
-      ?>
-      <!-- li class="nav-item"><a class="nav-link" id="<?=$subvoice_id?>" href="<?=$subvoice['url'] ?>"><?=ucwords($subvoice_name)?></a></li -->
-      <li><a class="list-item" href="<?=$subvoice['url'] ?>"><span><?=ucwords($subvoice_name)?></span></a></li>
-      <?php
-        }
-}
-?>              
-              </ul>
-          </div>
-        </div>
-      </li>                      
+?>
+                  <li class="nav-item"><a class="nav-link" id="<?=$voice_id?>" href="<?=$voice['url'] ?>"><?=ucwords($voice_name)?></a></li>
 <?php
-  }
-
-}
-?>                    
-                    <!-- li class="nav-item dropdown" id="mainMenuTable">
-                        <a class="nav-link dropdown-toggle" href="/#" data-toggle="dropdown" aria-expanded="false">
-                          <span>Tables</span>
-                          <svg class="icon icon-xs">
-                            <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-expand"></use>
-                          </svg>
-                        </a>
-                        <div class="dropdown-menu">
-                          <div class="link-list-wrapper">
-                            <ul class="link-list" id="mainMenuTableList">
-                              <li>
-                                <h3 class="no_toc" id="heading">DB Tables</h3>
-                              </li>
-                              <!-- li><span class="divider"></span></li -->
-                              <!-- li><a class="list-item" href="/#"><span>Link list 4</span></a></li -->
-                            </ul>
-                          </div>
-                        </div>
-                      </li -->                      
-                    <!-- li class="nav-item active"><a class="nav-link active" href="/#"><span>link 1 attivo</span><span class="sr-only">current</span></a></li>
-                    <li class="nav-item"><a class="nav-link" href="/#"><span>link 2</span></a></li>
-                    <li class="nav-item"><a class="nav-link disabled" href="/#"><span>link 3 disabilitato</span></a></li>
-  
-                    <li class="nav-item dropdown megamenu">
+        }
+        else
+        {
+?>
+                  <li class="nav-item dropdown" id="<?=$voice_id?>_drop_down">
                       <a class="nav-link dropdown-toggle" href="/#" data-toggle="dropdown" aria-expanded="false">
-                        <span>Esempio di Megamenu</span>
+                        <span><?=ucwords($voice_name)?></span>
                         <svg class="icon icon-xs">
                           <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-expand"></use>
                         </svg>
                       </a>
                       <div class="dropdown-menu">
-                        <div class="row">
-                          <div class="col-12 col-lg-4">
-                            <div class="link-list-wrapper">
-                              <ul class="link-list">
-                                <li>
-                                  <h3 class="no_toc">Heading 1</h3>
-                                </li>
-                                <li><a class="list-item" href="/#"><span>Link list 1 </span></a></li>
-                                <li><a class="list-item" href="/#"><span>Link list 2 </span></a></li>
-                                <li><a class="list-item" href="/#"><span>Link list 3 </span></a></li>
-                              </ul>
-                            </div>
-                          </div>
-                          <div class="col-12 col-lg-4">
-                            <div class="link-list-wrapper">
-                              <ul class="link-list">
-                                <li>
-                                  <h3 class="no_toc">Heading 2</h3>
-                                </li>
-                                <li><a class="list-item" href="/#"><span>Link list 1 </span></a></li>
-                                <li><a class="list-item" href="/#"><span>Link list 2 </span></a></li>
-                                <li><a class="list-item" href="/#"><span>Link list 3 </span></a></li>
-                              </ul>
-                            </div>
-                          </div>
-                          <div class="col-12 col-lg-4">
-                            <div class="link-list-wrapper">
-                              <ul class="link-list">
-                                <li>
-                                  <h3 class="no_toc">Heading 3</h3>
-                                </li>
-                                <li><a class="list-item" href="/#"><span>Link list 1 </span></a></li>
-                                <li><a class="list-item" href="/#"><span>Link list 2 </span></a></li>
-                                <li><a class="list-item" href="/#"><span>Link list 3</span></a></li>
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
+                        <div class="link-list-wrapper">
+                          <ul class="link-list" id="<?=$voice_id?>_list">
+<?php
+            /* <li><h3 class="no_toc" id="heading">DB Tables</h3></li>
+            <li><span class="divider"></span></li> */
+          if (isset($voice['submenu']))
+            foreach($voice['submenu'] as $subvoice_name=>$subvoice)
+            {
+              $subvoice_id = 'menu_subvoice_'.strtolower(str_replace(' ','_',$subvoice_name));
+              if (!isset($subvoice['submenu'])) 
+              {
+        /* <li class="nav-item"><a class="nav-link" id="<?=$subvoice_id?>" href="<?=$subvoice['url'] ?>"><?=ucwords($subvoice_name)?></a></li> */
+?>
+                            <li><a class="list-item" href="<?=$subvoice['url'] ?>"><span><?=ucwords($subvoice_name)?></span></a></li>
+<?php
+              }
+            }
+?>              
+                          </ul>
                       </div>
-                    </li -->
-                  </ul>
-                </div>
-
+                    </div>
+                  </li>                      
+<?php
+          }
+        }
+?>
+                </ul>
               </div>
-            </nav>
-          </div>
+
+            </div>
+          </nav>
         </div>
       </div>
     </div>
   </div>
-</div>
 
 <div class="container">
 

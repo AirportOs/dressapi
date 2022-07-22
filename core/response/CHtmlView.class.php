@@ -272,11 +272,12 @@ class CHtmlView
         {
             foreach($menu as &$item1)
             {
+                $item1['submenu'] = [];
+
                 $sql->select('*')
                 ->where('id_parent='.$item1['id']);
                 $db->query($sql);
 
-                $item1['submenu'] = [];
                 $db->getDataTable($item1['submenu'],CDB::DB_ASSOC,'name');
                 $this->createMenu($item1['submenu'], $sql);
 
@@ -284,10 +285,10 @@ class CHtmlView
                 if (isset($item1['query']) && $item1['query']!='')
                 {
                     $q = $item1['query'];
-                    if (str_contains($q,'TABLE LIST') || str_contains($q,'|'))
+                    if (str_contains($q,'{{TABLE LIST}}') || str_contains($q,'|'))
                     {
                         $qsql = new CSqlComposer();
-                        if (str_contains($q,'TABLE LIST'))
+                        if (str_contains($q,'{{TABLE LIST}}'))
                         {
                             $qsql = str_replace('{{','}}',$q);
                             $all_tables = [];
@@ -309,7 +310,7 @@ class CHtmlView
                             $item1['submenu'] = array_merge($item1['submenu'],$add_dynamic_voices);
                         }
                         
-                        foreach($menu['submenu'] as &$it)
+                        foreach($item1['submenu'] as &$it)
                         {
                             if (!isset($it['url']))
                                 $it['url'] = $item1['url'];
@@ -342,12 +343,26 @@ class CHtmlView
         global $user, $cache, $controller, $request, $response;
 
 
-        $sql = new CSqlComposer();
-        $sql->from(CMS_MENU_TABLE);        
-        $sql->where('id_parent IS NULL');
+        if ($cache && $user->isAnonymous())
+            $menu = $cache->getGlobal('menu');
+        if (!$menu)
+        {
+            $sql = new CSqlComposer();
+            $sql->from(CMS_MENU_TABLE);        
+            $sql->where('id_parent IS NULL');
+    
+            $menu = [];
+            $this->createMenu($menu, $sql);
+            if ($cache && $user->isAnonymous()) 
+                $cache->setGlobal('menu', $this->page_info['menu']);
+        }
 
-        $menu = [];
-        $this->createMenu($menu, $sql);
+        // Config Data
+        $sql = new CSqlComposer();
+        $sql->from(CONFIG_TABLE);
+        $db = new CDB();        
+        $db->query($sql);
+        $CONFIG = $db->getArrayByName('name','val');
 
         // PreProcessor
         foreach ( $this->modules as $module_name)
