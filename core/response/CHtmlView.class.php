@@ -290,7 +290,7 @@ class CHtmlView
                         $qsql = new CSqlComposer();
                         if (str_contains($q,'{{TABLE LIST}}'))
                         {
-                            $qsql = str_replace('{{','}}',$q);
+                            $qsql = str_replace(['{{','}}'],'',$q);
                             $all_tables = [];
                             $db->getAllTables($all_tables);
                             foreach(array_keys($all_tables) as $tab)
@@ -317,7 +317,7 @@ class CHtmlView
     
                             if (str_contains($it['url'],'{{'))
                                 foreach($it as $nm=>$val)
-                                    $it['url'] = str_replace('{{'.$nm.'}}', $val, $it['url']);
+                                    $it['url'] = str_replace('{{'.$nm.'}}', urlencode(str_replace(' ','-',$val)), $it['url']);
                         }
                     }
                 }
@@ -350,6 +350,7 @@ class CHtmlView
             $sql = new CSqlComposer();
             $sql->from(CMS_MENU_TABLE);        
             $sql->where('id_parent IS NULL');
+            $sql->orderBy(['priority ASC']);
     
             $menu = [];
             $this->createMenu($menu, $sql);

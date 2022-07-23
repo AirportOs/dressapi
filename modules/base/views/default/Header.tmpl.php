@@ -94,7 +94,7 @@ localStorage.list_options = list_options;
                 <div class="link-list-wrapper collapse" id="top-menu">
                   <div class="row">
                     <div class="col-12">
-                      <ul<?=((isset($menu['TopLeftMenu']) && $menu['TopLeftMenu']['submenu'])?(' class="link-list"'):(''))?>>
+                      <ul<?=((isset($menu['TopLeftMenu']) && isset($menu['TopLeftMenu']['submenu']))?(' class="link-list"'):(''))?>>
 <?php
 if (isset($menu['TopLeftMenu']) && $menu['TopLeftMenu']['submenu'])
 foreach($menu['TopLeftMenu']['submenu'] as $voice_name=>$voice)
@@ -300,7 +300,7 @@ foreach($menu['TopLeftMenu']['submenu'] as $voice_name=>$voice)
         if (!isset($voice['submenu'])) 
         {
 ?>
-                  <li class="nav-item"><a class="nav-link" id="<?=$voice_id?>" href="<?=$voice['url'] ?>"><?=ucwords($voice_name)?></a></li>
+                  <li class="nav-item"><a class="nav-link text-nowrap" id="<?=$voice_id?>" href="<?=$voice['url'] ?>"><?=ucwords($voice_name)?></a></li>
 <?php
         }
         else
@@ -327,7 +327,7 @@ foreach($menu['TopLeftMenu']['submenu'] as $voice_name=>$voice)
               {
         /* <li class="nav-item"><a class="nav-link" id="<?=$subvoice_id?>" href="<?=$subvoice['url'] ?>"><?=ucwords($subvoice_name)?></a></li> */
 ?>
-                            <li><a class="list-item" href="<?=$subvoice['url'] ?>"><span><?=ucwords($subvoice_name)?></span></a></li>
+                            <li><a class="list-item text-nowrap" href="<?=$subvoice['url'] ?>"><span><?=ucwords($subvoice_name)?></span></a></li>
 <?php
               }
             }

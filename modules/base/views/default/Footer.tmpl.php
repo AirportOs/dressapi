@@ -19,108 +19,140 @@
       </section>
       <section>
         <div class="row">
+
+<?php
+    if (isset($menu['FooterMenu']) && $menu['FooterMenu']['submenu'])
+      foreach($menu['FooterMenu']['submenu'] as $voice_name=>$voice)
+      {
+        $voice_id = 'mb_menu_voice_'.strtolower(str_replace(' ','_',$voice_name));
+        if (isset($voice['submenu'])) 
+        {
+?>
           <div class="col-lg-3 col-md-3 col-sm-6 pb-2">
             <h4>
-              <a href="/#" title="Vai alla pagina: Amministrazione">Amministrazione</a>
+              <a href="/#" title="Vai alla pagina: Amministrazione"><?=$voice_name?></a>
             </h4>
             <div class="link-list-wrapper">
               <ul class="footer-list link-list clearfix">
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Giunta e consiglio">Giunta e consiglio</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Aree di competenza">Aree di competenza</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Dipendenti">Dipendenti</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Luoghi">Luoghi</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Associazioni e società partecipate">Associazioni e società partecipate</a></li>
+<?php
+          if (isset($voice['submenu']))
+            foreach($voice['submenu'] as $subvoice_name=>$subvoice)
+            {
+              $subvoice_id = 'menu_subvoice_'.strtolower(str_replace(' ','_',$subvoice_name));
+              if (!isset($subvoice['submenu'])) 
+              {
+?>
+                <li><a class="list-item text-nowrap" title="<?=_T('Go To').': '.$subvoice_name?>" href="<?=$subvoice['url'] ?>"><?=$subvoice_name?></a></li>
+<?php
+              }
+            }
+?>
               </ul>
             </div>
           </div>
-          <div class="col-lg-3 col-md-3 col-sm-6 pb-2">
-            <h4>
-              <a href="/#" title="Vai alla pagina: Servizi">Servizi</a>
-            </h4>
-            <div class="link-list-wrapper">
-              <ul class="footer-list link-list clearfix">
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Pagamenti">Pagamenti</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Sostegno">Sostegno</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Domande e iscrizioni">Domande e iscrizioni</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Segnalazioni">Segnalazioni</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Autorizzazioni e concessioni">Autorizzazioni e concessioni</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Certificati e dichiarazioni">Certificati e dichiarazioni</a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-lg-3 col-md-3 col-sm-6 pb-2">
-            <h4>
-              <a href="/#" title="Vai alla pagina: Novità">Novità</a>
-            </h4>
-            <div class="link-list-wrapper">
-              <ul class="footer-list link-list clearfix">
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Notizie">Notizie</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Eventi">Eventi</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Comunicati stampa">Comunicati stampa</a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-lg-3 col-md-3 col-sm-6">
-            <h4>
-              <a href="/#" title="Vai alla pagina: Documenti">Documenti</a>
-            </h4>
-            <div class="link-list-wrapper">
-              <ul class="footer-list link-list clearfix">
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Progetti e attività">Progetti e attività</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Delibere, determine e ordinanze">Delibere, determine e ordinanze</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Bandi">Bandi</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Concorsi">Concorsi</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Albo pretorio">Albo pretorio</a></li>
-              </ul>
-            </div>
-          </div>
+<?php
+          }
+        }
+?>
         </div>
       </section>
       <section class="py-4 border-white border-top">
         <div class="row">
-          <div class="col-lg-4 col-md-4 pb-2">
-            <h4><a href="/#" title="Vai alla pagina: Contatti">Contatti</a></h4>
-            <p>
-              <strong>Comune di Lorem Ipsum</strong><br> Via Roma 0 - 00000 Lorem Ipsum Codice fiscale / P. IVA: 000000000
-            </p>
+
+<?php
+    if (isset($menu['TextMenu']) && $menu['TextMenu']['submenu'])
+      foreach($menu['TextMenu']['submenu'] as $voice_name=>$voice)
+      {
+        $voice_id = 'mb_menu_voice_'.strtolower(str_replace(' ','_',$voice_name));
+        if (isset($voice['submenu'])) 
+        {
+?>
+          <div class="col-lg-4 col-md-4 col-sm-6 pb-2">
+            <h4><a href="/#" title="<?=_T('Go To').': '.$voice_name?>"><?=$voice_name?></a></h4>
+<?php
+          if (isset($voice['submenu']))
+          {
+?>
             <div class="link-list-wrapper">
-              <ul class="footer-list link-list clearfix">
-                <li><a class="list-item" href="/#" title="Vai alla pagina: Posta Elettronica Certificata">Posta Elettronica Certificata</a></li>
-                <li><a class="list-item" href="/#" title="Vai alla pagina: URP - Ufficio Relazioni con il Pubblico">URP - Ufficio Relazioni con il Pubblico</a></li>
-              </ul>
+            <ul class="footer-list link-list clearfix">
+<?php
+            foreach($voice['submenu'] as $subvoice_name=>$subvoice)
+            {
+?>
+              <li>
+<?php
+
+              $subvoice_id = 'menu_subvoice_'.strtolower(str_replace(' ','_',$subvoice_name));
+              if (!str_starts_with($subvoice['name'],'#text') && $subvoice['url']=='')
+              {
+?>
+                  <strong><?=$subvoice_name?></strong><br>
+<?php
+              }
+?>
+                  <?php if (str_starts_with($subvoice['query'],'#text:')) 
+                          print substr($subvoice['query'],6);
+                        elseif ($subvoice['url']!='') 
+                          print '<a title="'._T('Go To').': '.$subvoice['name'].'" href="'.$subvoice['url'].'">'.$subvoice['name'].'</a>'; ?>
+              </li>
+<?php
+            }
+?>
+            </ul>
             </div>
+<?php
+          }
+?>
           </div>
-          <div class="col-lg-4 col-md-4 pb-2">
-            <h4><a href="/#" title="Vai alla pagina: Lorem Ipsum">Lorem Ipsum</a></h4>
+<?php
+        }
+      }
+?>
+<div class="col-lg-4 col-md-4 pb-2">
+            <h4>
+              <a href="#" title="Vai alla pagina: Seguici su">Seguici su</a>
+            </h4>
+            <ul class="list-inline text-start social">
+              <li class="list-inline-item">
+                <a title="Designers Italia" class="p-2 text-white" href="#" target="_blank">
+                  <svg class="icon icon-sm icon-white align-top">
+                    <use
+                      xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-designers-italia"
+                    ></use>
+                  </svg>
+                  </a>
+              </li>
+              <li class="list-inline-item">
+                <a title="Twitter" class="p-2 text-white" href="#" target="_blank">
+                  <svg class="icon icon-sm icon-white align-top">
+                    <use
+                      xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-twitter"
+                    ></use>
+                  </svg>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a title="Medium" class="p-2 text-white" href="#" target="_blank">
+                  <svg class="icon icon-sm icon-white align-top">
+                    <use
+                      xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-medium"
+                    ></use>
+                  </svg>
+                </a>
+              </li>
+              <li class="list-inline-item">
+                <a title="Behance" class="p-2 text-white" href="#" target="_blank">
+                  <svg class="icon icon-sm icon-white align-top">
+                    <use
+                      xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-behance"
+                    ></use>
+                  </svg>
+                  </a>
+              </li>
+            </ul>
           </div>
-          <div class="col-lg-4 col-md-4 pb-2">
-            <div class="pb-2">
-              <h4><a href="/#" title="Vai alla pagina: Seguici su">Seguici su</a></h4>
-              <ul class="list-inline text-left social">
-                <li class="list-inline-item"><a class="p-2 text-white" href="/#" target="_blank"><svg class="icon icon-sm icon-white align-top"><use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-designers-italia"></use></svg><span class="sr-only">Designers Italia</span></a></li>
-                <li class="list-inline-item"><a class="p-2 text-white" href="/#" target="_blank"><svg class="icon icon-sm icon-white align-top"><use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-twitter"></use></svg><span class="sr-only">Twitter</span></a></li>
-                <li class="list-inline-item"><a class="p-2 text-white" href="/#" target="_blank"><svg class="icon icon-sm icon-white align-top"><use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-medium"></use></svg><span class="sr-only">Medium</span></a></li>
-                <li class="list-inline-item"><a class="p-2 text-white" href="/#" target="_blank"><svg class="icon icon-sm icon-white align-top"><use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-behance"></use></svg><span class="sr-only">Behance</span></a></li>
-              </ul>
-            </div>
-            <div class="pb-2">
-              <h4><a href="/#" title="Vai alla pagina: Newsletter">Newsletter</a></h4>
-              <p>Form Newsletter</p>
-              <!--<form action="#" method="post">
-                <label for="input-newsletter" class="active">Iscriviti per riceverla</label>
-                <div class="input-group">
-                  <div class="input-group-prepend">
-                    <div class="input-group-text">@</div>
-                  </div>
-                  <input type="text" class="form-control" id="input-newsletter" name="input-newsletter" placeholder="Scrivi il tuo indirizzo email" >
-                  <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button" id="button-addon2">Button</button>
-                  </div>
-                </div>
-                <button class="btn btn-default pull-right" type="submit">Iscriviti</button>
-              </form>-->
-            </div>
-          </div>
+        
+        </div>
         </div>
       </section>
     </div>

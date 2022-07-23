@@ -93,7 +93,7 @@ define('DB_PORT', 3306);
 
 // name of DB
 // define('DB_NAME', 'dressapi-test');
-define('DB_NAME', 'dressapi-test');
+define('DB_NAME', 'dressapi-comune');
 
 // Username of db user
 define('DB_USERNAME', 'root');
@@ -136,8 +136,7 @@ define('USER_ROLE_TABLE',  '_user_role');
 
 
 define('CMS_MENU_TABLE',     'cmsmenu');
-define('CMS_NODE_TABLE',     'cmsnode');
-define('CMS_NODETYPE_TABLE', 'cmsnodetype');
+define('CMS_PAGE_TABLE',     'cmspage');
 
 
 // User Token
