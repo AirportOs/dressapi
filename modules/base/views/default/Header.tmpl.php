@@ -63,7 +63,7 @@ if (document.cookie.indexOf('cookies_consent=true') === -1) {
 
 <script>
 if (localStorage.token == null)
-    document.location = '/cms/signin/';
+    document.location = '/signin/';
 
 let list_options = 'wr/ob/id-DESC';
 localStorage.list_options = list_options;
