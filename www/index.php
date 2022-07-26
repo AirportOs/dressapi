@@ -9,6 +9,8 @@ require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../core/autoload.php'; // Autoloader dell'applicazione
 
+require_once __DIR__ . '/../core/generic_functions.php'; // Autoloader dell'applicazione
+
 use DressApi\core\dbms\CSqlComposerBase;
 
 use DressApi\core\dbms\CMySqlDB as CDB;       // In the future other DBMS as Oracle, PostgreSQL, MS SQL

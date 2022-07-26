@@ -1,6 +1,4 @@
 
-<?php
-/*
 <h1><?=$this->page_info['module']['title'];?></h1><?php
 
 if (isset($this->data) && isset($this->data['elements']))
@@ -22,7 +20,7 @@ if (isset($this->data) && isset($this->data['elements']))
 
     } // end elements
 }
-*/
+
 ?>
 
 <hr>
@@ -33,4 +31,4 @@ if (isset($this->data) && isset($this->data['elements']))
 <hr>
 <?php
 
-// echo '<pre>'; print_r($config);echo '</pre>';
+echo '<pre>'; print_r($this);echo '</pre>';

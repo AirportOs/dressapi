@@ -193,12 +193,68 @@ class CHtmlView
             $code = "\n<script>\n$code\n</script>\n";
     }
 
+
+    /**
+     * Replace TAGS with appropriate HTML code
+     * string $output the html code to transform
+     */
+    protected function replaceBlocks(string $output)
+    {
+        $mainblocks = [];
+
+        // $output = str_replace(["\r","\n"],['','§§'],$output);
+
+        // Replace PHP code for blocks
+        preg_match_all('/<(thead|tbody){1}.*?>(.*?)<\/(\1){1}?>/s', $output, $mainblocks, PREG_SET_ORDER, 0);
+        if ($mainblocks)
+        {
+            $replacements = [];
+            foreach($mainblocks as $mainblock)
+            {
+                $is_header = ($mainblock[1]=='thead');
+
+                // Replace PHP code for print variable
+                preg_match_all('/<(tr){1}.*?>(.*?)<\/(\1){1}?>/s', $mainblock[2], $elements, PREG_SET_ORDER, 0);
+                if ($elements)
+                {
+                    $thead = '';
+                    $tbody = '';
+                    foreach($elements as $p=>$element)
+                    {
+                        $include_name = str_contains($element[2],'@'); 
+                        $include_val = str_contains($element[2],'*'); 
+                        if ($include_name || $include_val)
+                        {
+                            $p = (($include_name && $include_val)?(0):(2));
+                            foreach($this->data['elements'] as $elem)
+                            {
+                                $row = '';
+                                foreach($elem as $name=>$val)
+                                    $row .= str_replace(['@','*','{{'.$name.'}}'],[_T(ucwords(str_replace('_',' ',$name))),$val,$val],rtrim($element[$p]));
+                                $tbody .= str_replace(trim($element[$p]), $row, $element[0]);
+                                if (!$include_val)
+                                    break;
+                            }
+                            $output = str_replace($element[0], $tbody, $output );
+                        }
+                    }
+                }
+            }
+        }
+        
+        return $output;
+    }
+    
+    
     /**
      * Replace TAGS with appropriate HTML code
      * string $output the html code to transform
      */
     function replaceTags(string $output)
     {
+        $output = $this->replaceBlocks($output);
+
+
         // Replace PHP code for print variable
         preg_match_all('/\{\{(.*?)\}\}/m', $output, $matches, PREG_SET_ORDER, 0);
         if ($matches)
@@ -212,7 +268,7 @@ class CHtmlView
             if (count($replacements)>0)
                 $output = str_replace(array_keys($replacements), array_values($replacements), $output);
         }
-        
+/*        */        
         // REPLACE CSS INLINE CODE
         $css_code = '';
         foreach($this->inline_css as $css_filename )
@@ -323,12 +379,12 @@ class CHtmlView
                 }
     
 
-                if ($item1['submenu']==[]) 
+                if (isset($item1['submenu']) && $item1['submenu']==[]) 
                     unset($item1['submenu']);
             }
         }
 
-        if ($menu['submenu']==[]) 
+        if (isset($menu['submenu']) && $menu['submenu']==[]) 
             unset($menu['submenu']);
 
         return true;
@@ -345,14 +401,17 @@ class CHtmlView
 
         if ($cache && $user->isAnonymous())
             $menu = $cache->getGlobal('menu');
+        else
+            $menu = null;
         if (!$menu)
         {
             $sql = new CSqlComposer();
             $sql->from(CMS_MENU_TABLE);        
             $sql->where('id_parent IS NULL');
             $sql->orderBy(['priority ASC']);
-    
+            
             $menu = [];
+    
             $this->createMenu($menu, $sql);
             if ($cache && $user->isAnonymous()) 
                 $cache->setGlobal('menu', $this->page_info['menu']);
@@ -374,7 +433,7 @@ class CHtmlView
                     if ($fullpath_filename)
                     {
                         include($fullpath_filename);
-                        break;
+                        // break;
                     }
                 }
 

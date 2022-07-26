@@ -175,12 +175,23 @@ class CResponse
      */
     protected function asHTML(array|object|null $data): string
     {
+        global $request;
+    
         $html_frame_name = CRequest::getHtmlFrame();
         header('Content-Type: text/html; charset='.CRequest::getCharset());
         if ($data === null)
             $data = ['message' => 'Empty'];
 
-        $view = new CHtmlView( $data, CRequest::getModuleName(), 'Default', 'default' );
+        if ($html_frame_name=='Read')
+        {
+            $ids = $request->getFilter('id');
+            if ($ids && count($ids))
+                $html_frame_name = 'Read_Details';
+            else
+                $html_frame_name = 'Read_List';
+        }
+
+        $view = new CHtmlView( $data, CRequest::getModuleName(), 'default', 'default' );
         $view->add( [
                     'Header.tmpl.php',
                     $html_frame_name.'.tmpl.php',

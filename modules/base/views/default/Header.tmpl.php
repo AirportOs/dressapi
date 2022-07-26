@@ -8,7 +8,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="Bootstrap Italia è un tema Bootstrap 4 per la creazione di applicazioni web nel pieno rispetto delle Linee guida di design per i servizi web della PA">
-<meta name="author" content="Team per la Trasformazione Digitale">
+<meta name="author" content="DressApi - Tufano Pasquale">
 
 <title>Template vuoto · Bootstrap Italia</title>
 
@@ -96,7 +96,7 @@ localStorage.list_options = list_options;
                     <div class="col-12">
                       <ul<?=((isset($menu['TopLeftMenu']) && isset($menu['TopLeftMenu']['submenu']))?(' class="link-list"'):(''))?>>
 <?php
-if (isset($menu['TopLeftMenu']) && $menu['TopLeftMenu']['submenu'])
+if (isset($menu['TopLeftMenu']) && isset($menu['TopLeftMenu']['submenu']))
 foreach($menu['TopLeftMenu']['submenu'] as $voice_name=>$voice)
 {
   $voice_id = 'left_menu_voice_'.strtolower(str_replace(' ','_',$voice_name));
@@ -232,36 +232,32 @@ foreach($menu['TopLeftMenu']['submenu'] as $voice_name=>$voice)
               </div>
               <div class="it-right-zone">
                 <div class="it-socials d-none d-md-flex">
-                  <span>Seguici su</span>
+                  <span><?=_T('Follow us') ?></span>
                   <ul>
+<?php
+    if (isset($menu['SocialMenu']) && $menu['SocialMenu']['submenu'])
+      foreach($menu['SocialMenu']['submenu'] as $voice_name=>$voice)
+      {
+?>
                     <li>
-                      <a href="/#" aria-label="Facebook" target="_blank">
-                        <svg class="icon">
-                          <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-facebook"></use>
+                      <a aria-label="<?=$voice['name']?>" title="<?=_T('Go To').': '.$voice['name']?>" class="p-2 text-white" href="<?=$voice['url']?>" target="_blank">
+                        <svg class="icon icon-sm icon-white align-top">
+                          <use
+                            xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#<?=$voice['icon']?>"
+                          ></use>
                         </svg>
-                      </a>
+                        </a>
                     </li>
-                    <li>
-                      <a href="/#" aria-label="Github" target="_blank">
-                        <svg class="icon">
-                          <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-github"></use>
-                        </svg>
-                      </a>
-                    </li>
-                    <li>
-                      <a href="/#" target="_blank" aria-label="Twitter">
-                        <svg class="icon">
-                          <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-twitter"></use>
-                        </svg>
-                      </a>
-                    </li>
+<?php
+      }
+?>                  
                   </ul>
                 </div>
                 <div class="it-search-wrapper">
-                  <span class="d-none d-md-block">Cerca</span>
-                  <div id="search_on_table" class="m-2"><input class="form-control rounded-icon" type="text" placeholder="Search" aria-label="Search" 
+                  <span class="d-none d-md-block"><?=_T('Search') ?></span>
+                  <div id="search_on_table" class="m-2"><input class="form-control rounded-icon" type="text" placeholder="<?=_T('Search') ?>" aria-label="<?=_T('Search') ?>" 
                     onkeyup="GetList(localStorage.current_table,  localStorage.list_options + '/all~'+this.value);"></div>
-                    <a class="search-link rounded-icon" href="/#" aria-label="Cerca">
+                    <a class="search-link rounded-icon" href="/#" aria-label="<?=_T('Search') ?>" title="<?=_T('Search') ?>">
                     <svg class="icon">
                       <use xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-search"></use>
                     </svg>
@@ -325,7 +321,6 @@ foreach($menu['TopLeftMenu']['submenu'] as $voice_name=>$voice)
               $subvoice_id = 'menu_subvoice_'.strtolower(str_replace(' ','_',$subvoice_name));
               if (!isset($subvoice['submenu'])) 
               {
-        /* <li class="nav-item"><a class="nav-link" id="<?=$subvoice_id?>" href="<?=$subvoice['url'] ?>"><?=ucwords($subvoice_name)?></a></li> */
 ?>
                             <li><a class="list-item text-nowrap" href="<?=$subvoice['url'] ?>"><span><?=ucwords($subvoice_name)?></span></a></li>
 <?php

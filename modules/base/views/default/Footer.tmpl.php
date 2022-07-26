@@ -110,45 +110,26 @@
 ?>
 <div class="col-lg-4 col-md-4 pb-2">
             <h4>
-              <a href="#" title="Vai alla pagina: Seguici su">Seguici su</a>
+              <a href="#" title="<?=_T('Go To').': '._T('Follow us') ?>"><?=_T('Follow us') ?></a>
             </h4>
             <ul class="list-inline text-start social">
+<?php
+    if (isset($menu['SocialMenu']) && $menu['SocialMenu']['submenu'])
+      foreach($menu['SocialMenu']['submenu'] as $voice_name=>$voice)
+      {
+?>
               <li class="list-inline-item">
-                <a title="Designers Italia" class="p-2 text-white" href="#" target="_blank">
+                <a aria-label="<?=$voice['name']?>" title="<?=_T('Go To').': '.$voice['name']?>" class="p-2 text-white" href="<?=$voice['url']?>" target="_blank">
                   <svg class="icon icon-sm icon-white align-top">
                     <use
-                      xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-designers-italia"
+                      xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#<?=$voice['icon']?>"
                     ></use>
                   </svg>
                   </a>
               </li>
-              <li class="list-inline-item">
-                <a title="Twitter" class="p-2 text-white" href="#" target="_blank">
-                  <svg class="icon icon-sm icon-white align-top">
-                    <use
-                      xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-twitter"
-                    ></use>
-                  </svg>
-                </a>
-              </li>
-              <li class="list-inline-item">
-                <a title="Medium" class="p-2 text-white" href="#" target="_blank">
-                  <svg class="icon icon-sm icon-white align-top">
-                    <use
-                      xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-medium"
-                    ></use>
-                  </svg>
-                </a>
-              </li>
-              <li class="list-inline-item">
-                <a title="Behance" class="p-2 text-white" href="#" target="_blank">
-                  <svg class="icon icon-sm icon-white align-top">
-                    <use
-                      xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-behance"
-                    ></use>
-                  </svg>
-                  </a>
-              </li>
+<?php
+      }
+?>
             </ul>
           </div>
         
@@ -161,10 +142,16 @@
     <div class="container">
       <h3 class="sr-only">Sezione Link Utili</h3>
       <ul class="it-footer-small-prints-list list-inline mb-0 d-flex flex-column flex-md-row">
-        <li class="list-inline-item"><a href="/#" title="Note Legali">Media policy</a></li>
-        <li class="list-inline-item"><a href="/#" title="Note Legali">Note legali</a></li>
-        <li class="list-inline-item"><a href="/#" title="Privacy-Cookies">Privacy policy</a></li>
-        <li class="list-inline-item"><a href="/#" title="Mappa del sito">Mappa del sito</a> </li>
+
+<?php
+    if (isset($menu['LegalMenu']) && $menu['LegalMenu']['submenu'])
+      foreach($menu['LegalMenu']['submenu'] as $voice_name=>$voice)
+      {
+?>
+        <li class="list-inline-item"><a href="<?=$voice['url']?>" title="<?=_T('Go To').': '.$voice['title']?>"><?=$voice['title']?></a></li>
+<?php
+      }
+?>      
       </ul>
     </div>
   </div>
