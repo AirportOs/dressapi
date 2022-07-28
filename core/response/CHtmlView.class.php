@@ -199,6 +199,38 @@ class CHtmlView
      * @param string $output the html code to transform
      * @return string the $output with interpreted code
      */
+    protected function replaceConditions(string $output)
+    {
+        $matches = [];
+
+
+        // Permissions
+        $re = '/\{\{([if]+)\s(permission::can_[read|update|insert|delete]+?)\}\}(.*?)\{\{end\s\1\s\2\}\}/s';
+        preg_match_all($re, $output, $matches, PREG_SET_ORDER, 0);
+
+        if ($matches)
+        {
+            foreach($matches as $m)
+            {
+                if ($m[1]=='if')
+                {
+                    list($dummy,$permission) = explode('::',trim($m[2]));
+                    $code = ((isset($this->data['permissions'][$permission]))?(trim($m[3])):(''));
+
+                    $output = str_replace($m[0], $code, $output);
+                }
+            }
+        }
+
+        return $output;
+    }
+
+
+    /**
+     * Replace {{TAGS}} with appropriate HTML code
+     * @param string $output the html code to transform
+     * @return string the $output with interpreted code
+     */
     protected function replaceBlocks(string $output, array $data = [], int $level = 1)
     {
 
@@ -211,7 +243,7 @@ class CHtmlView
         <th>{{name}}</th>
         {{end foreach name}}
         */
-        $re = '/\{\{([foreach]+)\s([:_a-zA-Z]*?)\s([:_a-zA-Z]*?)\}\}(.*?)\{\{end\s\1+\s\3\}\}/s';
+        $re = '/\{\{([foreach|if]+)\s([:_a-zA-Z]*?)\s([_a-zA-Z]*?)\}\}(.*?)\{\{end\s\1+\s\3\}\}/s';
         preg_match_all($re, $output, $matches, PREG_SET_ORDER, 0);
 
         if ($matches)
@@ -274,8 +306,10 @@ class CHtmlView
         {
             foreach($matches as $m)
             {
-                if ($m[1][0]=="'" && substr($m[1],-1)=="'")
+                if (($m[1][0]=="'" && substr($m[1],-1)=="'"))
                     $output = str_replace($m[0],_T(trim($m[1],"'")),$output); // string
+                elseif (substr($m[1],0,2)=="\'" && substr($m[1],-2)=="\'")
+                    $output = str_replace($m[0],_T(trim($m[1],"\'")),$output); // string
                 else
                 {
                     $splitted = explode('::',$m[1]);
@@ -314,10 +348,12 @@ class CHtmlView
         // blocks as foreach
         $output = $this->replaceBlocks($output);
 
+        // conditions
+        $output = $this->replaceConditions($output);
+
         // variables and labels
         $output = $this->replaceVars($output);
 
-        
         // REPLACE CSS INLINE CODE
         $css_code = '';
         foreach($this->inline_css as $css_filename )
