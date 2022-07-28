@@ -12,7 +12,7 @@
         $checked = ((in_array($value, $opt))?(' checked'):(''));
 ?>
         <div class="form-check<?=$inline ?>">
-            <input name="<?=$name ?>" type="radio" id="<?=$name.'_null' ?>"<?=$checked?>>
+            <input name="<?=$name ?>" value="" type="radio" id="<?=$name.'_null' ?>"<?=$checked?>>
             <label for="<?=$name.'_null' ?>">None</label>
         </div>
 <?php
@@ -24,7 +24,7 @@
         $checked = (($opt==$value)?(' checked'):(''));
 ?>
         <div class="form-check<?=$inline ?>">
-            <input name="<?=$name ?>" type="radio" id="<?=$id ?>"<?=$checked?>>
+            <input name="<?=$name ?>" value="<?=$opt ?>" type="radio" id="<?=$id ?>"<?=$checked?>>
             <label for="<?=$id ?>"><?=$opt ?></label>
         </div>
 <?php

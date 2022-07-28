@@ -527,9 +527,9 @@ class CHtmlView
 
         ob_start(['self','replaceTags']);
 
-        foreach($this->filenames as $filename)
+        foreach($this->filenames as $frame_filename)
         {
-            include($filename);
+            include($frame_filename);
             $output .= ob_get_contents();
             ob_flush(); // Empties the buffer for each include so that it doesn't wait too long
         }

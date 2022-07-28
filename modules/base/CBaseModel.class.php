@@ -710,15 +710,15 @@ class CBaseModel
                             throw new Exception("The value '".str_replace('"','\"',$field['value'])."' for item '".$field['field']."' is not valid" );
 
                         if (isset($field['max']) && isset($field['value']) && (int)$field['max']>0 && strlen($val)>(int)$field['max'])
-                            throw new Exception("The length of the ".$field['field']." field exceeds the maximum value of ".(strlen($val)-(int)$field['max'])." characters" );
+                            throw new Exception('The length of the '.$field['field'].' field exceeds the maximum value of '.(strlen($val)-(int)$field['max']).' characters' );
 
                         if ( isset($field['required']) )
                         {
                             if (!isset($field['value']))
-                                throw new Exception("The value of the ".$field['field']." is required" );
+                                throw new Exception('The value of the '.$field['field'].' is required' );
                             
                             if (isset($field['min']) && strlen($val)<(int)$field['min'])
-                                throw new Exception("The length of the ".$field['field']." must at least ".$field['min']." characters" );
+                                throw new Exception('The length of the '.$field['field'].' must at least '.$field['min'].' characters' );
                         }
                     }
                     else

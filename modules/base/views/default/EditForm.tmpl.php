@@ -1,10 +1,14 @@
-<form method="POST" action="/<?=$module_name.'/'.$action; ?>">
+<div class="container">
+
+<div class="result">
+
+<form method="POST" action="{{url}}<?=$url; ?>">
+<input type="hidden" name="next_url" value="<?=$next_url?>">
 <?php
 
 $data = $this->data;
 
-$module_name = $this->data['metadata']['module'];
-$related_tables = $this->data['related_tables'];
+
 foreach($this->data['elements'] as $pos_element=>$element)
 {
     foreach($this->data['structure'] as $element_structure)
@@ -20,10 +24,25 @@ foreach($this->data['elements'] as $pos_element=>$element)
     }
 }
 
-echo "<pre>";
-print_r($this);
+// echo "<pre>";
+// print_r($this);
+// $related_tables = $this->data['related_tables'];
+
 // print_r($request);
 // print_r($response);
 
 ?>
+
+<div class="row">
+    <input value="Save" type="submit" class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0">  
+    <a href="<?=$next_url?>" class="btn btn-secondary col-sm-3 col-lg-2 m-3 top-50 start-0">{{'Go to List'}}</a>  
+    <input value="Delete" type="submit" class="btn btn-danger col-sm-3 col-lg-2 m-3 top-50 end-0" onclick="return confirm('Are you sure?');">
+    <br>
+</div>
 </form>
+</div>
+</div>
+<?php
+
+echo "<pre>";
+print_r($this);

@@ -12,7 +12,7 @@
         $checked = (($opt==$value)?(' checked'):(''));
 ?>
         <div class="form-check<?=$inline ?>">
-            <input name="<?=$name ?>" type="checkbox" id="<?=$id ?>"<?=$checked?>>
+            <input name="<?=$name ?>" value="<?=$opt ?>" type="checkbox" id="<?=$id ?>"<?=$checked?>>
             <label for="<?=$id ?>"><?=$opt ?></label>
         </div>
 <?php

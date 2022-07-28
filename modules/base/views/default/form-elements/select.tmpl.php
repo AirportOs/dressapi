@@ -26,7 +26,7 @@
       if (preg_match($related_table_from_id, $name, $matches))
       {
           $rel_table = $matches[1];
-          $values = $related_tables[$rel_table];
+          $values = $this->data['related_tables'][$rel_table];
       }
 
     }

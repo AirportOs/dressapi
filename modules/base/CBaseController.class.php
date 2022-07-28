@@ -595,7 +595,7 @@ class CBaseController extends CDB
                 if ($this->model->existsField($key))
                     $item_types[] = $this->model->getFieldAttribute($key,'type');
                 else
-                    throw new Exception('Item ' . $key . ' not valid');
+                    unset($params[$key]); // throw new Exception('Item ' . $key . ' not valid');
             array_unshift($this->bind_params_types, ...$item_types);
 
             //  $this->bind_params_values, $this->bind_params_types

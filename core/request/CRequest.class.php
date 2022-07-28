@@ -210,7 +210,7 @@ class CRequest
                             self::$method = match ($f) 
                             {
                                 'insert' => 'POST',
-                                'modify' => 'PUT',
+                                'modify' => 'PATCH',
                                 'delete' => 'DELETE',
                             };
                             continue;
@@ -295,8 +295,6 @@ class CRequest
         }
 
         self::$format = ( ($format == '*') ? (DEFAULT_FORMAT_OUTPUT) : (strtolower($format)) );
-//        if (self::$format=='html')
-//            session_start();
 
         $this->with_relations = (self::$format == 'html');
     }
