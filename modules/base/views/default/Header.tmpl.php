@@ -63,7 +63,7 @@ if (document.cookie.indexOf('cookies_consent=true') === -1) {
 
 <script>
 if (localStorage.token == null)
-    document.location = '/signin/';
+    document.location = '/login';
 
 let list_options = 'wr/ob/id-DESC';
 localStorage.list_options = list_options;
@@ -240,7 +240,7 @@ foreach($menu['TopLeftMenu']['submenu'] as $voice_name=>$voice)
       {
 ?>
                     <li>
-                      <a aria-label="<?=$voice['name']?>" title="<?=_T('Go To').': '.$voice['name']?>" class="p-2 text-white" href="<?=$voice['url']?>" target="_blank">
+                      <a aria-label="<?=$voice['name']?>" title="<?=_T('Go to').': '.$voice['name']?>" class="p-2 text-white" href="<?=$voice['url']?>" target="_blank">
                         <svg class="icon icon-sm icon-white align-top">
                           <use
                             xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#<?=$voice['icon']?>"

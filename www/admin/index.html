@@ -32,7 +32,7 @@
     <link href="/assets/css/dressapi-admin.css" rel="stylesheet">
     <script>
         if (localStorage.token == null)
-            document.location = '/signin/';
+            document.location = '/login';
 
         let list_options = 'with-relations';
         localStorage.list_options = list_options;
@@ -52,7 +52,7 @@
         <div class="nav-link px-3 text-white" id="username_viewer"></div>
         <div class="navbar-nav">
             <div class="nav-item text-nowrap">
-                <a class="nav-link px-3" href="#" onclick="localStorage.token=null;document.location='/signin/';">Sign out</a>
+                <a class="nav-link px-3" href="#" onclick="localStorage.token=null;document.location='/logout';"><?=_T('Logout')?></a>
             </div>
         </div>
     </header>

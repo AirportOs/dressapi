@@ -4,7 +4,7 @@
  * CNodeController.class.php
  * 
  * DressAPI
- * @version 1.1
+ * @version 2.0 alpha
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale

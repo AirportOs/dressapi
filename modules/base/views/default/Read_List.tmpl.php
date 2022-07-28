@@ -1,50 +1,28 @@
 <div class="container">
-    <h1>{{title}}</h1>
+    <h1>{{page_info::element::title}}</h1>
+    <h4>{{page_info::element::description}}</h4>
     <div class="table-responsive">
         <table class="table table-striped table-sm">
 
         <thead>
             <tr>
-                <th><?=_T('Operations') ?></th>
-                <?php 
-            foreach($this->data[0] ?? [] as $name=>$col) 
-            { 
-                    ?><th>{{_T(ucwords(trim(str_replace('_',' ',$col))))}}</th>
-<?php       } 
-?>
+                <th>{{'Operations'}}</th>
+                {{foreach data::columns name}}
+                <th>{{name}}</th>
+                {{end foreach name}}
             </tr>
         </thead>
 
         <tbody>
-<?php 
-            foreach($this->data['elements'] ?? [] as $p=>$elem) 
-            { 
-                if ($p==0)
-                {
-?>
-                <tr>
-                    <th><?=_T('Operations') ?></th>
-<?php 
-                    foreach($elem ?? [] as $name=>$val) 
-                    { 
-?>                  <th><?=$name?></th>
-<?php               } 
-?>
-                </tr>
-<?php                        
-                }
-?>
-                <tr>
-                    <td><a class="btn btn-secondary m-1" href="/<?=$this->data['metadata']['module']?>/<?=$elem['id']?>" title="<?=_T('Go To').': '.''?>"><?=_T('Details')?></td>
-<?php 
-                    foreach($elem ?? [] as $name=>$val) 
-                    { 
-?>                  <td><?=$val?></td>
-<?php               } 
-?>
-                </tr>
-<?php       } 
-?>
+
+            {{foreach data::elements elem}}
+            <tr>
+                <td><a class="btn btn-secondary m-1" href="/{{data::metadata::module}}/{{elem::id}}" title="{{'Go to'}} {{'Details'}}">{{'Details'}}</a></td>
+                {{foreach elem value}}
+                <td>{{value}}</td>
+                {{end foreach value}}
+            </tr>
+            {{end foreach elem}}
         </tbody>
 
         </table>
@@ -52,8 +30,8 @@
 </div>
 
 
-
-
+<?php
+/*
 <!-- START EXAMPLE -->
 <div class="container">
 <b>BASE - {{creation_date}}</b>
@@ -62,12 +40,7 @@
 <h2><i>{{description}}</i></h2>
 <h3>{{body}}</h3>
 <p><br></p>
-
-<?php 
-
-echo "<pre>";print_r($this);echo "</pre>";
-?>
-
 </div>
 <!-- END EXAMPLE -->
+*/
 

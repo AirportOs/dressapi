@@ -31,7 +31,7 @@
     <link href="dashboard.css" rel="stylesheet">
     <script>
         if (localStorage.token==null)
-            document.location = './signin/';
+            document.location = './login';
 
         let list_options = 'with-relations/order-by/id-DESC';
     </script>
@@ -46,7 +46,7 @@
   <!-- input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search" -->
   <div class="navbar-nav">
     <div class="nav-item text-nowrap">
-      <a class="nav-link px-3" href="#" onclick="localStorage.token=null;document.location='./signin/';">Sign out</a>
+      <a class="nav-link px-3" href="#" onclick="localStorage.token=null;document.location='/login';">Sign out</a>
     </div>
   </div>
 </header>
@@ -512,7 +512,7 @@
     <script>
         (function() {
             if (!localStorage.token)
-                document.location('./signin/');
+                document.location('/login');
 
             document.getElementById('token').innerHTML = localStorage.token;
             

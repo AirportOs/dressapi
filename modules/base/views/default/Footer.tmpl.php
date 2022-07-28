@@ -42,7 +42,7 @@
               if (!isset($subvoice['submenu'])) 
               {
 ?>
-                <li><a class="list-item text-nowrap" title="<?=_T('Go To').': '.$subvoice_name?>" href="<?=$subvoice['url'] ?>"><?=$subvoice_name?></a></li>
+                <li><a class="list-item text-nowrap" title="<?=_T('Go to').': '.$subvoice_name?>" href="<?=$subvoice['url'] ?>"><?=$subvoice_name?></a></li>
 <?php
               }
             }
@@ -68,7 +68,7 @@
         {
 ?>
           <div class="col-lg-4 col-md-4 col-sm-6 pb-2">
-            <h4><a href="/#" title="<?=_T('Go To').': '.$voice_name?>"><?=$voice_name?></a></h4>
+            <h4><a href="/#" title="<?=_T('Go to').': '.$voice_name?>"><?=$voice_name?></a></h4>
 <?php
           if (isset($voice['submenu']))
           {
@@ -93,7 +93,7 @@
                   <?php if (str_starts_with($subvoice['query'],'#text:')) 
                           print substr($subvoice['query'],6);
                         elseif ($subvoice['url']!='') 
-                          print '<a title="'._T('Go To').': '.$subvoice['name'].'" href="'.$subvoice['url'].'">'.$subvoice['name'].'</a>'; ?>
+                          print '<a title="'._T('Go to').': '.$subvoice['name'].'" href="'.$subvoice['url'].'">'.$subvoice['name'].'</a>'; ?>
               </li>
 <?php
             }
@@ -110,7 +110,7 @@
 ?>
 <div class="col-lg-4 col-md-4 pb-2">
             <h4>
-              <a href="#" title="<?=_T('Go To').': '._T('Follow us') ?>"><?=_T('Follow us') ?></a>
+              <a href="#" title="<?=_T('Go to').': '._T('Follow us') ?>"><?=_T('Follow us') ?></a>
             </h4>
             <ul class="list-inline text-start social">
 <?php
@@ -119,7 +119,7 @@
       {
 ?>
               <li class="list-inline-item">
-                <a aria-label="<?=$voice['name']?>" title="<?=_T('Go To').': '.$voice['name']?>" class="p-2 text-white" href="<?=$voice['url']?>" target="_blank">
+                <a aria-label="<?=$voice['name']?>" title="<?=_T('Go to').': '.$voice['name']?>" class="p-2 text-white" href="<?=$voice['url']?>" target="_blank">
                   <svg class="icon icon-sm icon-white align-top">
                     <use
                       xlink:href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#<?=$voice['icon']?>"
@@ -148,7 +148,7 @@
       foreach($menu['LegalMenu']['submenu'] as $voice_name=>$voice)
       {
 ?>
-        <li class="list-inline-item"><a href="<?=$voice['url']?>" title="<?=_T('Go To').': '.$voice['title']?>"><?=$voice['title']?></a></li>
+        <li class="list-inline-item"><a href="<?=$voice['url']?>" title="<?=_T('Go to').': '.$voice['title']?>"><?=$voice['title']?></a></li>
 <?php
       }
 ?>      
@@ -205,7 +205,7 @@
 <script>
     (function () {
         if (!localStorage.token)
-            document.location('/signin/');
+            document.location('/login');
 
         // document.getElementById('token').innerHTML = localStorage.token;
         document.getElementById('username_viewer').innerHTML = localStorage.username;

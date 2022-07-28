@@ -2,7 +2,7 @@
 /**
  * 
  * DressAPI
- * @version 1.1
+ * @version 2.0 alpha
  * @license This file is under Apache 2.0 license
  * @author Tufano Pasquale
  * @copyright Tufano Pasquale
@@ -195,48 +195,64 @@ class CHtmlView
 
 
     /**
-     * Replace TAGS with appropriate HTML code
-     * string $output the html code to transform
+     * Replace {{TAGS}} with appropriate HTML code
+     * @param string $output the html code to transform
+     * @return string the $output with interpreted code
      */
-    protected function replaceBlocks(string $output)
+    protected function replaceBlocks(string $output, array $data = [], int $level = 1)
     {
-        $mainblocks = [];
 
-        // $output = str_replace(["\r","\n"],['','§§'],$output);
+        $matches = [];
 
-        // Replace PHP code for blocks
-        preg_match_all('/<(thead|tbody){1}.*?>(.*?)<\/(\1){1}?>/s', $output, $mainblocks, PREG_SET_ORDER, 0);
-        if ($mainblocks)
+        /* 
+        * Parserize foreach
+        * ie:
+        {{foreach data::columns name}}
+        <th>{{name}}</th>
+        {{end foreach name}}
+        */
+        $re = '/\{\{([foreach]+)\s([:_a-zA-Z]*?)\s([:_a-zA-Z]*?)\}\}(.*?)\{\{end\s\1+\s\3\}\}/s';
+        preg_match_all($re, $output, $matches, PREG_SET_ORDER, 0);
+
+        if ($matches)
         {
-            $replacements = [];
-            foreach($mainblocks as $mainblock)
+            foreach($matches as $m)
             {
-                $is_header = ($mainblock[1]=='thead');
-
-                // Replace PHP code for print variable
-                preg_match_all('/<(tr){1}.*?>(.*?)<\/(\1){1}?>/s', $mainblock[2], $elements, PREG_SET_ORDER, 0);
-                if ($elements)
+                if ($m[1]=='foreach')
                 {
-                    $thead = '';
-                    $tbody = '';
-                    foreach($elements as $p=>$element)
+                    $template = ltrim($m[4]);
+                    $a = explode('::', $m[2]);
+                    $res = '';
+                    if ($data==[] && count($a)>1 && isset($this->{$a[0]}) && isset($this->{$a[0]}[$a[1]]))
+                        $elements = $this->{$a[0]}[$a[1]];
+                    else
+                        $elements = $data;
+                    if ($elements!=[])
                     {
-                        $include_name = str_contains($element[2],'@'); 
-                        $include_val = str_contains($element[2],'*'); 
-                        if ($include_name || $include_val)
+                        foreach($elements as $name=>$elem)
                         {
-                            $p = (($include_name && $include_val)?(0):(2));
-                            foreach($this->data['elements'] as $elem)
+                            $name = _T(ucwords(trim(str_replace(['id__','_'],' ',$name))));
+                            if (is_array($elem))
                             {
-                                $row = '';
-                                foreach($elem as $name=>$val)
-                                    $row .= str_replace(['@','*','{{'.$name.'}}'],[_T(ucwords(str_replace('_',' ',$name))),$val,$val],rtrim($element[$p]));
-                                $tbody .= str_replace(trim($element[$p]), $row, $element[0]);
-                                if (!$include_val)
-                                    break;
+                                $a = $this->replaceBlocks($template, $elem, $level+1);
+                                foreach($elem as $nm=>$val)
+                                {
+                                    $label = $m[3].'::'.$nm;
+                                    $a = str_replace(['{{'.$label.'}}','{{'.$m[3].'::name}}','{{'.$m[3].'::value}}'],
+                                                     [$val,$nm,$val], 
+                                                     $a);    
+                                }
+
+                                $res .= $a;
                             }
-                            $output = str_replace($element[0], $tbody, $output );
+                            else
+                                if (str_contains($template,'::'))
+                                    $res .= str_replace(['{{'.$m[2].'::'.$m[3].'}}','{{'.$m[3].'::name}}','{{'.$m[3].'::value}}'],
+                                                        [$elem,$name,$elem], $template);
+                                else
+                                    $res .= str_replace('{{'.$m[3].'}}',$elem, $template);
                         }
+                        $output = str_replace($m[0], $res, $output);
                     }
                 }
             }
@@ -244,31 +260,64 @@ class CHtmlView
         
         return $output;
     }
-    
+
+
+    /**
+     * Replace PHP code for print variable
+     * @param string $output the html code to transform
+     * @return string the $output with interpreted code
+     */
+    protected function replaceVars(string $output) : string
+    {
+        preg_match_all('/\{\{(.*?)\}\}/m', $output, $matches, PREG_SET_ORDER, 0);
+        if ($matches)
+        {
+            foreach($matches as $m)
+            {
+                if ($m[1][0]=="'" && substr($m[1],-1)=="'")
+                    $output = str_replace($m[0],_T(trim($m[1],"'")),$output); // string
+                else
+                {
+                    $splitted = explode('::',$m[1]);
+                    if (count($splitted)==3 && 
+                        isset($this->{$splitted[0]})  && 
+                        isset($this->{$splitted[0]}[$splitted[1]])  && 
+                        isset($this->{$splitted[0]}[$splitted[1]][$splitted[2]])
+                    )
+                    {
+                        $res = $this->{$splitted[0]}[$splitted[1]][$splitted[2]];
+                        if (is_array($res) && isset($splitted[3]) && isset($res[$splitted[3]]) )
+                            $replacements[$m[0]] = $res[$splitted[3]];
+                        else
+                            $replacements[$m[0]] = $res; // ie: from "data::elements::0::title" to $this->data[elements][0][title]
+                    }
+                    else
+                        $replacements[$m[0]] = '';                    
+                }
+
+            }
+            
+            if (count($replacements)>0)
+                $output = str_replace(array_keys($replacements), array_values($replacements), $output);
+        }
+
+        return $output;
+    }
+
     
     /**
      * Replace TAGS with appropriate HTML code
      * string $output the html code to transform
      */
-    function replaceTags(string $output)
+    protected function replaceTags(string $output)
     {
+        // blocks as foreach
         $output = $this->replaceBlocks($output);
 
+        // variables and labels
+        $output = $this->replaceVars($output);
 
-        // Replace PHP code for print variable
-        preg_match_all('/\{\{(.*?)\}\}/m', $output, $matches, PREG_SET_ORDER, 0);
-        if ($matches)
-        {
-            foreach($matches as $m)
-                if (isset($this->page_info['element'][$m[1]]))
-                    $replacements[$m[0]] = $this->page_info['element'][$m[1]];
-                else
-                    $replacements[$m[0]] = '';
-            
-            if (count($replacements)>0)
-                $output = str_replace(array_keys($replacements), array_values($replacements), $output);
-        }
-/*        */        
+        
         // REPLACE CSS INLINE CODE
         $css_code = '';
         foreach($this->inline_css as $css_filename )
@@ -427,14 +476,11 @@ class CHtmlView
         // PreProcessor
         foreach ( $this->modules as $module_name)
             foreach ( $this->html_foldernames as $html_foldername)
-                foreach([$module_name,'base'] as $current_module)
+                foreach(['base',$module_name] as $current_module)
                 {
                     $fullpath_filename = realpath(__DIR__.'/../../modules/'.$current_module.'/views/'.$html_foldername.'/processors/PreProcess.php');
                     if ($fullpath_filename)
-                    {
                         include($fullpath_filename);
-                        // break;
-                    }
                 }
 
 
