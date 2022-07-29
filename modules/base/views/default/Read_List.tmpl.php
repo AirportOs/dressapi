@@ -32,7 +32,7 @@
 
 <?php
 /*
-<!-- START EXAMPLE -->
+<!-- START EXAMPLE FOR SPECIFIC TYPE OF ELEMENT -->
 <div class="container">
 <b>BASE - {{creation_date}}</b>
 <h1>{{title}}</h1>

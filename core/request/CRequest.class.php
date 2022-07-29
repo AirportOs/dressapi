@@ -381,6 +381,12 @@ class CRequest
     }
 
 
+    public static function goRedirect()
+    {
+        if (isset($_REQUEST['next_url']))
+            header('location: '.$_REQUEST['next_url']);
+    }
+
     public static function getFormat() : string  { return self::$format; }
     public static function getCharset() : string { return self::$charset; }
     public static function getModuleName() : string  { return self::$module_name; }

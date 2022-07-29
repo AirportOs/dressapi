@@ -177,6 +177,9 @@ class CResponse
     {
         global $request;
     
+        // Redirect with $_REQUEST['next_url']
+        CRequest::goRedirect();
+                
         $html_frame_name = CRequest::getHtmlFrame();
         header('Content-Type: text/html; charset='.CRequest::getCharset());
         if ($data === null)

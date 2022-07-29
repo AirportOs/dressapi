@@ -1,4 +1,5 @@
-<h1>{{page_info::element::title}}</h1>
+<h1>{{page_info::element::title}}{{page_info::element::name}}</h1>
+<i>{{page_info::element::description}}</i>
 
 {{foreach data::elements elem}}
 <div class="table-responsive">
@@ -31,8 +32,3 @@
 </div>
 
 {{end foreach elem}}
-
-<?php 
-
-echo "<pre>";print_r($this->data['permissions']);echo "</pre>";
-?>
