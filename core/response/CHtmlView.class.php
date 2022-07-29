@@ -498,8 +498,8 @@ class CHtmlView
             $menu = [];
     
             $this->createMenu($menu, $sql);
-            if ($cache && $user->isAnonymous()) 
-                $cache->setGlobal('menu', $this->page_info['menu']);
+            if ($cache && $user->isAnonymous() && isset($this->page_info['menu'])) 
+                $cache->setGlobal('menu', $this->page_info['menu'] );
         }
 
         // Config Data
