@@ -30,7 +30,7 @@ class CLogger
     /**
      * addLog
     *
-    * Writes a log request on file logs/dress-apirequest.log
+    * Writes a log request on file logs/dress-apirequests.log
     *
     * @param string CUser $users user object
     * @param string CRequest $request request object (for input data)
@@ -44,7 +44,10 @@ class CLogger
         {
             $path = realpath (__DIR__ . '/../../');
             $filename = $path.'/logs/dressapi-requests.log';
-            $datarow = sprintf(date('Y-m-d H:i:s') . ' '."%3d %8s %20s %-20s %s\r\n",$response->getStatusCode(), 
+            $datarow = sprintf("%s %20s %3d %8s %20s %-20s %s\r\n",$response->getStatusCode(),
+                                date('Y-m-d H:i:s'),
+                                $_SERVER['REMOTE_ADDR'],
+
                                 $request->getMethod(),  
                                 $user->getUsername(), $request->getRequest(), 
                                 implode(',',$request->getParameters() ?? []) 

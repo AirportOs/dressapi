@@ -1,6 +1,14 @@
 <div class="container">
+    {{if permission::can_insert}}
+    <a class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" href="/{{data::metadata::module}}/{{elem::id}}/insert-form">
+    <svg class="icon-white icon"><use href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-plus-circle"></use></svg>
+    {{'Insert New'}}</a>  
+    {{end if permission::can_insert}}
+
     <h1>{{page_info::element::title}}</h1>
     <h4>{{page_info::element::description}}</h4>
+    
+    {{if data::elements}}
     <div class="table-responsive">
         <table class="table table-striped table-sm">
 
@@ -27,6 +35,7 @@
 
         </table>
     </div>
+    {{end if data::elements}}
 </div>
 
 

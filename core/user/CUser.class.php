@@ -325,15 +325,17 @@ class CUser extends CDB
 
 
     /**
-     * Set a User Role
+     * Set a list User Roles
      * 
-     * @param array $user_roles role of user where role can be "Admin", "Publisher" and anything else
+     * @param array $roles role of user where role can be "Admin", "Publisher" and anything else
      *                               or a number 1=Admin, 2=Publisher, 3=Normal User
      *                               the role name and type depends from your app
      */
-    public function setUserRole( array $user_roles )
+    public function setUserRoles( array $roles )
     {
-        $this->user_roles = $user_roles;
+        $this->resetUserRoles();
+        foreach($roles as $role)
+            $this->addUserRole($role);
     }
 
 
@@ -341,7 +343,7 @@ class CUser extends CDB
      * Reset a User Role
      * 
      */
-    public function resetUserRole( )
+    public function resetUserRoles( )
     {
         $this->user_roles = [];
     }
@@ -355,7 +357,24 @@ class CUser extends CDB
      */
     public function addUserRole( string|int $role )
     {
-        $this->user_roles[] = $role;
+        if (is_string($role))
+        {
+            $sql = "SELECT id,name FROM _role";
+            $roles = $this->_queryCache($sql, false, CDB::DB_ASSOC, 'id', '_user', true);
+            $role = $roles[$role] ?? 0;
+        }
+        if ($role>0) 
+            $this->user_roles[] = $role;
+    }
+
+
+    /**
+     * Get the list of id__role of current user
+     * @return array list of current id__role available
+     */ 
+    public function getUserRoles( ) : array
+    {
+        return $this->user_roles;
     }
 
 
@@ -517,7 +536,23 @@ class CUser extends CDB
     }
 
 
-    private function _queryCache(string $sql, bool $as_ids_array = false, string $area_name = '', bool $is_global = false)
+    /**
+    * @param string $sql string containing the query to execute
+    * @param bool $as_ids_array if true return an array containing all id
+    * @param int $type it can assume the values: DB_ASSOC, DB_NUM and DB_BOTH equivalent to the type of array it must return, 
+    *                  respectively: 
+    *                    - numeric index (returned from getDBResultNum())
+    *                    - associative index (returned from getDBResultAssoc())
+    *                    - both indices (returned from getDBResultBoth())
+    *                  by default is value returned from getDBResultAssoc(), that is, it returns an associative array
+    * @param ?string $with_index indexes of the output array (for example it could be "id"), 
+    *                if specified the numeric value of the row is replaced with the value indicated in the index
+    * @param string $area_name string containing area/module name in the cache
+    * @param bool $is_global true for a global cache, false for single user cache
+    */
+   private function _queryCache(string $sql, bool $as_ids_array = false,
+                                 ?int $type = null, ?string $with_index = null,
+                                 string $area_name = '', bool $is_global = false) : ?array
     {
         $get = 'get'.(($is_global)?('Global'):(''));
         $set = 'set'.(($is_global)?('Global'):(''));
@@ -534,7 +569,7 @@ class CUser extends CDB
             if ($as_ids_array) 
                 $data = $this->getIDsArray();
             else
-                $this->getDataTable($data);
+                $this->getDataTable($data, $type, $with_index);
             if ($data !== null)     
                 $this->cache->$set($hash, $data, $area_name);    
         }
@@ -602,7 +637,7 @@ class CUser extends CDB
 
         $sc = new CSqlComposer();
         $sql = (string)$sc->select('id')->from(MODULE_TABLE)->where("name='$module_name'");       
-        $module_info = $this->_queryCache($sql, true, MODULE_TABLE, true);
+        $module_info = $this->_queryCache($sql, true, null, null, MODULE_TABLE, true);
         if ($module_info===null)
             $module_id = 0; 
         else 
@@ -610,7 +645,7 @@ class CUser extends CDB
 
         $sc = new CSqlComposer();
         $sql = (string)$sc->select('id__role')->from(USER_ROLE_TABLE)->where('id__user='.$this->id);       
-        $user_role = $this->_queryCache($sql, true, USER_ROLE_TABLE);       
+        $user_role = $this->_queryCache($sql, true, null, null, USER_ROLE_TABLE);       
 
         $role_conditions = (($user_role)?('(id__role IS NULL OR id__role IN ('.implode(',',$user_role).'))'):('FALSE'));
 

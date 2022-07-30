@@ -243,7 +243,8 @@ class CHtmlView
         <th>{{name}}</th>
         {{end foreach name}}
         */
-        $re = '/\{\{([foreach|if]+)\s([:_a-zA-Z]*?)\s([_a-zA-Z]*?)\}\}(.*?)\{\{end\s\1+\s\3\}\}/s';
+
+        $re = '/\{\{([foreach]+)\s([:_a-zA-Z]*?)\s([_a-zA-Z]*?)\}\}(.*?)\{\{end\s\1+\s\3\}\}/s';
         preg_match_all($re, $output, $matches, PREG_SET_ORDER, 0);
 
         if ($matches)
@@ -259,7 +260,15 @@ class CHtmlView
                         $elements = $this->{$a[0]}[$a[1]];
                     else
                         $elements = $data;
-                    if ($elements!=[])
+                    if ($elements==[])
+                    {
+                        $re = '/{\{([if]+)\s([data::elements]+)\}\}(.*?)\{\{end\s\1+\s\2+\}\}/s';
+                        preg_match_all($re, $output, $blocks, PREG_SET_ORDER, 0);
+                        if ($blocks)
+                            foreach($blocks as $block)
+                                $output = str_replace($block[0], '', $output);
+                    }
+                    else
                     {
                         foreach($elements as $name=>$elem)
                         {
@@ -413,10 +422,15 @@ class CHtmlView
         {
             foreach($menu as &$item1)
             {
+                $rule_conditions = 'id__role IS NULL';
+                $current_id_roles = $user->getUserRoles();
+                if ($current_id_roles)
+                    $rule_conditions .= ' OR id__role IN ('.implode(',',$current_id_roles).')';
+                
                 $item1['submenu'] = [];
 
                 $sql->select('*')
-                ->where('id_parent='.$item1['id']);
+                ->where('id_parent='.$item1['id'].' AND ('.$rule_conditions.') ');
                 $db->query($sql);
 
                 $db->getDataTable($item1['submenu'],CDB::DB_ASSOC,'name');
@@ -522,7 +536,7 @@ class CHtmlView
 
         //
         // Start HTML Code
-        //
+        // o
         $output = '';
 
         ob_start(['self','replaceTags']);

@@ -15,7 +15,7 @@ foreach($this->data['elements'] as $pos_element=>$element)
     {
         $filename = realpath(__DIR__.'/form-elements/'.$element_structure['html_type'].'.tmpl.php');
         $name = $element_structure['field'];
-        $value = $element[$name] ?? '';
+        $value = $element[$name] ?? ($element_structure['default'] ?? '');
         $comment = $element_structure['comment'] ?? '';
         $pattern = $element_structure['rule'] ?? '';
         $display_name = $element_structure['display_name'] ?? '';
@@ -42,7 +42,6 @@ foreach($this->data['elements'] as $pos_element=>$element)
 </form>
 </div>
 </div>
-<?php
 
-echo "<pre>";
-print_r($this);
+<?php
+// printr($this);

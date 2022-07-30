@@ -1,6 +1,8 @@
 <h1>{{page_info::element::title}}{{page_info::element::name}}</h1>
 <i>{{page_info::element::description}}</i>
 
+{{if data::elements}}
+
 {{foreach data::elements elem}}
 <div class="table-responsive">
     <table class="table table-striped table-sm">
@@ -32,3 +34,5 @@
 </div>
 
 {{end foreach elem}}
+
+{{end if data::elements}}

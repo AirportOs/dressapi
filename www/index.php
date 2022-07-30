@@ -66,7 +66,7 @@ try
         // in the "acl" table then delete these instructions
         // if (!$imported_permission)
         // {
-        //     $user->setUserRole(['all']); // // Add role "all" to current user
+        //     $user->setUserRoles(['all']); // // Add role "all" to current user
         //     $powers = ['can_read'=>'YES','can_insert'=>'YES','can_update'=>'YES','can_delete'=>'YES'];
         //     $user->addRolePermission('all', '*', $powers, false); // Role=all, All modules, all permission, only_owner  
         // }
@@ -98,6 +98,7 @@ try
         print $controller->exec();
     }
 
+    $user->addUserRole( 'admin' );
 
     //        CDB::disconnect();
 }
@@ -105,6 +106,9 @@ catch (Exception $ex)
 {
     print $response->error(($ex->getCode())?$ex->getCode():CResponse::HTTP_STATUS_BAD_REQUEST, $ex->getMessage());
 }
-
-// track request into log file by logger
-(new CLogger())->addLog($user, $request, $response);
+finally
+{
+    // track request into log file by logger
+    if (REQUEST_LOG)
+        (new CLogger())->addLog($user, $request, $response);
+}

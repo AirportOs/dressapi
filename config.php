@@ -17,6 +17,8 @@ define('ACCEPTED_FORMAT_OUTPUT', ['json','html','xml','text']); // json, xml, pl
 // Level of log info
 define('LOG_LEVEL_MIN', 'info');
 
+// Track all requests in the log file
+define('REQUEST_LOG', false);
 
 //
 // Relations
