@@ -1,5 +1,6 @@
-<div class="container">
 
+<h1>{{page_info::module::title}}::{{page_info::element::title}}{{page_info::element::name}}</h1>
+<br>
 <div class="result">
 
 <form method="POST" action="{{url}}<?=$url; ?>">
@@ -24,12 +25,11 @@ foreach($this->data['elements'] as $pos_element=>$element)
     }
 }
 
-// echo "<pre>";
-// print_r($this);
+// printr($this);
 // $related_tables = $this->data['related_tables'];
 
-// print_r($request);
-// print_r($response);
+// printr($request);
+// printr($response);
 
 ?>
 
@@ -40,7 +40,6 @@ foreach($this->data['elements'] as $pos_element=>$element)
     <br>
 </div>
 </form>
-</div>
 </div>
 
 <?php

@@ -1,20 +1,20 @@
-<div class="container">
+    <h1>{{page_info::element::title}}</h1>
+    <h4>{{page_info::element::description}}</h4>
+
     {{if permission::can_insert}}
-    <a class="btn btn-warning col-sm-3 col-lg-2 m-3 top-50 start-0" href="/{{data::metadata::module}}/{{elem::id}}/insert-form">
+    <a class="btn btn-success col-sm-3 col-lg-2 start-0" href="/{{data::metadata::module}}/{{elem::id}}/insert-form">
     <svg class="icon-white icon"><use href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-plus-circle"></use></svg>
     {{'Insert New'}}</a>  
     {{end if permission::can_insert}}
 
-    <h1>{{page_info::element::title}}</h1>
-    <h4>{{page_info::element::description}}</h4>
-    
+
     {{if data::elements}}
     <div class="table-responsive">
         <table class="table table-striped table-sm">
 
         <thead>
             <tr>
-                <th>{{'Operations'}}</th>
+                <th colspan="2">{{'Operations'}}</th>
                 {{foreach data::columns name}}
                 <th>{{name}}</th>
                 {{end foreach name}}
@@ -25,7 +25,14 @@
 
             {{foreach data::elements elem}}
             <tr>
-                <td><a class="btn btn-secondary m-1" href="/{{data::metadata::module}}/{{elem::id}}" title="{{'Go to'}} {{'Details'}}">{{'Details'}}</a></td>
+                <td>
+                    <a class="btn btn-primary" href="/{{data::metadata::module}}/{{elem::id}}" title="{{'Go to'}} {{'Details'}}"> <svg class="icon-white icon icon-sm"><use href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-password-visible"></use></svg></a>
+                </td>
+                <td>
+                {{if permission::can_update}}
+                    <a class="btn btn-secondary" href="/{{data::metadata::module}}/{{elem::id}}/modify-form" title="{{'Go to'}} {{'Modify'}}"> <svg class="icon-white icon icon-sm"><use href="/frameworks/bootstrap-italia/dist/svg/sprite.svg#it-pencil"></use></svg></a>
+                {{end if permission::can_update}}
+                </td>
                 {{foreach elem value}}
                 <td>{{value}}</td>
                 {{end foreach value}}
@@ -36,6 +43,7 @@
         </table>
     </div>
     {{end if data::elements}}
+<div class="container">
 </div>
 
 
