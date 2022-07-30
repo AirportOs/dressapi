@@ -37,7 +37,7 @@ class CPagesModel extends CBaseModel
     /**
      * Return a string contains all additional conditions for a GET/PUT/PATCH requests
      *
-     * @return array list of column names of current table
+     * @return string all additional conditions
      */
     public function getAdditionalConditions() : string
     {
