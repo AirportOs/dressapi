@@ -41,7 +41,12 @@ class CPagesModel extends CBaseModel
      */
     public function getAdditionalConditions() : string
     {
-        $conditions = ""; // id_cmsnodetype IN (SELECT id FROM cmsnodetype WHERE name='$this->module')";
+        $user_conditions = 'a.id__user='.$this->user->getId().'';
+        if ($this->user->isAnonymous())
+            $status_conditions = 'status=\'public\'';
+        else
+            $status_conditions = 'a.status IN (\'reserved\',\'public\')';
+        $conditions = "($user_conditions OR $status_conditions)"; // id_cmsnodetype IN (SELECT id FROM cmsnodetype WHERE name='$this->module')";
 
         return $conditions;
     }
@@ -74,7 +79,7 @@ class CPagesModel extends CBaseModel
 
 
     /**
-     * Change items values befor insert/update into db
+     * Change items values before insert/update into db
      *
      * @param array &$values all $values of table
      * @param string $operation type of operation ('insert' or 'modify')
